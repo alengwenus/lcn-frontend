@@ -27,65 +27,66 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
 
     @property({ attribute: false }) public route!: Route;
 
-    //   protected firstUpdated(_changedProps) {
-    //     if (!this.hass) {
-    //       return;
-    //     }
-    //     if (!this.knx) {
-    //       this._initKnx();
-    //     }
-    //     this.addEventListener("knx-location-changed", (e) => this._setRoute(e as LocationChangedEvent));
+    protected firstUpdated(changedProps) {
+      super.firstUpdated(changedProps)
+      if (!this.hass) {
+        return;
+      }
+      // if (!this.lcn) {
+      //   this._initLCN();
+      // }
+      // this.addEventListener("lcn-location-changed", (e) => this._setRoute(e as LocationChangedEvent));
 
-    //     if (this.route.path === "" || this.route.path === "/") {
-    //       navigate("/knx/info", { replace: true });
-    //     }
+      if (this.route.path === "" || this.route.path === "/") {
+        navigate("/lcn/devices", { replace: true });
+      }
 
-    //     computeDirectionStyles(computeRTL(this.hass), this.parentElement as LitElement);
+      // computeDirectionStyles(computeRTL(this.hass), this.parentElement as LitElement);
 
-    //     listenMediaQuery("(prefers-color-scheme: dark)", (_matches) => {
-    //       this._applyTheme();
-    //     });
-    //     makeDialogManager(this, this.shadowRoot!);
-    //   }
+      listenMediaQuery("(prefers-color-scheme: dark)", (_matches) => {
+        this._applyTheme();
+      });
+      makeDialogManager(this, this.shadowRoot!);
+    }
 
-    protected render() {
-        if (!this.hass) {
-            return nothing;
-        }
-        return html`
-          <lcn-router
-            .hass=${this.hass}
-            .route=${this.route}
-            .narrow=${this.narrow}
-          ></lcn-router>
-          `;
-        }
+  protected render() {
+      if (!this.hass) {
+          return nothing;
+      }
+      return html`
+        <lcn-router
+          .hass=${this.hass}
+          .route=${this.route}
+          .narrow=${this.narrow}
+        ></lcn-router>
+        `;
+      }
 
-        //   private _setRoute(ev: LocationChangedEvent): void {
-    //     if (!ev.detail?.route) {
-    //       return;
-    //     }
-    //     this.route = ev.detail.route;
-    //     navigate(this.route.path, { replace: true });
-    //     this.requestUpdate();
-    //   }
+  // private _setRoute(ev: LocationChangedEvent): void {
+  //   if (!ev.detail?.route) {
+  //     return;
+  //   }
+  //   this.route = ev.detail.route;
+  //   navigate(this.route.path, { replace: true });
+  //   this.requestUpdate();
+  // }
 
-    //   private _applyTheme() {
-    //     applyThemesOnElement(
-    //       this.parentElement,
-    //       this.hass.themes,
-    //       this.hass.selectedTheme?.theme ||
-    //         (this.hass.themes.darkMode && this.hass.themes.default_dark_theme
-    //           ? this.hass.themes.default_dark_theme!
-    //           : this.hass.themes.default_theme),
-    //       {
-    //         ...this.hass.selectedTheme,
-    //         dark: this.hass.themes.darkMode,
-    //       },
-    //     );
-    //     this.parentElement!.style.backgroundColor = "var(--primary-background-color)";
-    //     this.parentElement!.style.color = "var(--primary-text-color)";
-    //   }
+  private _applyTheme() {
+    applyThemesOnElement(
+      this.parentElement,
+      this.hass.themes,
+      this.hass.selectedTheme?.theme ||
+        (this.hass.themes.darkMode && this.hass.themes.default_dark_theme
+          ? this.hass.themes.default_dark_theme!
+          : this.hass.themes.default_theme),
+      {
+        ...this.hass.selectedTheme,
+        dark: this.hass.themes.darkMode,
+      },
+    );
+    this.parentElement!.style.backgroundColor = "var(--primary-background-color)";
+    this.parentElement!.style.color = "var(--primary-text-color)";
+  }
 }
 
 

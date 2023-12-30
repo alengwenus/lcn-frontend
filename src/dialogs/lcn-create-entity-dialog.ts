@@ -1,14 +1,13 @@
 import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@polymer/paper-input/paper-input";
 import "@ha/components/ha-icon-button";
-import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
-import { customElement, property, query } from "lit/decorators";
+import { css, html, LitElement, TemplateResult, CSSResultGroup } from "lit";
+import { customElement, property } from "lit/decorators";
+import { createCloseHeading } from "@ha/components/ha-dialog";
 import { haStyleDialog } from "@ha/resources/styles";
 import { HomeAssistant } from "@ha/types";
 import { LcnEntityDialogParams } from "./show-dialog-create-entity";
 import { LcnEntityConfig } from "types/lcn";
-import { fireEvent } from "@ha/common/dom/fire_event";
-import { HaDialog } from "@ha/components/ha-dialog";
 import "./lcn-config-binary-sensor";
 import "./lcn-config-climate";
 import "./lcn-config-cover";
@@ -29,8 +28,6 @@ export class CreateEntityDialog extends LitElement {
 
   @property() private _invalid = false;
 
-  @query("ha-dialog", true) private _dialog!: HaDialog;
-
   private _domains: string[] = [
     "binary_sensor",
     "climate",
@@ -44,7 +41,6 @@ export class CreateEntityDialog extends LitElement {
   public async showDialog(params: LcnEntityDialogParams): Promise<void> {
     this._params = params;
     await this.updateComplete;
-    fireEvent(this._dialog as HTMLElement, "iron-resize");
   }
 
   protected render(): TemplateResult {
@@ -52,7 +48,14 @@ export class CreateEntityDialog extends LitElement {
       return html``;
     }
     return html`
-      <ha-dialog open scrimClickAction heading="Create new entity">
+      <ha-dialog
+        open
+        .heading=${createCloseHeading(
+          this.hass,
+          "Create new entity"
+        )}
+        @closed=${this._closeDialog}
+      >
         <div>
           <paper-dropdown-menu
             label="Domain"
@@ -165,77 +168,13 @@ export class CreateEntityDialog extends LitElement {
     this.domain = ev.detail.value.itemValue;
   }
 
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup {
     return [
       haStyleDialog,
       css`
-        app-toolbar {
-          color: var(--primary-text-color);
-          background-color: var(--secondary-background-color);
-          margin: 0;
-          padding: 0 16px;
+        .form {
+          padding-bottom: 24px;
         }
-
-        app-toolbar [main-title] {
-          /* Design guideline states 24px, changed to 16 to align with state info */
-          margin-left: 16px;
-          line-height: 1.3em;
-          max-height: 2.6em;
-          overflow: hidden;
-          /* webkit and blink still support simple multiline text-overflow */
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          text-overflow: ellipsis;
-        }
-
-        @media all and (min-width: 451px) and (min-height: 501px) {
-          .main-title {
-            pointer-events: auto;
-            cursor: default;
-          }
-        }
-
-        ha-dialog {
-          width: 450px;
-          max-height: none !important;
-        }
-
-        /* overrule the ha-style-dialog max-height on small screens */
-        @media all and (max-width: 450px), all and (max-height: 500px) {
-          app-toolbar {
-            background-color: var(--app-header-background-color);
-            color: var(--app-header-text-color, white);
-          }
-          ha-dialog {
-            height: 100%;
-            max-height: 100% !important;
-            width: 100% !important;
-            border-radius: 0px;
-            position: fixed !important;
-            margin: 0;
-          }
-          ha-dialog::before {
-            content: "";
-            position: fixed;
-            z-index: -1;
-            top: 0px;
-            left: 0px;
-            right: 0px;
-            bottom: 0px;
-            background-color: inherit;
-          }
-        }
-
-        :host([rtl]) app-toolbar {
-          direction: rtl;
-          text-align: right;
-        }
-        :host {
-          --paper-font-title_-_white-space: normal;
-        }
-      `,
-      css`
         .buttons {
           display: flex;
           justify-content: space-between;

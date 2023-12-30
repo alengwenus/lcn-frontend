@@ -6,7 +6,9 @@ export interface LcnDeviceDialogParams {
 }
 
 export const loadLCNCreateDeviceDialog = () =>
-  import("./lcn-create-device-dialog");
+  import(
+    /* webpackChunkName: "lcn-create-device-dialog" */ "./lcn-create-device-dialog"
+  );
 
 export const showLCNCreateDeviceDialog = (
   element: HTMLElement,

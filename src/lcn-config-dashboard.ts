@@ -231,11 +231,6 @@ export class LCNConfigDashboard extends LitElement {
           width: 40%;
           display: inline-block;
         }
-        #open-option-flow {
-          display: inline-block;
-          margin-top: 20px;
-          justify-content: center;
-        }
         #scan-devices {
           display: inline-block;
           margin-top: 20px;
