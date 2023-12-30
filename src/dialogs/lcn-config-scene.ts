@@ -11,7 +11,7 @@ import {
   PropertyValues,
 } from "lit";
 import { customElement, property } from "lit/decorators";
-import "../../../../../../components/ha-switch";
+import "@ha/components/ha-switch";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import "@ha/components/ha-checkbox";

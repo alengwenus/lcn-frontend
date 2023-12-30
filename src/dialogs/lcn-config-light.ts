@@ -2,8 +2,8 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-listbox/paper-listbox";
-import "../../../../../../components/ha-radio";
-import "../../../../../../components/ha-formfield";
+import "@ha/components/ha-radio";
+import "@ha/components/ha-formfield";
 import {
   css,
   html,

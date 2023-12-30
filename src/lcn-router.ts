@@ -4,13 +4,13 @@ import {
   HassRouterPage,
   RouterOptions,
 } from "@ha/layouts/hass-router-page";
-import { HomeAssistant } from "@ha/types";
+import { HomeAssistant, Route } from "@ha/types";
 
-@customElement("lcn-config-dashboard-router")
-class LCNConfigDashboardRouter extends HassRouterPage {
+@customElement("lcn-router")
+class LCNRouter extends HassRouterPage {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() public isWide!: boolean;
+  @property({ attribute: false }) public route!: Route;
 
   @property() public narrow!: boolean;
 
@@ -26,20 +26,25 @@ class LCNConfigDashboardRouter extends HassRouterPage {
     routes: {
       devices: {
         tag: "lcn-config-dashboard",
-        load: () => import("./lcn-config-dashboard"),
+        load: () => {
+          console.log("Importing lcn-config-dashboard");
+          return import("./lcn-config-dashboard");
+        },
       },
-      entities: {
-        tag: "lcn-entities-page",
-        load: () => import("./lcn-entities-page"),
-      },
+    //   entities: {
+    //     tag: "lcn-entities-page",
+    //     load: () => import("./lcn-entities-page"),
+    //   },
     },
   };
 
   protected updatePageEl(el): void {
-    el.route = this.routeTail;
     el.hass = this.hass;
-    el.isWide = this.isWide;
+    el.route = this.routeTail;
     el.narrow = this.narrow;
+
+    console.log(`Current Page: ${this._currentPage} Route: ${this.route.path}`);
+
     if (this._currentPage === "entities") {
       el.hostId = this.routeTail.path.substr(1).split("/")[0];
       const addressString = this.routeTail.path.substr(1).split("/")[1];
@@ -57,6 +62,6 @@ class LCNConfigDashboardRouter extends HassRouterPage {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "lcn-config-dashboard-router": LCNConfigDashboardRouter;
+    "lcn-router": LCNRouter;
   }
 }

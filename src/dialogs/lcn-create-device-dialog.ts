@@ -1,8 +1,8 @@
 import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@polymer/paper-input/paper-input";
-import "../../../../../../components/ha-icon-button";
-import "../../../../../../components/ha-radio";
-import "../../../../../../components/ha-formfield";
+import "@ha/components/ha-icon-button";
+import "@ha/components/ha-radio";
+import "@ha/components/ha-formfield";
 import {
   css,
   html,

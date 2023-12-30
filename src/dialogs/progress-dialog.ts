@@ -1,4 +1,4 @@
-import "../../../../../../components/ha-circular-progress";
+import "@ha/components/ha-circular-progress";
 import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { haStyleDialog } from "@ha/resources/styles";

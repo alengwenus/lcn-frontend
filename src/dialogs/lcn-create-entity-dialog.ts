@@ -1,6 +1,6 @@
 import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@polymer/paper-input/paper-input";
-import "../../../../../../components/ha-icon-button";
+import "@ha/components/ha-icon-button";
 import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { haStyleDialog } from "@ha/resources/styles";

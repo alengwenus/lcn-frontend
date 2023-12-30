@@ -29,8 +29,6 @@ export type DeviceRowData = LcnDeviceConfig & {
 export class LCNDevicesDataTable extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() public isWide!: boolean;
-
   @property() public narrow!: boolean;
 
   @property() public route!: Route;
@@ -110,6 +108,7 @@ export class LCNDevicesDataTable extends LitElement {
     const handler = (ev) => this._openDevice(ev.detail.id);
     return html`
       <ha-data-table
+        .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._devices(this.devices)}
         .id=${"address"}

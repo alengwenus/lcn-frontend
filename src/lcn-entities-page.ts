@@ -6,7 +6,7 @@ import { HomeAssistant, Route } from "@ha/types";
 import { computeRTL } from "@ha/common/util/compute_rtl";
 import "@ha/layouts/hass-tabs-subpage";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
-import "ha/ha-config-section";
+import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";

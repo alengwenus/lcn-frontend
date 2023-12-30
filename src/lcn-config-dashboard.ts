@@ -17,13 +17,12 @@ import { HomeAssistant, Route } from "@ha/types";
 import { computeRTL } from "@ha/common/util/compute_rtl";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 import { getConfigEntries } from "@ha/data/config_entries";
-import { showOptionsFlowDialog } from "@ha/dialogs/config-flow/show-dialog-options-flow";
-import "../../../../../layouts/hass-tabs-subpage";
+import "@ha/layouts/hass-tabs-subpage";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
-import "../../../ha-config-section";
-import "../../../../../layouts/hass-loading-screen";
-import "../../../../../components/ha-card";
-import "../../../../../components/ha-svg-icon";
+import "@ha/panels/config/ha-config-section";
+import "@ha/layouts/hass-loading-screen";
+import "@ha/components/ha-card";
+import "@ha/components/ha-svg-icon";
 import { haStyle } from "@ha/resources/styles";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
@@ -49,8 +48,6 @@ export const lcnTabs: PageNavigation[] = [];
 @customElement("lcn-config-dashboard")
 export class LCNConfigDashboard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
-
-  @property() public isWide!: boolean;
 
   @property() public narrow!: boolean;
 
@@ -110,11 +107,11 @@ export class LCNConfigDashboard extends LitElement {
       >
         <ha-config-section .narrow=${this.narrow} .isWide=${this.isWide}>
           <span slot="header">
-            ${this.hass.localize("ui.panel.config.lcn.header")}
+            LCN Panel
           </span>
 
           <span slot="introduction">
-            ${this.hass.localize("ui.panel.config.lcn.introduction")}
+            Welcome to the LCN configuration panel.
           </span>
 
           <div id="box">
@@ -138,12 +135,6 @@ export class LCNConfigDashboard extends LitElement {
               </paper-dropdown-menu>
             </div>
 
-            <div id="open-option-flow">
-              <mwc-button raised @click=${this._openOptionFlow}
-                >Open host options</mwc-button
-              >
-            </div>
-
             <div id="scan-devices">
               <mwc-button raised @click=${this._scanDevices}
                 >Scan modules</mwc-button
@@ -164,7 +155,6 @@ export class LCNConfigDashboard extends LitElement {
             aria-label="Create new module/group"
             title="Create new module/group"
             @click=${this._addDevice}
-            ?is-wide=${this.isWide}
             ?narrow=${this.narrow}
             ?rtl=${computeRTL(this.hass!)}
           >
@@ -203,14 +193,6 @@ export class LCNConfigDashboard extends LitElement {
 
     this._deviceConfigs = await scanDevices(this.hass!, this._host.id);
     await dialog()!.closeDialog();
-  }
-
-  private async _openOptionFlow() {
-    const configEntries = await getConfigEntries(this.hass);
-    const configEntry = configEntries.find(
-      (entry) => entry.entry_id === this._host.id
-    );
-    showOptionsFlowDialog(this, configEntry!);
   }
 
   private _addDevice() {

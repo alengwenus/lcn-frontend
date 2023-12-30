@@ -1,4 +1,4 @@
-import "../../../../../components/ha-icon-button";
+import "@ha/components/ha-icon-button";
 import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
@@ -90,6 +90,7 @@ export class LCNEntitiesDataTable extends LitElement {
   protected render() {
     return html`
       <ha-data-table
+        .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._entities(this.entities)}
         .id=${"unique_id"}

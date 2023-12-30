@@ -13,7 +13,7 @@ import "@ha/resources/ha-style";
 import { HomeAssistant, Route } from "@ha/types";
 
 // import { lcnElement } from "./lcn";
-// import "./lcn-config-dashboard-router";
+import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
 import { logger } from "workbox-core/_private";
 // import { LCN } from "./types/lcn";
@@ -52,16 +52,14 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
         if (!this.hass) {
             return nothing;
         }
-        console.log("Hello!");
         return html`
-          Hello
+          <lcn-router
+            .hass=${this.hass}
+            .route=${this.route}
+            .narrow=${this.narrow}
+          ></lcn-router>
           `;
         }
-        // <lcn-router
-        //   .hass=${this.hass}
-        //   .route=${this.route}
-        //   .narrow=${this.narrow}
-        // ></lcn-router>
 
         //   private _setRoute(ev: LocationChangedEvent): void {
     //     if (!ev.detail?.route) {
