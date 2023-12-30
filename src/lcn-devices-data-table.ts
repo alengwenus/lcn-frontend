@@ -22,7 +22,7 @@ export type DeviceRowData = LcnDeviceConfig & {
   segment_id: number;
   address_id: number;
   is_group: boolean;
-  delete: LcnAddress;
+  delete: LcnDeviceConfig;
 };
 
 @customElement("lcn-devices-data-table")
@@ -43,7 +43,7 @@ export class LCNDevicesDataTable extends LitElement {
       segment_id: device.address[0],
       address_id: device.address[1],
       is_group: device.address[2],
-      delete: device.address,
+      delete: device,
     }));
     return deviceRowData;
   });
@@ -85,8 +85,8 @@ export class LCNDevicesDataTable extends LitElement {
               title: "",
               sortable: false,
               width: "60px",
-              template: (address: LcnAddress) => {
-                const handler = (ev) => this._onDeviceDelete(ev, address);
+              template: (device: LcnDeviceConfig) => {
+                const handler = (ev) => this._onDeviceDelete(ev, device);
                 return html`
                   <ha-icon-button
                     title="Delete LCN device"
@@ -120,9 +120,9 @@ export class LCNDevicesDataTable extends LitElement {
     `;
   }
 
-  private _onDeviceDelete(ev, address) {
+  private _onDeviceDelete(ev, device: LcnDeviceConfig) {
     ev.stopPropagation();
-    this._deleteDevice(address);
+    this._deleteDevice(device.address);
   }
 
   private _dispatchConfigurationChangedEvent() {
@@ -137,7 +137,7 @@ export class LCNDevicesDataTable extends LitElement {
   private _openDevice(address) {
     // convert address tuple into string (e.g. m000007) for use in url
     const addressString = createAddressString(address);
-    navigate(`/config/lcn/entities/${this.host.id}/${addressString}`);
+    navigate(`/lcn/entities/${this.host.id}/${addressString}`);
   }
 
   private async _deleteDevice(address: LcnAddress) {

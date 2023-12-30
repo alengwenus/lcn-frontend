@@ -13,13 +13,15 @@ import {
 } from "types/lcn";
 import { DataTableColumnContainer } from "@ha/components/data-table/ha-data-table";
 
-export type EntityRowData = LcnEntityConfig;
+// export type EntityRowData = LcnEntityConfig;
+
+export type EntityRowData = LcnEntityConfig & {
+  delete: LcnEntityConfig;
+};
 
 @customElement("lcn-entities-data-table")
 export class LCNEntitiesDataTable extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
-
-  @property() public isWide!: boolean;
 
   @property() public narrow!: boolean;
 
@@ -30,10 +32,9 @@ export class LCNEntitiesDataTable extends LitElement {
   @property() public entities: LcnEntityConfig[] = [];
 
   private _entities = memoizeOne((entities: LcnEntityConfig[]) => {
-    let entityRowData: EntityRowData[] = entities;
-
-    entityRowData = entities.map((entity) => ({
+    const entityRowData: EntityRowData[] = entities.map((entity) => ({
       ...entity,
+      delete: entity,
     }));
     return entityRowData;
   });
@@ -68,13 +69,15 @@ export class LCNEntitiesDataTable extends LitElement {
               direction: "asc",
               grows: true,
             },
-            address: {
+            delete: {
               title: "",
               sortable: false,
               width: "60px",
-              template: (address, entity) => {
-                const handler = (ev) =>
-                  this._onEntityDelete(ev, address, entity);
+              template: (entity: LcnEntityConfig) => {
+                const handler = (ev) => {
+                  console.log(ev, entity);
+                  this._onEntityDelete(ev, entity);
+                }
                 return html`
                   <ha-icon-button
                     title="Delete LCN entity"
@@ -99,9 +102,9 @@ export class LCNEntitiesDataTable extends LitElement {
     `;
   }
 
-  private _onEntityDelete(ev, address, entity) {
+  private _onEntityDelete(ev, entity: LcnEntityConfig) {
     ev.stopPropagation();
-    this._deleteEntity(address, entity.domain, entity.resource);
+    this._deleteEntity(entity.address, entity.domain, entity.resource);
   }
 
   private async _deleteEntity(

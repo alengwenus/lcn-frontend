@@ -31,10 +31,13 @@ class LCNRouter extends HassRouterPage {
           return import("./lcn-config-dashboard");
         },
       },
-    //   entities: {
-    //     tag: "lcn-entities-page",
-    //     load: () => import("./lcn-entities-page"),
-    //   },
+      entities: {
+        tag: "lcn-entities-page",
+        load: () => {
+          console.log("Importing lcn-entities-page");
+          return import("./lcn-entities-page");
+        },
+      },
     },
   };
 

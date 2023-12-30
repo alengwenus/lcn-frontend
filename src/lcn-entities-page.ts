@@ -34,8 +34,6 @@ export const lcnTabs: PageNavigation[] = [];
 export class LCNEntitiesPage extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() public isWide!: boolean;
-
   @property() public narrow!: boolean;
 
   @property() public route!: Route;
@@ -71,10 +69,10 @@ export class LCNEntitiesPage extends LitElement {
         .hass=${this.hass}
         .narrow=${this.narrow}
         .route=${this.route}
-        back-path="/config/lcn"
+        back-path="/lcn/devices"
         .tabs=${lcnTabs}
       >
-        <ha-config-section .narrow=${this.narrow} .isWide=${this.isWide}>
+        <ha-config-section .narrow=${this.narrow} >
           <span slot="header"> Device configuration </span>
 
           <span slot="introduction"> Configure entities for this device. </span>
@@ -102,7 +100,6 @@ export class LCNEntitiesPage extends LitElement {
             aria-label="Create new entity"
             title="Create new entity"
             @click=${this._addEntity}
-            ?is-wide=${this.isWide}
             ?narrow=${this.narrow}
             ?rtl=${computeRTL(this.hass!)}
           >
