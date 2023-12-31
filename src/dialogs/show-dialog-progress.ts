@@ -4,7 +4,7 @@ import { ProgressDialog } from "./progress-dialog";
 
 const getDialog = () =>
   document
-    .querySelector("home-assistant")!
+    .querySelector("lcn-frontend")!
     .shadowRoot!.querySelector("progress-dialog") as ProgressDialog | undefined;
 
 export interface ProgressDialogParams {
