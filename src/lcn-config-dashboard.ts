@@ -35,6 +35,7 @@ import {
 } from "./dialogs/show-dialog-progress";
 import "./lcn-devices-data-table";
 import {
+  LCN,
   fetchHosts,
   fetchDevices,
   scanDevices,
@@ -48,6 +49,8 @@ export const lcnTabs: PageNavigation[] = [];
 @customElement("lcn-config-dashboard")
 export class LCNConfigDashboard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public lcn!: LCN;
 
   @property() public narrow!: boolean;
 
@@ -65,6 +68,7 @@ export class LCNConfigDashboard extends LitElement {
     changedProperties: PropertyValues
   ): Promise<void> {
     super.firstUpdated(changedProperties);
+    console.log(this.lcn);
     await this._fetchHosts();
     loadProgressDialog();
     loadLCNCreateDeviceDialog();

@@ -5,10 +5,13 @@ import {
   RouterOptions,
 } from "@ha/layouts/hass-router-page";
 import { HomeAssistant, Route } from "@ha/types";
+import { LCN } from "./types/lcn";
 
 @customElement("lcn-router")
 class LCNRouter extends HassRouterPage {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public lcn!: LCN;
 
   @property({ attribute: false }) public route!: Route;
 
@@ -43,6 +46,7 @@ class LCNRouter extends HassRouterPage {
 
   protected updatePageEl(el): void {
     el.hass = this.hass;
+    el.lcn = this.lcn;
     el.route = this.routeTail;
     el.narrow = this.narrow;
 

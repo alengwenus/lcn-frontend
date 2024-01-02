@@ -1,4 +1,12 @@
 import { HomeAssistant } from "@ha/types";
+import { ConfigEntry } from "@ha/data/config_entries";
+
+
+export interface LCN {
+  language: string;
+  config_entries: ConfigEntry[];
+}
+
 
 export interface LcnHost {
   name: string;

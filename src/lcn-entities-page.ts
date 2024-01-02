@@ -13,6 +13,7 @@ import "@ha/components/ha-svg-icon";
 import { haStyle } from "@ha/resources/styles";
 import "./lcn-entities-data-table";
 import {
+  LCN,
   fetchHosts,
   fetchEntities,
   fetchDevice,
@@ -33,6 +34,8 @@ export const lcnTabs: PageNavigation[] = [];
 @customElement("lcn-entities-page")
 export class LCNEntitiesPage extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public lcn!: LCN;
 
   @property() public narrow!: boolean;
 

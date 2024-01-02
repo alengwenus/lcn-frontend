@@ -10,18 +10,20 @@ import { computeRTL, computeDirectionStyles } from "@ha/common/util/compute_rtl"
 import { navigate } from "@ha/common/navigate";
 import { makeDialogManager } from "@ha/dialogs/make-dialog-manager";
 import "@ha/resources/ha-style";
+import { getConfigEntries } from "@ha/data/config_entries";
 import { HomeAssistant, Route } from "@ha/types";
 
-// import { lcnElement } from "./lcn";
 import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
-import { logger } from "workbox-core/_private";
-// import { LCN } from "./types/lcn";
-// import { LocationChangedEvent } from "./types/navigation";
+import { LCN } from "./types/lcn";
+import { LocationChangedEvent } from "./types/navigation";
+
 
 @customElement("lcn-frontend")
 class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     @property({ attribute: false }) public hass!: HomeAssistant;
+
+    @property({ attribute: false }) public lcn!: LCN;
 
     @property({ attribute: false }) public narrow!: boolean;
 
@@ -32,10 +34,10 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       if (!this.hass) {
         return;
       }
-      // if (!this.lcn) {
-      //   this._initLCN();
-      // }
-      // this.addEventListener("lcn-location-changed", (e) => this._setRoute(e as LocationChangedEvent));
+      if (!this.lcn) {
+        this._initLCN();
+      }
+      this.addEventListener("lcn-location-changed", (e) => this._setRoute(e as LocationChangedEvent));
 
       if (this.route.path === "" || this.route.path === "/") {
         navigate("/lcn/devices", { replace: true });
@@ -56,20 +58,32 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       return html`
         <lcn-router
           .hass=${this.hass}
+          .lcn=${this.lcn}
           .route=${this.route}
           .narrow=${this.narrow}
         ></lcn-router>
         `;
       }
 
-  // private _setRoute(ev: LocationChangedEvent): void {
-  //   if (!ev.detail?.route) {
-  //     return;
-  //   }
-  //   this.route = ev.detail.route;
-  //   navigate(this.route.path, { replace: true });
-  //   this.requestUpdate();
-  // }
+  protected _initLCN() {
+    getConfigEntries(this.hass, { domain: "lcn" }).then((configEntries) => {
+      this.lcn = {
+        language: this.hass.language,
+        config_entries: configEntries,
+        // localize: (string, replace) => localize(this.hass.language || "en", string, replace),
+        // log: new LCNLogger(),
+      };
+    });
+  }
+
+  private _setRoute(ev: LocationChangedEvent): void {
+    if (!ev.detail?.route) {
+      return;
+    }
+    this.route = ev.detail.route;
+    navigate(this.route.path, { replace: true });
+    this.requestUpdate();
+  }
 
   private _applyTheme() {
     applyThemesOnElement(
@@ -88,7 +102,6 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     this.parentElement!.style.color = "var(--primary-text-color)";
   }
 }
-
 
 declare global {
   interface HTMLElementTagNameMap {
