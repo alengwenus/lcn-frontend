@@ -137,9 +137,6 @@ export class LCNDevicesDataTable extends LitElement {
   }
 
   private _openDevice() {
-    // convert address tuple into string (e.g. m000007) for use in url
-    // const addressString = createAddressString(address);
-    // navigate(`/lcn/entities/${this.lcn.host.id}/${addressString}`);
     navigate(`/lcn/entities`);
   }
 

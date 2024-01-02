@@ -150,8 +150,6 @@ export class LCNConfigDashboard extends LitElement {
       return;
     }
     this.lcn.host = ev.detail.value.itemValue;
-    // this.lcn.host = this._host
-    // sessionStorage.setItem("lcn-host-id", this._host.id);
     this._fetchDevices(this.lcn.host);
   }
 

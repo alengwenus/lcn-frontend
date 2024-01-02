@@ -10,7 +10,7 @@ import { computeRTL, computeDirectionStyles } from "@ha/common/util/compute_rtl"
 import { navigate } from "@ha/common/navigate";
 import { makeDialogManager } from "@ha/dialogs/make-dialog-manager";
 import "@ha/resources/ha-style";
-import { getConfigEntries } from "@ha/data/config_entries";
+import { getConfigEntries, getConfigEntry } from "@ha/data/config_entries";
 import { HomeAssistant, Route } from "@ha/types";
 
 import "./lcn-router";
@@ -78,7 +78,7 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
             name: configEntry.title,
             id: configEntry.entry_id
           }),
-          address: <LcnAddress>([0, 0, false])
+          address: <LcnAddress>[0, 0, false]
         };
       });
     }

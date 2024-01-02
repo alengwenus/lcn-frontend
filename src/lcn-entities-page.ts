@@ -15,7 +15,7 @@ import "./lcn-entities-data-table";
 import {
   LCN,
   fetchEntities,
-  fetchDevice,
+  fetchDevices,
   addEntity,
   LcnDeviceConfig,
   LcnEntityConfig,
@@ -47,7 +47,7 @@ export class LCNEntitiesPage extends LitElement {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
 
-    this._fetchEntities(this.lcn.host.id, this.lcn.address);
+    await this._fetchEntities(this.lcn.host.id, this.lcn.address);
   }
 
   protected render(): TemplateResult {
@@ -105,7 +105,11 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   private async _fetchEntities(host: string, address: LcnAddress) {
-    this._deviceConfig = await fetchDevice(this.hass!, host, address);
+    const deviceConfigs = await fetchDevices(this.hass!, host);
+    const deviceConfig = deviceConfigs.find((el) => el.address[0] === address[0] && el.address[1] === address[1] && el.address[2] === address[2]);
+    if (deviceConfig !== undefined) {
+      this._deviceConfig = deviceConfig;
+    };
     this._entityConfigs = await fetchEntities(this.hass!, host, address);
   }
 
