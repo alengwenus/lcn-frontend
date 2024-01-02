@@ -5,10 +5,10 @@ import memoizeOne from "memoize-one";
 import { mdiDelete } from "@mdi/js";
 import { HomeAssistant } from "@ha/types";
 import {
+  LCN,
   LcnEntityConfig,
   deleteEntity,
   LcnDeviceConfig,
-  LcnHost,
   LcnAddress,
 } from "types/lcn";
 import { DataTableColumnContainer } from "@ha/components/data-table/ha-data-table";
@@ -23,9 +23,9 @@ export type EntityRowData = LcnEntityConfig & {
 export class LCNEntitiesDataTable extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() public narrow!: boolean;
+  @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public host!: LcnHost;
+  @property() public narrow!: boolean;
 
   @property() public device!: LcnDeviceConfig;
 
@@ -121,7 +121,7 @@ export class LCNEntitiesDataTable extends LitElement {
         entity.resource === resource
     )!;
 
-    await deleteEntity(this.hass, this.host.id, entity_to_delete);
+    await deleteEntity(this.hass, this.lcn.host.id, entity_to_delete);
 
     this.dispatchEvent(
       new CustomEvent("lcn-configuration-changed", {

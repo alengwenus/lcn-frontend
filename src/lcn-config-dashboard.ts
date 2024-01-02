@@ -16,7 +16,6 @@ import { mdiPlus } from "@mdi/js";
 import { HomeAssistant, Route } from "@ha/types";
 import { computeRTL } from "@ha/common/util/compute_rtl";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
-import { getConfigEntries } from "@ha/data/config_entries";
 import "@ha/layouts/hass-tabs-subpage";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import "@ha/panels/config/ha-config-section";
@@ -56,11 +55,7 @@ export class LCNConfigDashboard extends LitElement {
 
   @property() public route!: Route;
 
-  @property() public hostId!: string;
-
   @property() private _hosts: LcnHost[] = [];
-
-  @property() private _host!: LcnHost;
 
   @property() private _deviceConfigs: LcnDeviceConfig[] = [];
 
@@ -73,32 +68,13 @@ export class LCNConfigDashboard extends LitElement {
     loadProgressDialog();
     loadLCNCreateDeviceDialog();
 
-    if (this.hostId) {
-      // host_id externally set (via searchParams)
-      this._host = this._hosts.find((host) => host.id === this.hostId)!;
-      if (!this._host) {
-        this._host = this._hosts[0];
-      }
-    } else if (sessionStorage.getItem("lcn-host-id")) {
-      // host_id from sessionStorage
-      this._host = this._hosts.find(
-        (host) => host.id === sessionStorage.getItem("lcn-host-id")
-      )!;
-      if (!this._host) {
-        this._host = this._hosts[0];
-      }
-    } else {
-      // all other cases
-      this._host = this._hosts[0];
-    }
-
     this.addEventListener("lcn-config-changed", async () => {
-      this._fetchDevices(this._host);
+      this._fetchDevices(this.lcn.host);
     });
   }
 
   protected render(): TemplateResult {
-    if (!(this.hass && this._host)) {
+    if (!(this.hass && this.lcn)) {
       return html` <hass-loading-screen></hass-loading-screen> `;
     }
     return html`
@@ -127,7 +103,7 @@ export class LCNConfigDashboard extends LitElement {
                 <paper-listbox
                   slot="dropdown-content"
                   selected=${this._hosts.findIndex(
-                    (host) => host.id === this._host.id
+                    (host) => host.id === this.lcn.host.id
                   )}
                 >
                   ${this._hosts.map(
@@ -146,10 +122,10 @@ export class LCNConfigDashboard extends LitElement {
             </div>
           </div>
 
-          <ha-card header="Devices for host (${this._host.name})">
+          <ha-card header="Devices for host (${this.lcn.host.name})">
             <lcn-devices-data-table
               .hass=${this.hass}
-              .host=${this._host}
+              .lcn=${this.lcn}
               .devices=${this._deviceConfigs}
               .narrow=${this.narrow}
             ></lcn-devices-data-table>
@@ -173,9 +149,10 @@ export class LCNConfigDashboard extends LitElement {
     if (!ev.detail.value) {
       return;
     }
-    this._host = ev.detail.value.itemValue;
-    sessionStorage.setItem("lcn-host-id", this._host.id);
-    this._fetchDevices(this._host);
+    this.lcn.host = ev.detail.value.itemValue;
+    // this.lcn.host = this._host
+    // sessionStorage.setItem("lcn-host-id", this._host.id);
+    this._fetchDevices(this.lcn.host);
   }
 
   private async _fetchHosts() {
@@ -195,14 +172,14 @@ export class LCNConfigDashboard extends LitElement {
       `,
     });
 
-    this._deviceConfigs = await scanDevices(this.hass!, this._host.id);
+    this._deviceConfigs = await scanDevices(this.hass!, this.lcn.host.id);
     await dialog()!.closeDialog();
   }
 
   private _addDevice() {
     showLCNCreateDeviceDialog(this, {
       createDevice: async (deviceParams) => {
-        if (!(await addDevice(this.hass, this._host.id, deviceParams))) {
+        if (!(await addDevice(this.hass, this.lcn.host.id, deviceParams))) {
           await showAlertDialog(this, {
             title: "Device already exists",
             text: `The specified
@@ -214,7 +191,7 @@ export class LCNConfigDashboard extends LitElement {
           });
           return;
         }
-        this._fetchDevices(this._host);
+        this._fetchDevices(this.lcn.host);
       },
     });
   }

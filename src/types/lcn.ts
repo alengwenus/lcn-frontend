@@ -5,14 +5,13 @@ import { ConfigEntry } from "@ha/data/config_entries";
 export interface LCN {
   language: string;
   config_entries: ConfigEntry[];
+  host: LcnHost;
+  address: LcnAddress;
 }
-
 
 export interface LcnHost {
   name: string;
   id: string;
-  ip_address: string;
-  port: number;
 }
 
 export type LcnAddress = [number, number, boolean];
@@ -167,19 +166,3 @@ export const deleteDevice = (
     host_id: hostId,
     address: device.address,
   });
-
-export const createAddressString = (address: LcnAddress): string => {
-  // convert address tuple into string (e.g. m000007) for use in url
-  const segId = address[0].toString().padStart(3, "0");
-  const addrId = address[1].toString().padStart(3, "0");
-  const isGroup = address[2] ? "g" : "m";
-  return isGroup + segId + addrId;
-};
-
-export const parseAddressString = (addressString: string): LcnAddress =>
-  // convert address string (e.g. m000007) into address tuple
-  [
-    +addressString.slice(1, 4),
-    +addressString.slice(4, 7),
-    addressString[0] === "g",
-  ];

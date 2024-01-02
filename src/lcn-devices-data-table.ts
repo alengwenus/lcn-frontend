@@ -9,11 +9,10 @@ import type { HomeAssistant, Route } from "@ha/types";
 import { showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import { navigate } from "@ha/common/navigate";
 import {
+  LCN,
   LcnDeviceConfig,
   deleteDevice,
-  LcnHost,
   LcnAddress,
-  createAddressString,
 } from "types/lcn";
 import "@ha/components/ha-icon-button";
 import { loadLCNCreateDeviceDialog } from "./dialogs/show-dialog-create-device";
@@ -29,11 +28,11 @@ export type DeviceRowData = LcnDeviceConfig & {
 export class LCNDevicesDataTable extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
+  @property({ attribute: false }) public lcn!: LCN;
+
   @property() public narrow!: boolean;
 
   @property() public route!: Route;
-
-  @property() public host!: LcnHost;
 
   @property() public devices: LcnDeviceConfig[] = [];
 
@@ -105,7 +104,10 @@ export class LCNDevicesDataTable extends LitElement {
   }
 
   protected render(): TemplateResult {
-    const handler = (ev) => this._openDevice(ev.detail.id);
+    const handler = (ev) => {
+      this.lcn.address = ev.detail.id;
+      this._openDevice();
+    };
     return html`
       <ha-data-table
         .hass=${this.hass}
@@ -134,10 +136,11 @@ export class LCNDevicesDataTable extends LitElement {
     );
   }
 
-  private _openDevice(address) {
+  private _openDevice() {
     // convert address tuple into string (e.g. m000007) for use in url
-    const addressString = createAddressString(address);
-    navigate(`/lcn/entities/${this.host.id}/${addressString}`);
+    // const addressString = createAddressString(address);
+    // navigate(`/lcn/entities/${this.lcn.host.id}/${addressString}`);
+    navigate(`/lcn/entities`);
   }
 
   private async _deleteDevice(address: LcnAddress) {
@@ -163,7 +166,7 @@ export class LCNDevicesDataTable extends LitElement {
       return;
     }
 
-    await deleteDevice(this.hass, this.host.id, device_to_delete);
+    await deleteDevice(this.hass, this.lcn.host.id, device_to_delete);
     this._dispatchConfigurationChangedEvent();
   }
 }

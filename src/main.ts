@@ -15,7 +15,7 @@ import { HomeAssistant, Route } from "@ha/types";
 
 import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
-import { LCN } from "./types/lcn";
+import { LCN, LcnHost, LcnAddress } from "./types/lcn";
 import { LocationChangedEvent } from "./types/navigation";
 
 
@@ -51,60 +51,67 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       makeDialogManager(this, this.shadowRoot!);
     }
 
-  protected render() {
+    protected render() {
       if (!this.hass) {
-          return nothing;
+        return nothing;
       }
       return html`
-        <lcn-router
-          .hass=${this.hass}
-          .lcn=${this.lcn}
-          .route=${this.route}
-          .narrow=${this.narrow}
-        ></lcn-router>
-        `;
-      }
-
-  protected _initLCN() {
-    getConfigEntries(this.hass, { domain: "lcn" }).then((configEntries) => {
-      this.lcn = {
-        language: this.hass.language,
-        config_entries: configEntries,
-        // localize: (string, replace) => localize(this.hass.language || "en", string, replace),
-        // log: new LCNLogger(),
-      };
-    });
-  }
-
-  private _setRoute(ev: LocationChangedEvent): void {
-    if (!ev.detail?.route) {
-      return;
+      <lcn-router
+      .hass=${this.hass}
+      .lcn=${this.lcn}
+      .route=${this.route}
+      .narrow=${this.narrow}
+      ></lcn-router>
+      `;
     }
-    this.route = ev.detail.route;
-    navigate(this.route.path, { replace: true });
-    this.requestUpdate();
-  }
 
-  private _applyTheme() {
-    applyThemesOnElement(
-      this.parentElement,
-      this.hass.themes,
-      this.hass.selectedTheme?.theme ||
+    protected _initLCN() {
+      getConfigEntries(this.hass, { domain: "lcn" }).then((configEntries) => {
+        const configEntry = configEntries.find((el) => el.disabled_by === null)
+
+        if (configEntry === undefined) return
+
+        this.lcn = {
+          language: this.hass.language,
+          config_entries: configEntries,
+          host: <LcnHost>({
+            name: configEntry.title,
+            id: configEntry.entry_id
+          }),
+          address: <LcnAddress>([0, 0, false])
+        };
+      });
+    }
+
+    private _setRoute(ev: LocationChangedEvent): void {
+      if (!ev.detail?.route) {
+        return;
+      }
+      this.route = ev.detail.route;
+      navigate(this.route.path, { replace: true });
+      this.requestUpdate();
+    }
+
+    private _applyTheme() {
+      applyThemesOnElement(
+        this.parentElement,
+        this.hass.themes,
+        this.hass.selectedTheme?.theme ||
         (this.hass.themes.darkMode && this.hass.themes.default_dark_theme
           ? this.hass.themes.default_dark_theme!
           : this.hass.themes.default_theme),
-      {
-        ...this.hass.selectedTheme,
-        dark: this.hass.themes.darkMode,
-      },
-    );
-    this.parentElement!.style.backgroundColor = "var(--primary-background-color)";
-    this.parentElement!.style.color = "var(--primary-text-color)";
-  }
-}
+          {
+            ...this.hass.selectedTheme,
+            dark: this.hass.themes.darkMode,
+          },
+          );
+          this.parentElement!.style.backgroundColor = "var(--primary-background-color)";
+          this.parentElement!.style.color = "var(--primary-text-color)";
+        }
+      }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    "lcn-frontend": LcnFrontend;
-  }
-}
+      declare global {
+        interface HTMLElementTagNameMap {
+          "lcn-frontend": LcnFrontend;
+        }
+      }

@@ -14,13 +14,11 @@ import { haStyle } from "@ha/resources/styles";
 import "./lcn-entities-data-table";
 import {
   LCN,
-  fetchHosts,
   fetchEntities,
   fetchDevice,
   addEntity,
   LcnDeviceConfig,
   LcnEntityConfig,
-  LcnHost,
   LcnAddress,
 } from "types/lcn";
 import {
@@ -41,14 +39,6 @@ export class LCNEntitiesPage extends LitElement {
 
   @property() public route!: Route;
 
-  @property() public address!: LcnAddress;
-
-  @property() public hostId!: string;
-
-  @property() private _host!: LcnHost;
-
-  @property() private _hosts: LcnHost[] = [];
-
   @property() private _deviceConfig!: LcnDeviceConfig;
 
   @property() private _entityConfigs: LcnEntityConfig[] = [];
@@ -57,10 +47,7 @@ export class LCNEntitiesPage extends LitElement {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
 
-    await this._fetchHosts();
-    this._host = this._hosts.find((host) => host.id === this.hostId)!;
-
-    this._fetchEntities(this._host.id, this.address);
+    this._fetchEntities(this.lcn.host.id, this.lcn.address);
   }
 
   protected render(): TemplateResult {
@@ -84,14 +71,14 @@ export class LCNEntitiesPage extends LitElement {
             header="Entities for ${this._deviceConfig.address[2]
               ? "group"
               : "module"}
-              (${this._host.name}, ${this._deviceConfig.address[0]},
+              (${this.lcn.host.name}, ${this._deviceConfig.address[0]},
               ${this._deviceConfig.address[1]})
               ${this._deviceConfig.name ? " - " + this._deviceConfig.name : ""}
             "
           >
             <lcn-entities-data-table
               .hass=${this.hass}
-              .host=${this._host}
+              .lcn=${this.lcn}
               .entities=${this._entityConfigs}
               .device=${this._deviceConfig}
               .narrow=${this.narrow}
@@ -114,11 +101,7 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   private _configurationChanged() {
-    this._fetchEntities(this._host.id, this.address);
-  }
-
-  private async _fetchHosts() {
-    this._hosts = await fetchHosts(this.hass!);
+    this._fetchEntities(this.lcn.host.id, this.lcn.address);
   }
 
   private async _fetchEntities(host: string, address: LcnAddress) {
@@ -130,7 +113,7 @@ export class LCNEntitiesPage extends LitElement {
     showLCNCreateEntityDialog(this, {
       device: <LcnDeviceConfig>this._deviceConfig,
       createEntity: async (entityParams) => {
-        if (!(await addEntity(this.hass, this._host.id, entityParams))) {
+        if (!(await addEntity(this.hass, this.lcn.host.id, entityParams))) {
           await showAlertDialog(this, {
             title: "LCN resource already assigned",
             text: `The specified LCN resource is already
@@ -139,7 +122,7 @@ export class LCNEntitiesPage extends LitElement {
           });
           return;
         }
-        await this._fetchEntities(this._host.id, this.address);
+        await this._fetchEntities(this.lcn.host.id, this.lcn.address);
       },
     });
   }

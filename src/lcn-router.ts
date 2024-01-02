@@ -1,5 +1,4 @@
 import { customElement, property } from "lit/decorators";
-import { parseAddressString } from "types/lcn";
 import {
   HassRouterPage,
   RouterOptions,
@@ -16,10 +15,6 @@ class LCNRouter extends HassRouterPage {
   @property({ attribute: false }) public route!: Route;
 
   @property() public narrow!: boolean;
-
-  private _configEntry = new URLSearchParams(window.location.search).get(
-    "config_entry"
-  );
 
   protected routerOptions: RouterOptions = {
     defaultPage: "devices",
@@ -51,19 +46,6 @@ class LCNRouter extends HassRouterPage {
     el.narrow = this.narrow;
 
     console.log(`Current Page: ${this._currentPage} Route: ${this.route.path}`);
-
-    if (this._currentPage === "entities") {
-      el.hostId = this.routeTail.path.substr(1).split("/")[0];
-      const addressString = this.routeTail.path.substr(1).split("/")[1];
-      const address = parseAddressString(addressString);
-      el.address = address;
-    } else if (this._currentPage === "devices") {
-      const searchParams = new URLSearchParams(window.location.search);
-      if (this._configEntry && !searchParams.has("config_entry")) {
-        // searchParams.append("config_entry", this._configEntry);
-        el.hostId = this._configEntry;
-      }
-    }
   }
 }
 
