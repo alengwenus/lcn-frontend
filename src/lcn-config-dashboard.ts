@@ -2,7 +2,7 @@ import "@material/mwc-button";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-import "@material/mwc-fab";
+import "@ha/components/ha-fab"
 import {
   css,
   html,
@@ -14,7 +14,6 @@ import {
 import { customElement, property } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import { HomeAssistant, Route } from "@ha/types";
-import { computeRTL } from "@ha/common/util/compute_rtl";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/layouts/hass-tabs-subpage";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
@@ -43,8 +42,6 @@ import {
   LcnDeviceConfig,
 } from "types/lcn";
 
-export const lcnTabs: PageNavigation[] = [];
-
 @customElement("lcn-config-dashboard")
 export class LCNConfigDashboard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -54,6 +51,8 @@ export class LCNConfigDashboard extends LitElement {
   @property() public narrow!: boolean;
 
   @property() public route!: Route;
+
+  @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
   @property() private _hosts: LcnHost[] = [];
 
@@ -80,11 +79,12 @@ export class LCNConfigDashboard extends LitElement {
       <hass-tabs-subpage
         .hass=${this.hass}
         .narrow=${this.narrow}
-        .route=${this.route}
         back-path="/lcn"
-        .tabs=${lcnTabs}
+        .route=${this.route}
+        .tabs=${this.tabs}
       >
-        <ha-config-section .narrow=${this.narrow}>
+        <ha-config-section
+          .narrow=${this.narrow}>
           <span slot="header">
             ${this.lcn.localize("config-dashboard")}
           </span>
@@ -96,7 +96,7 @@ export class LCNConfigDashboard extends LitElement {
           <div id="box">
             <div id="hosts-dropdown">
               <paper-dropdown-menu
-                label="Hosts"
+                label=${this.lcn.localize("config-hosts")}
                 @selected-item-changed=${this._hostChanged}
               >
                 <paper-listbox
@@ -116,12 +116,13 @@ export class LCNConfigDashboard extends LitElement {
 
             <div id="scan-devices">
               <mwc-button raised @click=${this._scanDevices}
-                >Scan modules</mwc-button
+                >${this.lcn.localize("config-scan-devices")}</mwc-button
               >
             </div>
           </div>
 
-          <ha-card header="Devices for host (${this.lcn.host.name})">
+          <ha-card
+            header="${this.lcn.localize("config-devices-for-host")} (${this.lcn.host.name})">
             <lcn-devices-data-table
               .hass=${this.hass}
               .lcn=${this.lcn}
@@ -130,18 +131,17 @@ export class LCNConfigDashboard extends LitElement {
             ></lcn-devices-data-table>
           </ha-card>
 
-          <mwc-fab
-            aria-label="Create new module/group"
-            title="Create new module/group"
-            @click=${this._addDevice}
-            ?narrow=${this.narrow}
-            ?rtl=${computeRTL(this.hass!)}
-          >
-            <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-          </mwc-fab>
         </ha-config-section>
+        <ha-fab
+          slot="fab"
+          @click=${this._addDevice}
+          .label=${this.lcn.localize("config-devices-add")}
+          extended
+        >
+          <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
+        </ha-fab>
       </hass-tabs-subpage>
-    `;
+        `;
   }
 
   private _hostChanged(ev: CustomEvent) {
@@ -197,10 +197,6 @@ export class LCNConfigDashboard extends LitElement {
     return [
       haStyle,
       css`
-        .disabled {
-          opacity: 0.3;
-          pointer-events: none;
-        }
         #box {
           display: flex;
           justify-content: space-between;
@@ -215,34 +211,10 @@ export class LCNConfigDashboard extends LitElement {
           justify-content: center;
         }
 
-        mwc-fab {
-          position: fixed;
-          bottom: 16px;
-          right: 16px;
-          z-index: 1;
-        }
-
-        mwc-fab[is-wide] {
-          bottom: 24px;
-          right: 24px;
-        }
-        mwc-fab[narrow] {
-          bottom: 84px;
-        }
-
-        mwc-fab[rtl] {
-          right: auto;
-          left: 16px;
-        }
-        mwc-fab[rtl][is-wide] {
-          bottom: 24px;
-          right: auto;
-          left: 24px;
-        }
-      `,
-    ];
+        `,
+      ];
+    }
   }
-}
 
 declare global {
   interface HTMLElementTagNameMap {

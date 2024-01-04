@@ -1,15 +1,14 @@
-import "@material/mwc-fab";
 import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import { HomeAssistant, Route } from "@ha/types";
-import { computeRTL } from "@ha/common/util/compute_rtl";
 import "@ha/layouts/hass-tabs-subpage";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
+import "@ha/components/ha-fab"
 import { haStyle } from "@ha/resources/styles";
 import "./lcn-entities-data-table";
 import {
@@ -27,7 +26,6 @@ import {
 } from "./dialogs/show-dialog-create-entity";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 
-export const lcnTabs: PageNavigation[] = [];
 
 @customElement("lcn-entities-page")
 export class LCNEntitiesPage extends LitElement {
@@ -38,6 +36,8 @@ export class LCNEntitiesPage extends LitElement {
   @property() public narrow!: boolean;
 
   @property() public route!: Route;
+
+  @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
   @property() private _deviceConfig!: LcnDeviceConfig;
 
@@ -60,9 +60,10 @@ export class LCNEntitiesPage extends LitElement {
         .narrow=${this.narrow}
         .route=${this.route}
         back-path="/lcn/devices"
-        .tabs=${lcnTabs}
+        .tabs=${this.tabs}
       >
-        <ha-config-section .narrow=${this.narrow} >
+        <ha-config-section
+          .narrow=${this.narrow} >
           <span slot="header"> Device configuration </span>
 
           <span slot="introduction"> Configure entities for this device. </span>
@@ -86,16 +87,15 @@ export class LCNEntitiesPage extends LitElement {
             ></lcn-entities-data-table>
           </ha-card>
 
-          <mwc-fab
-            aria-label="Create new entity"
-            title="Create new entity"
-            @click=${this._addEntity}
-            ?narrow=${this.narrow}
-            ?rtl=${computeRTL(this.hass!)}
-          >
-            <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-          </mwc-fab>
         </ha-config-section>
+        <ha-fab
+          slot="fab"
+          @click=${this._addEntity}
+          .label=${this.lcn.localize("config-entities-add")}
+          extended
+        >
+          <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
+        </ha-fab>
       </hass-tabs-subpage>
     `;
   }
@@ -131,37 +131,13 @@ export class LCNEntitiesPage extends LitElement {
     });
   }
 
-  static get styles(): CSSResult[] {
-    return [
-      haStyle,
-      css`
-        mwc-fab {
-          position: fixed;
-          bottom: 16px;
-          right: 16px;
-          z-index: 1;
-        }
-
-        mwc-fab[is-wide] {
-          bottom: 24px;
-          right: 24px;
-        }
-        mwc-fab[narrow] {
-          bottom: 84px;
-        }
-
-        mwc-fab[rtl] {
-          right: auto;
-          left: 16px;
-        }
-        mwc-fab[rtl][is-wide] {
-          bottom: 24px;
-          right: auto;
-          left: 24px;
-        }
-      `,
-    ];
-  }
+  // static get styles(): CSSResult[] {
+  //   return [
+  //     haStyle,
+  //     css`
+  //     `,
+  //   ];
+  // }
 }
 
 declare global {

@@ -1,5 +1,13 @@
 {
   "title": "LCN",
+
   "config-dashboard": "LCN Konfiguration",
-  "config-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard."
+  "config-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard.",
+  "config-hosts": "Hosts",
+  "config-devices-title": "Geräte",
+  "config-scan-devices": "Module scannen",
+  "config-devices-for-host": "Geräte für Host",
+  "config-devices-add": "Modul/Gruppe erstellen",
+
+  "config-entities-add": "Entität erstellen"
 }
