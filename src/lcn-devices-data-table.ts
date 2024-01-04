@@ -64,26 +64,30 @@ export class LCNDevicesDataTable extends LitElement {
               sortable: true,
               direction: "asc",
               grows: true,
+              width: "40%"
             },
             segment_id: {
               title: "Segment",
               sortable: true,
-              width: "90px",
+              grows: false,
+              width: "15%",
             },
             address_id: {
               title: "ID",
               sortable: true,
-              width: "90px",
+              grows: false,
+              width: "15%",
             },
             is_group: {
               title: "Group",
               sortable: true,
-              width: "90px",
+              grows: false,
+              width: "15%",
             },
             delete: {
               title: "",
               sortable: false,
-              width: "60px",
+              width: "80px",
               template: (device: LcnDeviceConfig) => {
                 const handler = (ev) => this._onDeviceDelete(ev, device);
                 return html`

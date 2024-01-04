@@ -54,32 +54,27 @@ export class LCNEntitiesDataTable extends LitElement {
               title: "Name",
               sortable: true,
               direction: "asc",
-              grows: false,
+              grows: true,
               width: "35%",
             },
             domain: {
               title: "Domain",
               sortable: true,
-              direction: "asc",
               grows: false,
               width: "25%",
             },
             resource: {
               title: "Resource",
               sortable: true,
-              direction: "asc",
-              grows: true,
-              width: "20%",
+              grows: false,
+              width: "25%",
             },
             delete: {
               title: "",
               sortable: false,
-              width: "60px",
+              width: "80px",
               template: (entity: LcnEntityConfig) => {
-                const handler = (ev) => {
-                  console.log(ev, entity);
-                  this._onEntityDelete(ev, entity);
-                }
+                const handler = (ev) => this._onEntityDelete(ev, entity);
                 return html`
                   <ha-icon-button
                     title="Delete LCN entity"
