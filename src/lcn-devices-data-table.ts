@@ -20,7 +20,7 @@ import { loadLCNCreateDeviceDialog } from "./dialogs/show-dialog-create-device";
 export type DeviceRowData = LcnDeviceConfig & {
   segment_id: number;
   address_id: number;
-  is_group: boolean;
+  type: string;
   delete: LcnDeviceConfig;
 };
 
@@ -41,7 +41,9 @@ export class LCNDevicesDataTable extends LitElement {
       ...device,
       segment_id: device.address[0],
       address_id: device.address[1],
-      is_group: device.address[2],
+      type: device.address[2]
+        ? this.lcn.localize("general-group")
+        : this.lcn.localize("general-module"),
       delete: device,
     }));
     return deviceRowData;
@@ -52,7 +54,7 @@ export class LCNDevicesDataTable extends LitElement {
       narrow
         ? {
             name: {
-              title: "Name",
+              title: this.lcn.localize("dashboard-devices-table-name"),
               sortable: true,
               direction: "asc",
               grows: true,
@@ -60,26 +62,26 @@ export class LCNDevicesDataTable extends LitElement {
           }
         : {
             name: {
-              title: "Name",
+              title: this.lcn.localize("dashboard-devices-table-name"),
               sortable: true,
               direction: "asc",
               grows: true,
               width: "40%"
             },
             segment_id: {
-              title: "Segment",
+              title: this.lcn.localize("dashboard-devices-table-segment"),
               sortable: true,
               grows: false,
               width: "15%",
             },
             address_id: {
-              title: "ID",
+              title: this.lcn.localize("dashboard-devices-table-address-id"),
               sortable: true,
               grows: false,
               width: "15%",
             },
-            is_group: {
-              title: "Group",
+            type: {
+              title: this.lcn.localize("dashboard-devices-table-type"),
               sortable: true,
               grows: false,
               width: "15%",
@@ -92,7 +94,7 @@ export class LCNDevicesDataTable extends LitElement {
                 const handler = (ev) => this._onDeviceDelete(ev, device);
                 return html`
                   <ha-icon-button
-                    title="Delete LCN device"
+                    .label=${this.lcn.localize("dashboard-devices-table-delete")}
                     .path=${mdiDelete}
                     @click=${handler}
                   ></ha-icon-button>
@@ -118,7 +120,7 @@ export class LCNDevicesDataTable extends LitElement {
         .columns=${this._columns(this.narrow)}
         .data=${this._devices(this.devices)}
         .id=${"address"}
-        .noDataText=${"No devices configured."}
+        .noDataText=${this.lcn.localize("dashboard-devices-table-no-data")}
         .dir=${computeRTLDirection(this.hass)}
         auto-height
         clickable
@@ -142,7 +144,7 @@ export class LCNDevicesDataTable extends LitElement {
   }
 
   private _openDevice() {
-    navigate(`/lcn/entities`);
+    navigate("/lcn/entities");
   }
 
   private async _deleteDevice(address: LcnAddress) {
@@ -155,14 +157,20 @@ export class LCNDevicesDataTable extends LitElement {
 
     if (
       !(await showConfirmationDialog(this, {
-        title: `Delete
-          ${device_to_delete.address[2] ? "group" : "module"}`,
-        text: html` You are about to remove
-          ${device_to_delete.address[2] ? "group" : "module"}
-          ${device_to_delete.address[1]} in segment
-          ${device_to_delete.address[0]}
-          ${device_to_delete.name ? `('${device_to_delete.name}')` : ""}.<br />
-          Removing a device will also delete all associated entities!`,
+        title: `
+          ${device_to_delete.address[2]
+          ? this.lcn.localize("dashboard-devices-dialog-delete-group-title")
+          : this.lcn.localize("dashboard-devices-dialog-delete-module-title")
+        }`,
+        text: html`${this.lcn.localize("dashboard-devices-dialog-delete-text")}
+          ${device_to_delete.name ? `'${device_to_delete.name}'` : ""}
+          (${device_to_delete.address[2]
+            ? this.lcn.localize("general-group")
+            : this.lcn.localize("general-module")}:
+          ${this.lcn.localize("general-segment")} ${device_to_delete.address[0]},
+          ${this.lcn.localize("general-address-id")} ${device_to_delete.address[1]})
+          <br />
+          ${this.lcn.localize("dashboard-devices-dialog-delete-warning")}`,
       }))
     ) {
       return;

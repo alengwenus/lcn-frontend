@@ -36,7 +36,6 @@ export class CreateDeviceDialog extends LitElement {
   private _invalid = false;
 
   public async showDialog(params: LcnDeviceDialogParams): Promise<void> {
-    console.log("showDialog");
     this._params = params;
     await this.updateComplete;
   }
@@ -158,19 +157,7 @@ export class CreateDeviceDialog extends LitElement {
       name: "",
       address: [this._segmentId, this._addressId, this._isGroup],
     };
-
-    const dialog: () => ProgressDialog | undefined = showProgressDialog(this, {
-      title: "Requesting device info from LCN",
-      text: html`
-        The information for the specified device is beeing requested from LCN.
-        This might take several seconds.<br />
-        This dialog will close automatically.
-      `,
-    });
-
     await this._params!.createDevice(values);
-    dialog()!.closeDialog();
-
     this._closeDialog();
   }
 

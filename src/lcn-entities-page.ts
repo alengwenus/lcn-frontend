@@ -91,7 +91,7 @@ export class LCNEntitiesPage extends LitElement {
         <ha-fab
           slot="fab"
           @click=${this._addEntity}
-          .label=${this.lcn.localize("config-entities-add")}
+          .label=${this.lcn.localize("dashboard-entities-add")}
           extended
         >
           <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>

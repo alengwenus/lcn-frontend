@@ -1,13 +1,35 @@
 {
   "title": "LCN",
+  "general-group": "Gruppe",
+  "general-module": "Modul",
+  "general-segment": "Segment",
+  "general-address-id": "Id",
 
-  "config-dashboard": "LCN Konfiguration",
-  "config-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard.",
-  "config-hosts": "Hosts",
-  "config-devices-title": "Geräte",
-  "config-scan-devices": "Module scannen",
-  "config-devices-for-host": "Geräte für Host",
-  "config-devices-add": "Modul/Gruppe erstellen",
+  "dashboard-title": "LCN Konfiguration",
+  "dashboard-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard.",
+  "dashboard-hosts": "Hosts",
+  "dashboard-scan-devices": "Module scannen",
 
-  "config-entities-add": "Entität erstellen"
+  "dashboard-dialog-scan-devices-title": "Suche nach Modulen...",
+  "dashboard-dialog-scan-devices-text": "Das Suchen nach Modulen kann bis zu 30 Sekunden dauern. Dieses Fenster schließt sich automatisch.",
+
+  "dashboard-devices-dialog-add-alert-title": "Modul oder Gruppe existiert bereits",
+  "dashboard-devices-dialog-add-alert-text": "Das Modul oder die Gruppe existiert bereits:",
+  "dashboard-devices-dialog-add-alert-hint": "Module und Gruppen dürfen nur einmal angegeben werden.",
+
+  "dashboard-devices-for-host": "Module/Gruppen für Host",
+  "dahsboard-devices-add": "Modul/Gruppe erstellen",
+  "dashboard-devices-table-name": "Name",
+  "dashboard-devices-table-segment": "Segment",
+  "dashboard-devices-table-address-id": "Id",
+  "dashboard-devices-table-type": "Typ",
+  "dashboard-devices-table-delete": "Lösche Eintrag",
+  "dashboard-devices-table-no-data": "Keine Geräte konfiguriert.",
+
+  "dashboard-devices-dialog-delete-module-title": "Modul löschen",
+  "dashboard-devices-dialog-delete-group-title": "Gruppe löschen",
+  "dashboard-devices-dialog-delete-text": "Du möchtest folgendes Gerät löschen:",
+  "dashboard-devices-dialog-delete-warning": "Mit dem Löschen des Gerätes werden alle zugehörigen Entitäten gelöscht!",
+
+  "dahsboard-entities-add": "Entität erstellen"
 }

@@ -86,17 +86,17 @@ export class LCNConfigDashboard extends LitElement {
         <ha-config-section
           .narrow=${this.narrow}>
           <span slot="header">
-            ${this.lcn.localize("config-dashboard")}
+            ${this.lcn.localize("dashboard-title")}
           </span>
 
           <span slot="introduction">
-            ${this.lcn.localize("config-introduction")}
+            ${this.lcn.localize("dashboard-introduction")}
           </span>
 
           <div id="box">
             <div id="hosts-dropdown">
               <paper-dropdown-menu
-                label=${this.lcn.localize("config-hosts")}
+                label=${this.lcn.localize("dashboard-hosts")}
                 @selected-item-changed=${this._hostChanged}
               >
                 <paper-listbox
@@ -115,14 +115,17 @@ export class LCNConfigDashboard extends LitElement {
             </div>
 
             <div id="scan-devices">
-              <mwc-button raised @click=${this._scanDevices}
-                >${this.lcn.localize("config-scan-devices")}</mwc-button
+              <mwc-button
+                raised
+                @click=${this._scanDevices}
               >
+                ${this.lcn.localize("dashboard-scan-devices")}
+              </mwc-button>
             </div>
           </div>
 
           <ha-card
-            header="${this.lcn.localize("config-devices-for-host")} (${this.lcn.host.name})">
+            header="${this.lcn.localize("dashboard-devices-for-host")} (${this.lcn.host.name})">
             <lcn-devices-data-table
               .hass=${this.hass}
               .lcn=${this.lcn}
@@ -135,7 +138,7 @@ export class LCNConfigDashboard extends LitElement {
         <ha-fab
           slot="fab"
           @click=${this._addDevice}
-          .label=${this.lcn.localize("config-devices-add")}
+          .label=${this.lcn.localize("dashboard-devices-add")}
           extended
         >
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
@@ -162,11 +165,8 @@ export class LCNConfigDashboard extends LitElement {
 
   private async _scanDevices() {
     const dialog: () => ProgressDialog | undefined = showProgressDialog(this, {
-      title: "Scanning for modules...",
-      text: html`
-        Scanning for modules might take up to 30 seconds.<br />
-        This dialog will close automatically.
-      `,
+      title: this.lcn.localize("dashboard-dialog-scan-devices-title"),
+      text: this.lcn.localize("dashboard-dialog-scan-devices-text")
     });
 
     this._deviceConfigs = await scanDevices(this.hass!, this.lcn.host.id);
@@ -175,22 +175,37 @@ export class LCNConfigDashboard extends LitElement {
 
   private _addDevice() {
     showLCNCreateDeviceDialog(this, {
-      createDevice: async (deviceParams) => {
-        if (!(await addDevice(this.hass, this.lcn.host.id, deviceParams))) {
-          await showAlertDialog(this, {
-            title: "Device already exists",
-            text: `The specified
-                  ${deviceParams.address![2] ? "group" : "module"}
-                  with address ${deviceParams.address![1]}
-                  in segment ${deviceParams.address![0]}
-                  already exists.
-                  Devices have to be unique.`,
-          });
-          return;
-        }
-        this._fetchDevices(this.lcn.host);
-      },
+      createDevice: (deviceParams) => this._createDevice(deviceParams),
     });
+  }
+
+  private async _createDevice(deviceParams: Partial<LcnDeviceConfig>) {
+    const dialog: () => ProgressDialog | undefined = showProgressDialog(this, {
+      title: "Requesting device info from LCN",
+      text: html`
+        The information for the specified device is beeing requested from LCN.
+        This might take several seconds.<br />
+        This dialog will close automatically.
+      `,
+    });
+
+    if (!await addDevice(this.hass, this.lcn.host.id, deviceParams)) {
+      dialog()!.closeDialog();
+      await showAlertDialog(this, {
+        title: this.lcn.localize("dashboard-devices-dialog-add-alert-title"),
+        text: html`${this.lcn.localize("dashboard-devices-dialog-add-alert-text")}
+              (${deviceParams.address![2]
+                ? this.lcn.localize("general-group")
+                : this.lcn.localize("general-module")}:
+              ${this.lcn.localize("general-segment")} ${deviceParams.address![0]},
+              ${this.lcn.localize("general-address-id")} ${deviceParams.address![1]})
+              <br />
+              ${this.lcn.localize("dashboard-devices-dialog-add-alert-hint")}`,
+      });
+      return;
+    }
+    dialog()!.closeDialog();
+    this._fetchDevices(this.lcn.host);
   }
 
   static get styles(): CSSResult[] {

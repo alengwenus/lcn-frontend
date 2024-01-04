@@ -1,13 +1,35 @@
 {
   "title": "LCN",
+  "general-group": "Group",
+  "general-module": "Module",
+  "general-segment": "Segment",
+  "general-address-id": "Id",
 
-  "config-dashboard": "LCN Configuration Dashboard",
-  "config-introduction": "Welcome to the LCN configuration dashboard.",
-  "config-hosts": "Hosts",
-  "config-scan-devices": "Scan modules",
-  "config-devices-title": "Devices",
-  "config-devices-for-host": "Devices for host",
-  "config-devices-add": "Create module/group",
+  "dashboard-title": "LCN Configuration Dashboard",
+  "dashboard-introduction": "Welcome to the LCN configuration dashboard.",
+  "dashboard-hosts": "Hosts",
+  "dashboard-scan-devices": "Scan modules",
 
-  "config-entities-add": "Create entity"
+  "dashboard-dialog-scan-devices-title": "Scanning for modules...",
+  "dashboard-dialog-scan-devices-text": "Scanning for modules might take up to 30 seconds. This dialog will close automatically.",
+
+  "dashboard-devices-dialog-add-alert-title": "Module or group already exists",
+  "dashboard-devices-dialog-add-alert-text": "The specified module or group already exists:",
+  "dashboard-devices-dialog-add-alert-hint": "Modules and groups have to be unique.",
+
+  "dashboard-devices-for-host": "Modules/groups for host",
+  "dashboard-devices-add": "Create module/group",
+  "dashboard-devices-table-name": "Name",
+  "dashboard-devices-table-segment": "Segment",
+  "dashboard-devices-table-address-id": "Id",
+  "dashboard-devices-table-type": "Type",
+  "dashboard-devices-table-delete": "Delete entry",
+  "dashboard-devices-table-no-data": "No devices configured.",
+
+  "dashboard-devices-dialog-delete-module-title": "Delete module",
+  "dashboard-devices-dialog-delete-group-title": "Delete group",
+  "dashboard-devices-dialog-delete-text": "You are about to delete:",
+  "dashboard-devices-dialog-delete-warning": "Removing a device will also delete all associated entities!",
+
+  "dashboard-entities-add": "Create entity"
 }
