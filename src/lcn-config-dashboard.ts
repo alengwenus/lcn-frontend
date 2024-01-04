@@ -63,7 +63,6 @@ export class LCNConfigDashboard extends LitElement {
     changedProperties: PropertyValues
   ): Promise<void> {
     super.firstUpdated(changedProperties);
-    console.log(this.lcn);
     await this._fetchHosts();
     loadProgressDialog();
     loadLCNCreateDeviceDialog();
@@ -87,11 +86,11 @@ export class LCNConfigDashboard extends LitElement {
       >
         <ha-config-section .narrow=${this.narrow}>
           <span slot="header">
-            LCN Panel
+            ${this.lcn.localize("config-dashboard")}
           </span>
 
           <span slot="introduction">
-            Welcome to the LCN configuration panel.
+            ${this.lcn.localize("config-introduction")}
           </span>
 
           <div id="box">
