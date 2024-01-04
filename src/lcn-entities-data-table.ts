@@ -3,6 +3,7 @@ import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import { mdiDelete } from "@mdi/js";
+import { computeRTLDirection } from "@ha/common/util/compute_rtl";
 import { HomeAssistant } from "@ha/types";
 import {
   LCN,
@@ -12,8 +13,6 @@ import {
   LcnAddress,
 } from "types/lcn";
 import { DataTableColumnContainer } from "@ha/components/data-table/ha-data-table";
-
-// export type EntityRowData = LcnEntityConfig;
 
 export type EntityRowData = LcnEntityConfig & {
   delete: LcnEntityConfig;
@@ -97,7 +96,10 @@ export class LCNEntitiesDataTable extends LitElement {
         .columns=${this._columns(this.narrow)}
         .data=${this._entities(this.entities)}
         .id=${"unique_id"}
+        .noDataText=${"No entities configured."}
+        .dir=${computeRTLDirection(this.hass)}
         auto-height
+        clickable
       ></ha-data-table>
     `;
   }
