@@ -1,4 +1,4 @@
-import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
+import { html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import { HomeAssistant, Route } from "@ha/types";
@@ -9,7 +9,6 @@ import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
 import "@ha/components/ha-fab"
-import { haStyle } from "@ha/resources/styles";
 import "./lcn-entities-data-table";
 import {
   LCN,
@@ -64,14 +63,14 @@ export class LCNEntitiesPage extends LitElement {
       >
         <ha-config-section
           .narrow=${this.narrow} >
-          <span slot="header"> Device configuration </span>
+          <span slot="header"> ${this.lcn.localize("dashboard-entities-title")} </span>
 
-          <span slot="introduction"> Configure entities for this device. </span>
+          <span slot="introduction"> ${this.lcn.localize("dashboard-entities-introduction")} </span>
 
           <ha-card
             header="Entities for ${this._deviceConfig.address[2]
-              ? "group"
-              : "module"}
+              ? this.lcn.localize("group")
+              : this.lcn.localize("module")}
               (${this.lcn.host.name}, ${this._deviceConfig.address[0]},
               ${this._deviceConfig.address[1]})
               ${this._deviceConfig.name ? " - " + this._deviceConfig.name : ""}
@@ -119,10 +118,9 @@ export class LCNEntitiesPage extends LitElement {
       createEntity: async (entityParams) => {
         if (!(await addEntity(this.hass, this.lcn.host.id, entityParams))) {
           await showAlertDialog(this, {
-            title: "LCN resource already assigned",
-            text: `The specified LCN resource is already
-                   assigned to an entity within the ${entityParams.domain}-domain.
-                   LCN resources may only be assigned once within a domain.`,
+            title: this.lcn.localize("dashboard-entities-dialog-add-alert-title"),
+            text: `${this.lcn.localize("dashboard-entities-dialog-add-alert-text")}
+                   ${this.lcn.localize("dashboard-entities-dialog-add-alert-hint")}`,
           });
           return;
         }
@@ -130,14 +128,6 @@ export class LCNEntitiesPage extends LitElement {
       },
     });
   }
-
-  // static get styles(): CSSResult[] {
-  //   return [
-  //     haStyle,
-  //     css`
-  //     `,
-  //   ];
-  // }
 }
 
 declare global {

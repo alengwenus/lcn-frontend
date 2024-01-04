@@ -16,14 +16,15 @@ import { createCloseHeading } from "@ha/components/ha-dialog";
 import type { HaRadio } from "@ha/components/ha-radio";
 import { haStyleDialog } from "@ha/resources/styles";
 import { HomeAssistant } from "@ha/types";
-import { ProgressDialog } from "./progress-dialog";
-import { loadProgressDialog, showProgressDialog } from "./show-dialog-progress";
+import { loadProgressDialog } from "./show-dialog-progress";
 import { LcnDeviceDialogParams } from "./show-dialog-create-device";
-import { LcnDeviceConfig } from "types/lcn";
+import { LCN, LcnDeviceConfig } from "types/lcn";
 
 @customElement("lcn-create-device-dialog")
 export class CreateDeviceDialog extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public lcn!: LCN;
 
   @property() private _params?: LcnDeviceDialogParams;
 
@@ -37,6 +38,7 @@ export class CreateDeviceDialog extends LitElement {
 
   public async showDialog(params: LcnDeviceDialogParams): Promise<void> {
     this._params = params;
+    this.lcn = params.lcn;
     await this.updateComplete;
   }
 
@@ -61,14 +63,15 @@ export class CreateDeviceDialog extends LitElement {
         open
         .heading=${createCloseHeading(
           this.hass,
-          "Create new module / group"
+          this.lcn.localize("dashboard-devices-dialog-create-title")
         )}
         @closed=${this._closeDialog}
 
       >
         <form>
-          <div>Type:</div>
-          <ha-formfield label="Module">
+          <div>${this.lcn.localize("type")}</div>
+          <ha-formfield
+            label=${this.lcn.localize("module")}>
             <ha-radio
               name="is_group"
               value="module"
@@ -76,7 +79,8 @@ export class CreateDeviceDialog extends LitElement {
               @change=${this._isGroupChanged}
             ></ha-radio>
           </ha-formfield>
-          <ha-formfield label="Group">
+          <ha-formfield
+            label=${this.lcn.localize("group")}>
             <ha-radio
               name="is_group"
               value="group"
@@ -86,40 +90,40 @@ export class CreateDeviceDialog extends LitElement {
           </ha-formfield>
 
           <paper-input
-            label="Segment ID"
+            label=${this.lcn.localize("segment-id")}
             type="number"
             value="0"
             min="0"
             @value-changed=${this._segmentIdChanged}
             }}
             .invalid=${this._validateSegmentId(this._segmentId)}
-            error-message="Segment ID must be 0, 5..128."
+            error-message=${this.lcn.localize("dashboard-devices-dialog-error-segment")}
           >
           </paper-input>
           <paper-input
-            label="ID"
+            label=${this.lcn.localize("id")}
             type="number"
             value="5"
             min="0"
             @value-changed=${this._addressIdChanged}
             .invalid=${this._validateAddressId(this._addressId, this._isGroup)}
             error-message=${this._isGroup
-        ? "Group ID must be 3..254."
-        : "Module ID must be 5..254"}
+        ? this.lcn.localize("dashboard-devices-dialog-error-segment")
+        : this.lcn.localize("dashboard-devices-dialog-error-segment")}
           >
           </paper-input>
         </form>
 
         <div class="buttons">
           <mwc-button @click=${this._closeDialog} slot="secondaryAction">
-            Dismiss
+            ${this.lcn.localize("dismiss")}
           </mwc-button>
           <mwc-button
             @click=${this._create}
             .disabled=${this._invalid}
             slot="primaryAction"
           >
-            Create
+          ${this.lcn.localize("create")}
           </mwc-button>
         </div>
       </ha-dialog>
@@ -147,7 +151,7 @@ export class CreateDeviceDialog extends LitElement {
     // module_id: 5-254
     // group_id: 3-254
     if (is_group) {
-      return !(address_id >= 3 && address_id <= 254);
+      return !(address_id >= 5 && address_id <= 254);
     }
     return !(address_id >= 5 && address_id <= 254);
   }

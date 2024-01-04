@@ -43,7 +43,7 @@ export class LCNEntitiesDataTable extends LitElement {
       narrow
         ? {
             name: {
-              title: "Name",
+              title: this.lcn.localize("name"),
               sortable: true,
               direction: "asc",
               grows: true,
@@ -51,20 +51,20 @@ export class LCNEntitiesDataTable extends LitElement {
           }
         : {
             name: {
-              title: "Name",
+              title: this.lcn.localize("name"),
               sortable: true,
               direction: "asc",
               grows: true,
               width: "35%",
             },
             domain: {
-              title: "Domain",
+              title: this.lcn.localize("domain"),
               sortable: true,
               grows: false,
               width: "25%",
             },
             resource: {
-              title: "Resource",
+              title: this.lcn.localize("resource"),
               sortable: true,
               grows: false,
               width: "25%",
@@ -77,7 +77,7 @@ export class LCNEntitiesDataTable extends LitElement {
                 const handler = (ev) => this._onEntityDelete(ev, entity);
                 return html`
                   <ha-icon-button
-                    title="Delete LCN entity"
+                    title=${this.lcn.localize("dashboard-entities-table-delete")}
                     .path=${mdiDelete}
                     @click=${handler}
                   ></ha-icon-button>
@@ -94,7 +94,7 @@ export class LCNEntitiesDataTable extends LitElement {
         .columns=${this._columns(this.narrow)}
         .data=${this._entities(this.entities)}
         .id=${"unique_id"}
-        .noDataText=${"No entities configured."}
+        .noDataText=${this.lcn.localize("dashboard-entities-table-no-data")}
         .dir=${computeRTLDirection(this.hass)}
         auto-height
         clickable

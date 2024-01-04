@@ -1,14 +1,24 @@
 {
   "title": "LCN",
-  "general-group": "Gruppe",
-  "general-module": "Modul",
-  "general-segment": "Segment",
-  "general-address-id": "Id",
+  "group": "Gruppe",
+  "module": "Modul",
+  "segment": "Segment",
+  "id": "Id",
+  "module-id": "Modul Id",
+  "segment-id": "Segment Id",
+  "name": "Name",
+  "type": "Typ",
+  "domain": "Domäne",
+  "resource": "Ressource",
+  "create": "Erstellen",
+  "dismiss": "Abbrechen",
 
-  "dashboard-title": "LCN Konfiguration",
-  "dashboard-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard.",
-  "dashboard-hosts": "Hosts",
-  "dashboard-scan-devices": "Module scannen",
+  "dashboard-devices-title": "LCN Konfiguration",
+  "dashboard-devices-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard.",
+  "dashboard-devices-hosts": "Hosts",
+  "dashboard-devices-scan": "Module scannen",
+  "dashboard-devices-for-host": "Module/Gruppen für Host",
+  "dashboard-devices-add": "Modul/Gruppe erstellen",
 
   "dashboard-dialog-scan-devices-title": "Suche nach Modulen...",
   "dashboard-dialog-scan-devices-text": "Das Suchen nach Modulen kann bis zu 30 Sekunden dauern. Dieses Fenster schließt sich automatisch.",
@@ -17,12 +27,10 @@
   "dashboard-devices-dialog-add-alert-text": "Das Modul oder die Gruppe existiert bereits:",
   "dashboard-devices-dialog-add-alert-hint": "Module und Gruppen dürfen nur einmal angegeben werden.",
 
-  "dashboard-devices-for-host": "Module/Gruppen für Host",
-  "dahsboard-devices-add": "Modul/Gruppe erstellen",
-  "dashboard-devices-table-name": "Name",
-  "dashboard-devices-table-segment": "Segment",
-  "dashboard-devices-table-address-id": "Id",
-  "dashboard-devices-table-type": "Typ",
+  "dashboard-devices-dialog-request-info-title": "Fordere Eigenschaften vom LCN Modul an",
+  "dashboard-devices-dialog-request-info-text": "Die Eigenschaften für das angegebene Modul werden angefordert. Dies kann einige Sekunden dauern.",
+  "dashboard-devices-dialog-request-info-hint": "Dieses Fenster schließt sich automatisch.",
+
   "dashboard-devices-table-delete": "Lösche Eintrag",
   "dashboard-devices-table-no-data": "Keine Geräte konfiguriert.",
 
@@ -31,5 +39,19 @@
   "dashboard-devices-dialog-delete-text": "Du möchtest folgendes Gerät löschen:",
   "dashboard-devices-dialog-delete-warning": "Mit dem Löschen des Gerätes werden alle zugehörigen Entitäten gelöscht!",
 
-  "dahsboard-entities-add": "Entität erstellen"
+  "dashboard-devices-dialog-create-title": "Erstelle Modul / Gruppe",
+  "dashboard-devices-dialog-error-segment": "Segment ID muss 0, 5..128 sein.",
+  "dashboard-devices-dialog-error-module": "Modul ID muss 5..254 sein.",
+  "dashboard-devices-dialog-error-group": "Gruppen ID muss 5..254 sein.",
+
+  "dashboard-entities-title": "Konfiguration Entitäten",
+  "dashboard-entities-introduction": "Konfiguration der Entitäten für dieses Modul / Gruppe.",
+  "dahsboard-entities-add": "Entität erstellen",
+
+  "dashboard-entities-dialog-add-alert-title": "LCN Ressource existiert bereits",
+  "dashboard-entities-dialog-add-alert-text": "Die angegebene LCN Ressource ist der Entität bereits zugewiesen.",
+  "dashboard-entities-dialog-add-alert-hint": "LCN Ressourcen dürfen für jede Domäne nur einmal existieren.",
+
+  "dashboard-entities-table-delete": "Lösche Eintrag",
+  "dashboard-entities-table-no-data": "Keine Entitäten konfiguriert."
 }

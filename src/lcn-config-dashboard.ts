@@ -86,17 +86,17 @@ export class LCNConfigDashboard extends LitElement {
         <ha-config-section
           .narrow=${this.narrow}>
           <span slot="header">
-            ${this.lcn.localize("dashboard-title")}
+            ${this.lcn.localize("dashboard-devices-title")}
           </span>
 
           <span slot="introduction">
-            ${this.lcn.localize("dashboard-introduction")}
+            ${this.lcn.localize("dashboard-devices-introduction")}
           </span>
 
           <div id="box">
             <div id="hosts-dropdown">
               <paper-dropdown-menu
-                label=${this.lcn.localize("dashboard-hosts")}
+                label=${this.lcn.localize("dashboard-devices-hosts")}
                 @selected-item-changed=${this._hostChanged}
               >
                 <paper-listbox
@@ -119,7 +119,7 @@ export class LCNConfigDashboard extends LitElement {
                 raised
                 @click=${this._scanDevices}
               >
-                ${this.lcn.localize("dashboard-scan-devices")}
+                ${this.lcn.localize("dashboard-devices-scan")}
               </mwc-button>
             </div>
           </div>
@@ -175,17 +175,18 @@ export class LCNConfigDashboard extends LitElement {
 
   private _addDevice() {
     showLCNCreateDeviceDialog(this, {
+      lcn: this.lcn,
       createDevice: (deviceParams) => this._createDevice(deviceParams),
     });
   }
 
   private async _createDevice(deviceParams: Partial<LcnDeviceConfig>) {
     const dialog: () => ProgressDialog | undefined = showProgressDialog(this, {
-      title: "Requesting device info from LCN",
+      title: this.lcn.localize("dashboard-devices-dialog-request-info-title"),
       text: html`
-        The information for the specified device is beeing requested from LCN.
-        This might take several seconds.<br />
-        This dialog will close automatically.
+        ${this.lcn.localize("dashboard-devices-dialog-request-info-text")}
+        <br />
+        ${this.lcn.localize("dashboard-devices-dialog-request-info-hint")}
       `,
     });
 
@@ -195,10 +196,10 @@ export class LCNConfigDashboard extends LitElement {
         title: this.lcn.localize("dashboard-devices-dialog-add-alert-title"),
         text: html`${this.lcn.localize("dashboard-devices-dialog-add-alert-text")}
               (${deviceParams.address![2]
-                ? this.lcn.localize("general-group")
-                : this.lcn.localize("general-module")}:
-              ${this.lcn.localize("general-segment")} ${deviceParams.address![0]},
-              ${this.lcn.localize("general-address-id")} ${deviceParams.address![1]})
+                ? this.lcn.localize("group")
+                : this.lcn.localize("module")}:
+              ${this.lcn.localize("segment")} ${deviceParams.address![0]},
+              ${this.lcn.localize("id")} ${deviceParams.address![1]})
               <br />
               ${this.lcn.localize("dashboard-devices-dialog-add-alert-hint")}`,
       });
