@@ -114,9 +114,9 @@ export class LCNDevicesDataTable extends LitElement {
         .columns=${this._columns(this.narrow)}
         .data=${this._devices(this.devices)}
         .id=${"address"}
-        auto-height
-        .dir=${computeRTLDirection(this.hass)}
         .noDataText=${"No devices configured."}
+        .dir=${computeRTLDirection(this.hass)}
+        auto-height
         clickable
         @row-click=${handler}
       ></ha-data-table>
