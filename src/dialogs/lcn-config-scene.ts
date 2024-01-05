@@ -12,7 +12,9 @@ import {
 } from "lit";
 import { customElement, property } from "lit/decorators";
 import "@ha/components/ha-switch";
-import { HomeAssistant } from "@ha/types";
+import "@ha/components/ha-textfield"
+import { HaTextField } from "@ha/components/ha-textfield";
+import { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
@@ -96,7 +98,7 @@ export class LCNConfigSceneElement extends LitElement {
 
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
-    this._invalid = this._validateTransition(this.domainData.transition);
+    this._invalid = !this._validateTransition(this.domainData.transition);
   }
 
   protected update(changedProperties: PropertyValues) {
@@ -112,13 +114,13 @@ export class LCNConfigSceneElement extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <form>
+      <div class="registers">
         <paper-dropdown-menu
           label=${this.lcn.localize("register")}
           .value=${this._registers[0].name}
         >
           <paper-listbox
-            id="registerss-listbox"
+            id="registers-listbox"
             slot="dropdown-content"
             @selected-changed=${this._registerChanged}
           >
@@ -148,61 +150,65 @@ export class LCNConfigSceneElement extends LitElement {
             )}
           </paper-listbox>
         </paper-dropdown-menu>
+      </div>
 
-        <div id="output-ports">
-          <label>${this.lcn.localize("outputs")}:</label><br />
-          ${this._outputPorts.map(
-            (port) => html`
-              <ha-formfield label=${port.name}>
-                <ha-checkbox
-                  .value=${port.value}
-                  @change=${this._portCheckedChanged}
-                ></ha-checkbox>
-              </ha-formfield>
-            `
-          )}
-        </div>
+      <div id="output-ports">
+        <label>${this.lcn.localize("outputs")}:</label><br />
+        ${this._outputPorts.map(
+          (port) => html`
+            <ha-formfield label=${port.name}>
+              <ha-checkbox
+                .value=${port.value}
+                @change=${this._portCheckedChanged}
+              ></ha-checkbox>
+            </ha-formfield>
+          `
+        )}
+      </div>
 
-        <div id="relay-ports">
-          <label>${this.lcn.localize("relays")}:</label><br />
-          ${this._relayPorts.map(
-            (port) => html`
-              <ha-formfield label=${port.name}>
-                <ha-checkbox
-                  .value=${port.value}
-                  @change=${this._portCheckedChanged}
-                ></ha-checkbox>
-              </ha-formfield>
-            `
-          )}
-        </div>
+      <div id="relay-ports">
+        <label>${this.lcn.localize("relays")}:</label><br />
+        ${this._relayPorts.map(
+          (port) => html`
+            <ha-formfield label=${port.name}>
+              <ha-checkbox
+                .value=${port.value}
+                @change=${this._portCheckedChanged}
+              ></ha-checkbox>
+            </ha-formfield>
+          `
+        )}
+      </div>
 
-        <paper-input
-          label=${this.lcn.localize("dashboard-entities-dialog-scene-transition")}
+      <div class="transition">
+        <ha-textfield
+          .label=${this.lcn.localize("dashboard-entities-dialog-scene-transition")}
           type="number"
-          value="0"
+          .value=${this.domainData.transition}
           min="0"
           max="486"
-          @value-changed=${this._transitionChanged}
-          .invalid=${this._validateTransition(this.domainData.transition)}
+          required
+          autoValidate
+          @input=${this._transitionChanged}
+          .validityTransform=${(value: string) => ({ valied: this._validateTransition(+value) }) }
           .disabled=${this._transitionDisabled}
-          error-message=${this.lcn.localize("dashboard-entities-dialog-scene-transition-error")}
-        ></paper-input>
-      </form>
+          .validationMessage=${this.lcn.localize("dashboard-entities-dialog-scene-transition-error")}
+        ></ha-textfield>
+      <div>
     `;
   }
 
-  private _registerChanged(ev: CustomEvent): void {
+  private _registerChanged(ev: ValueChangedEvent<string>): void {
     const register = this._registers[ev.detail.value];
     this.domainData.register = +register.value;
   }
 
-  private _sceneChanged(ev: CustomEvent): void {
+  private _sceneChanged(ev: ValueChangedEvent<string>): void {
     const scene = this._scenes[ev.detail.value];
     this.domainData.scene = +scene.value;
   }
 
-  private _portCheckedChanged(ev: CustomEvent | any): void {
+  private _portCheckedChanged(ev: ValueChangedEvent<string> | any): void {
     if (ev.target.checked) {
       this.domainData.outputs.push(ev.target.value);
     } else {
@@ -213,13 +219,14 @@ export class LCNConfigSceneElement extends LitElement {
     this.requestUpdate();
   }
 
-  private _transitionChanged(ev: CustomEvent): void {
-    this.domainData.transition = +ev.detail.value;
+  private _transitionChanged(ev: ValueChangedEvent<string>): void {
+    const target = ev.target as HaTextField;
+    this.domainData.transition = +target.value;
     this.requestUpdate();
   }
 
   private _validateTransition(transition: number): boolean {
-    return !(transition >= 0 && transition <= 486);
+    return (transition >= 0 && transition <= 486);
   }
 
   private get _transitionDisabled(): boolean {
@@ -235,18 +242,19 @@ export class LCNConfigSceneElement extends LitElement {
     return [
       haStyleDialog,
       css`
-        #registers-listbox {
-          width: 120px;
-        }
-        #scenes-listbox {
-          width: 120px;
-        }
-        #output-ports {
-          margin-top: 10px;
-        }
-        #relay-ports {
-          margin-top: 10px;
-        }
+      .registers > * {
+        display: inline-block
+      }
+      #output-ports {
+        margin-top: 10px;
+      }
+      #relay-ports {
+        margin-top: 10px;
+      }
+      .transition > * {
+        display: block;
+        margin-top: 16px;
+      }
       `,
     ];
   }

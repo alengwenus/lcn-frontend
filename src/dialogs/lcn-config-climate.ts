@@ -2,6 +2,7 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import "@polymer/paper-input/paper-input";
+import "@ha/components/ha-textfield";
 import {
   css,
   html,
@@ -12,9 +13,10 @@ import {
 } from "lit";
 import { customElement, property } from "lit/decorators";
 import { HaSwitch } from "@ha/components/ha-switch";
-import { HomeAssistant } from "@ha/types";
+import { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import { LCN, ClimateConfig } from "types/lcn";
+import { HaTextField } from "@ha/components/ha-textfield";
 
 interface ConfigItem {
   name: string;
@@ -103,8 +105,8 @@ export class LCNConfigClimateElement extends LitElement {
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
     this._invalid =
-      this._validateMinTemp(this.domainData.min_temp) ||
-      this._validateMaxTemp(this.domainData.max_temp);
+      !this._validateMinTemp(this.domainData.min_temp) ||
+      !this._validateMaxTemp(this.domainData.max_temp);
   }
 
   protected update(changedProperties: PropertyValues) {
@@ -120,7 +122,7 @@ export class LCNConfigClimateElement extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <form>
+      <div class="sources">
         <paper-dropdown-menu
           label=${this.lcn.localize("source")}
           .value=${this._sources[0].name}
@@ -158,32 +160,40 @@ export class LCNConfigClimateElement extends LitElement {
             )}
           </paper-listbox>
         </paper-dropdown-menu>
+      </div>
 
-        <div id="lockable">
-          <label>${this.lcn.localize("dashboard-entities-dialog-climate-lockable")}:</label>
-          <ha-switch
-            .checked=${this.domainData.lockable}
-            @change=${this._lockableChanged}
-          ></ha-switch>
-        </div>
+      <div class="lockable">
+        <label>${this.lcn.localize("dashboard-entities-dialog-climate-lockable")}:</label>
+        <ha-switch
+          .checked=${this.domainData.lockable}
+          @change=${this._lockableChanged}
+        ></ha-switch>
+      </div>
 
-        <paper-input
-          label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
+      <div class="temperature">
+        <ha-textfield
+          id="min-textfield"
+          .label=${this.lcn.localize("dashboard-entities-dialog-climate-min-temperature")}
           type="number"
-          value="7"
-          @value-changed=${this._minTempChanged}
-          .invalid=${this._validateMinTemp(this.domainData.min_temp)}
-          error-message=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature-error")}
-        ></paper-input>
+          .value=${this.domainData.min_temp}
+          required
+          autoValidate
+          @input=${this._minTempChanged}
+          .validityTransform=${(value: string) => ({ valid: this._validateMinTemp(+value) }) }
+          .validationMessage=${this.lcn.localize("dashboard-entities-dialog-climate-min-temperature-error")}
+        ></ha-textfield>
 
-        <paper-input
-          label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
+        <ha-textfield
+          id="max-textfield"
+          .label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
           type="number"
-          value="35"
-          @value-changed=${this._maxTempChanged}
-          .invalid=${this._validateMaxTemp(this.domainData.max_temp)}
-          error-message=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature-error")}
-        ></paper-input>
+          .value=${this.domainData.max_temp}
+          required
+          autoValidate
+          @input=${this._maxTempChanged}
+          .validityTransform=${(value: string) => ({ valid: this._validateMaxTemp(+value) }) }
+          .validationMessage=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature-error")}
+        ></ha-textfield>
 
         <paper-dropdown-menu
           label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
@@ -201,61 +211,68 @@ export class LCNConfigClimateElement extends LitElement {
             )}
           </paper-listbox>
         </paper-dropdown-menu>
-      </form>
+      </div>
     `;
   }
 
-  private _sourceChanged(ev: CustomEvent): void {
+  private _sourceChanged(ev: ValueChangedEvent<string>): void {
     const source = this._sources[ev.detail.value];
     this.domainData.source = source.value;
   }
 
-  private _setpointChanged(ev: CustomEvent): void {
+  private _setpointChanged(ev: ValueChangedEvent<string>): void {
     const setpoint = this._setpoints[ev.detail.value];
     this.domainData.setpoint = setpoint.value;
   }
 
-  private _minTempChanged(ev: CustomEvent): void {
-    this.domainData.min_temp = +ev.detail.value;
+  private _minTempChanged(ev: ValueChangedEvent<string>): void {
+    const target = ev.target as HaTextField;
+    this.domainData.min_temp = +target.value;
+    const maxTextfield: HaTextField = this.shadowRoot!.querySelector('#max-textfield')!;
+    maxTextfield.reportValidity();
     this.requestUpdate();
   }
 
-  private _maxTempChanged(ev: CustomEvent): void {
-    this.domainData.max_temp = +ev.detail.value;
+  private _maxTempChanged(ev: ValueChangedEvent<string>): void {
+    const target = ev.target as HaTextField;
+    this.domainData.max_temp = +target.value;
+    const minTextfield: HaTextField = this.shadowRoot!.querySelector('#min-textfield')!;
+    minTextfield.reportValidity();
     this.requestUpdate();
   }
 
-  private _lockableChanged(ev: CustomEvent): void {
+  private _lockableChanged(ev: ValueChangedEvent<string>): void {
     this.domainData.lockable = (ev.target as HaSwitch).checked;
   }
 
-  private _unitChanged(ev: CustomEvent): void {
+  private _unitChanged(ev: ValueChangedEvent<string>): void {
     const unit = this._varUnits[ev.detail.value];
     this.domainData.unit_of_measurement = unit.value;
   }
 
   private _validateMaxTemp(max_temp: number): boolean {
-    return max_temp <= this.domainData.min_temp;
+    return max_temp > this.domainData.min_temp;
   }
 
-  private _validateMinTemp(_min_temp: number): boolean {
-    return false;
+  private _validateMinTemp(min_temp: number): boolean {
+    return min_temp < this.domainData.max_temp;
   }
 
   static get styles(): CSSResult[] {
     return [
       haStyleDialog,
       css`
-        #sources-listbox {
-          width: 120px;
+        .temperature > * {
+          display: block;
+          margin-top: 16px;
         }
-        #setpoints-listbox {
-          width: 120px;
+        .sources > * {
+          display: inline-block;
         }
         #units-listbox {
           width: 120px;
         }
-        #lockable {
+        .lockable {
           margin-top: 10px;
         }
         ha-switch {

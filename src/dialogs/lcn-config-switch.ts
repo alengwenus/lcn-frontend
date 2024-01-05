@@ -65,31 +65,32 @@ export class LCNConfigSwitchElement extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <form>
-        <div>
-          <div>${this.lcn.localize("port-type")}:</div>
-          <ha-formfield
-            label=${this.lcn.localize("output")}
-          >
-            <ha-radio
-              name="port"
-              value="output"
-              .checked=${this._portType === "output"}
-              @change=${this._portTypeChanged}
-            ></ha-radio>
-          </ha-formfield>
-          <ha-formfield
-            label=${this.lcn.localize("relay")}
-          >
-            <ha-radio
-              name="port"
-              value="relay"
-              .checked=${this._portType === "relay"}
-              @change=${this._portTypeChanged}
-            ></ha-radio>
-          </ha-formfield>
-        </div>
+      <div class="port-type">
+        <div>${this.lcn.localize("port-type")}:</div>
+        <ha-formfield
+          label=${this.lcn.localize("output")}
+        >
+          <ha-radio
+            name="port"
+            value="output"
+            .checked=${this._portType === "output"}
+            @change=${this._portTypeChanged}
+          ></ha-radio>
+        </ha-formfield>
 
+        <ha-formfield
+          label=${this.lcn.localize("relay")}
+        >
+          <ha-radio
+            name="port"
+            value="relay"
+            .checked=${this._portType === "relay"}
+            @change=${this._portTypeChanged}
+          ></ha-radio>
+        </ha-formfield>
+      </div>
+
+      <div class="port">
         <paper-dropdown-menu
           label=${this.lcn.localize("port")}
           .value=${this._ports[this._portType][0].name}
@@ -106,7 +107,7 @@ export class LCNConfigSwitchElement extends LitElement {
             )}
           </paper-listbox>
         </paper-dropdown-menu>
-      </form>
+      </div>
     `;
   }
 
@@ -130,9 +131,13 @@ export class LCNConfigSwitchElement extends LitElement {
     return [
       haStyleDialog,
       css`
-        #ports-listbox {
-          width: 120px;
-        }
+      .port-type {
+        margin-top: 16px
+      }
+      .port > * {
+        display: block;
+        margin-top: 16px;
+      }
       `,
     ];
   }

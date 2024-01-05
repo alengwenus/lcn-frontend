@@ -4,6 +4,7 @@ import "@polymer/paper-input/paper-input";
 import "@polymer/paper-listbox/paper-listbox";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
+import "@ha/components/ha-textfield"
 import {
   css,
   html,
@@ -15,7 +16,8 @@ import {
 import { customElement, property, query } from "lit/decorators";
 import type { HaRadio } from "@ha/components/ha-radio";
 import { HaSwitch } from "@ha/components/ha-switch";
-import { HomeAssistant } from "@ha/types";
+import { HaTextField } from "@ha/components/ha-textfield";
+import { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import { LCN, LightConfig } from "types/lcn";
 
@@ -80,7 +82,7 @@ export class LCNConfigLightElement extends LitElement {
 
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
-    this._invalid = this._validateTransition(this.domainData.transition);
+    this._invalid = !this._validateTransition(this.domainData.transition);
   }
 
   protected update(changedProperties: PropertyValues) {
@@ -96,26 +98,31 @@ export class LCNConfigLightElement extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <div>
-        <div>
-          <div>${this.lcn.localize("port-type")}:</div>
-          <ha-formfield label=${this.lcn.localize("output")}>
-            <ha-radio
-              name="port"
-              value="output"
-              .checked=${this._portType === "output"}
-              @change=${this._portTypeChanged}
-            ></ha-radio>
-          </ha-formfield>
-          <ha-formfield label=${this.lcn.localize("relay")}>
-            <ha-radio
-              name="port"
-              value="relay"
-              .checked=${this._portType === "relay"}
-              @change=${this._portTypeChanged}
-            ></ha-radio>
-          </ha-formfield>
-        </div>
+      <div id="port-type">
+        ${this.lcn.localize("port-type")}:
+      </div>
+
+      <div class="type">
+        <ha-formfield label=${this.lcn.localize("output")}>
+          <ha-radio
+            name="port"
+            value="output"
+            .checked=${this._portType === "output"}
+            @change=${this._portTypeChanged}
+          ></ha-radio>
+        </ha-formfield>
+
+        <ha-formfield label=${this.lcn.localize("relay")}>
+          <ha-radio
+            name="port"
+            value="relay"
+            .checked=${this._portType === "relay"}
+            @change=${this._portTypeChanged}
+          ></ha-radio>
+        </ha-formfield>
+      </div>
+
+      <div class="port">
         <paper-dropdown-menu
           label=${this.lcn.localize("port")}
           .value=${this._ports[this._portType][0].name}
@@ -132,9 +139,9 @@ export class LCNConfigLightElement extends LitElement {
             )}
           </paper-listbox>
         </paper-dropdown-menu>
-
-        ${this.renderOutputFeatures()}
       </div>
+
+      ${this.renderOutputFeatures()}
     `;
   }
 
@@ -144,22 +151,27 @@ export class LCNConfigLightElement extends LitElement {
         return html`
           <div id="dimmable">
             <label>${this.lcn.localize("dashboard-entities-dialog-light-dimmable")}:</label>
+
             <ha-switch
               .checked=${this.domainData.dimmable}
               @change=${this._dimmableChanged}
             ></ha-switch>
           </div>
 
-          <paper-input
-            label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
-            type="number"
-            value="0"
-            min="0"
-            max="486"
-            @value-changed=${this._transitionChanged}
-            .invalid=${this._validateTransition(this.domainData.transition)}
-            error-message=${this.lcn.localize("dashboard-entities-dialog-light-transition-error")}
-          ></paper-input>
+          <div class="transition">
+            <ha-textfield
+              .label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
+              type="number"
+              .value=${this.domainData.transition}
+              min="0"
+              max="486"
+              required
+              autoValidate
+              @input=${this._transitionChanged}
+              .validityTransform=${(value: string) => ({ valid: this._validateTransition(+value) }) }
+              .validationMessage=${this.lcn.localize("dashboard-entities-dialog-light-transition-error")}
+            ></ha-textfield>
+          </div>
         `;
       case "relay":
         return html``;
@@ -168,7 +180,7 @@ export class LCNConfigLightElement extends LitElement {
     }
   }
 
-  private _portTypeChanged(ev: CustomEvent): void {
+  private _portTypeChanged(ev: ValueChangedEvent<string>): void {
     this._portType = (ev.target as HaRadio).value;
     this._portsListBox.selectIndex(0);
 
@@ -176,7 +188,7 @@ export class LCNConfigLightElement extends LitElement {
     this.domainData.output = port.value;
   }
 
-  private _portChanged(ev: CustomEvent): void {
+  private _portChanged(ev: ValueChangedEvent<string>): void {
     if (!ev.detail.value) {
       return;
     }
@@ -184,31 +196,37 @@ export class LCNConfigLightElement extends LitElement {
     this.domainData.output = port.value;
   }
 
-  private _dimmableChanged(ev: CustomEvent): void {
+  private _dimmableChanged(ev: ValueChangedEvent<boolean>): void {
     this.domainData.dimmable = (ev.target as HaSwitch).checked;
   }
 
-  private _transitionChanged(ev: CustomEvent): void {
-    this.domainData.transition = +ev.detail.value;
+  private _transitionChanged(ev: ValueChangedEvent<string>): void {
+    const target = ev.target as HaTextField;
+    this.domainData.transition = +target.value;
     this.requestUpdate();
   }
 
   private _validateTransition(transition: number): boolean {
-    return !(transition >= 0 && transition <= 486);
+    return (transition >= 0 && transition <= 486);
   }
 
   static get styles(): CSSResult[] {
     return [
       haStyleDialog,
       css`
-        #ports-listbox {
-          width: 120px;
+        #port-type {
+          margin-top: 16px;
         }
         #dimmable {
-          margin-top: 10px;
+          margin-top: 16px;
         }
-        ha-switch {
-          margin-left: 25px;
+        .port > * {
+          display: block;
+          margin-top: 16px;
+        }
+        .transition > * {
+          display: block;
+          margin-top: 16px;
         }
       `,
     ];

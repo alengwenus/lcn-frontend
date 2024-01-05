@@ -48,7 +48,7 @@ export class LCNConfigCoverElement extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <form>
+      <div class="motor">
         <paper-dropdown-menu label="Motor" .value=${this._motors[0].name}>
           <paper-listbox
             id="motors-listbox"
@@ -81,9 +81,9 @@ export class LCNConfigCoverElement extends LitElement {
                   )}
                 </paper-listbox>
               </paper-dropdown-menu>
-            `
+            </div>
+          `
           : html``}
-      </form>
     `;
   }
 
@@ -108,11 +108,9 @@ export class LCNConfigCoverElement extends LitElement {
     return [
       haStyleDialog,
       css`
-        #motors-listbox {
-          width: 120px;
-        }
-        #reverse-times-listbox {
-          width: 120px;
+        .motor > * {
+          display: block;
+          margin-top: 16px;
         }
       `,
     ];

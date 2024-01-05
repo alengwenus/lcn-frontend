@@ -98,7 +98,7 @@ export class LCNConfigBinarySensorElement extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <div>
+      <div class="sources">
         <paper-dropdown-menu
           label=${this.lcn.localize("source-type")}
           .value=${this._sourceTypes[this._sourceType].name}
@@ -116,8 +116,7 @@ export class LCNConfigBinarySensorElement extends LitElement {
               `
             )}
         </paper-dropdown-menu>
-      </div>
-      <div>
+
         <paper-dropdown-menu
           label=${this.lcn.localize("source")}
           .value=${this._sourceTypes[this._sourceType].value[0].name}
@@ -156,6 +155,10 @@ export class LCNConfigBinarySensorElement extends LitElement {
     return [
       haStyleDialog,
       css`
+        .sources > * {
+          display: block;
+          margin-top: 16px;
+        }
         #sources-type-listbox {
           width: 175px;
         }

@@ -185,7 +185,7 @@ export class LCNConfigSensorElement extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <form>
+      <div class="sources">
         <paper-dropdown-menu
           label=${this.lcn.localize("source-type")}
           .value=${this._sourceTypes[this._sourceType].name}
@@ -223,7 +223,8 @@ export class LCNConfigSensorElement extends LitElement {
             )}
           </paper-listbox>
         </paper-dropdown-menu>
-
+      </div>
+      <div class="unit">
         <paper-dropdown-menu
           label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
           .value=${this._varUnits[0].name}
@@ -240,7 +241,7 @@ export class LCNConfigSensorElement extends LitElement {
             )}
           </paper-listbox>
         </paper-dropdown-menu>
-      </form>
+      </div>
     `;
   }
 
@@ -266,11 +267,12 @@ export class LCNConfigSensorElement extends LitElement {
     return [
       haStyleDialog,
       css`
-        #sources-type-listbox {
-          width: 120px;
+        .sources > * {
+          display: inline-block;
         }
-        #sources-listbox {
-          width: 120px;
+        .unit > * {
+          display: block;
+          margin-top: 16px;
         }
       `,
     ];

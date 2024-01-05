@@ -68,7 +68,7 @@ public async showDialog(params: LcnEntityDialogParams): Promise<void> {
         )}
         @closed=${this._closeDialog}
       >
-        <div>
+        <div class="general-properties">
           <paper-dropdown-menu
             label=${this.lcn.localize("domain")}
             @selected-item-changed=${this._domain_changed}
@@ -80,21 +80,27 @@ public async showDialog(params: LcnEntityDialogParams): Promise<void> {
               )}
             </paper-listbox>
           </paper-dropdown-menu>
-          <paper-input
+
+          <ha-textfield
             label=${this.lcn.localize("name")}
             placeholder=${this.domain}
-            max-length="20"
-            @value-changed=${this._nameChanged}
+            type="string"
+            maxLength="20"
+            @change=${this._nameChanged}
           >
-          </paper-input>
-          ${this.renderDomain(this.domain)}
+          </ha-textfield>
         </div>
 
+        ${this.renderDomain(this.domain)}
+
         <div class="buttons">
-          <mwc-button @click=${this._closeDialog}
+          <mwc-button
+            slot="secondaryAction"
+            @click=${this._closeDialog}
             .label=${this.lcn.localize("dismiss")}
           ></mwc-button>
           <mwc-button
+            slot="primaryAction"
             .disabled=${this._invalid}
             @click=${this._create}
             .label=${this.lcn.localize("create")}
@@ -195,8 +201,9 @@ public async showDialog(params: LcnEntityDialogParams): Promise<void> {
     return [
       haStyleDialog,
       css`
-        .form {
-          padding-bottom: 24px;
+        .general-properties > * {
+          display: block;
+          margin-top: 16px;
         }
         .buttons {
           display: flex;
