@@ -125,7 +125,7 @@ export class LCNConfigDashboard extends LitElement {
           </div>
 
           <ha-card
-            header="${this.lcn.localize("dashboard-devices-for-host")} (${this.lcn.host.name})">
+            header="${this.lcn.localize("dashboard-devices-for-host")}: ${this.lcn.host.name}">
             <lcn-devices-data-table
               .hass=${this.hass}
               .lcn=${this.lcn}

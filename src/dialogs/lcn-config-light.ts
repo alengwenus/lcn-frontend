@@ -133,26 +133,39 @@ export class LCNConfigLightElement extends LitElement {
           </paper-listbox>
         </paper-dropdown-menu>
 
-        <div id="dimmable">
-          <label>${this.lcn.localize("dashboard-entities-dialog-light-dimmable")}:</label>
-          <ha-switch
-            .checked=${this.domainData.dimmable}
-            @change=${this._dimmableChanged}
-          ></ha-switch>
-        </div>
-
-        <paper-input
-          label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
-          type="number"
-          value="0"
-          min="0"
-          max="486"
-          @value-changed=${this._transitionChanged}
-          .invalid=${this._validateTransition(this.domainData.transition)}
-          error-message=${this.lcn.localize("dashboard-entities-dialog-light-transition-error")}
-        ></paper-input>
+        ${this.renderOutputFeatures()}
       </div>
     `;
+  }
+
+  private renderOutputFeatures() {
+    switch (this._portType) {
+      case "output":
+        return html`
+          <div id="dimmable">
+            <label>${this.lcn.localize("dashboard-entities-dialog-light-dimmable")}:</label>
+            <ha-switch
+              .checked=${this.domainData.dimmable}
+              @change=${this._dimmableChanged}
+            ></ha-switch>
+          </div>
+
+          <paper-input
+            label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
+            type="number"
+            value="0"
+            min="0"
+            max="486"
+            @value-changed=${this._transitionChanged}
+            .invalid=${this._validateTransition(this.domainData.transition)}
+            error-message=${this.lcn.localize("dashboard-entities-dialog-light-transition-error")}
+          ></paper-input>
+        `;
+      case "relay":
+        return html``;
+      default:
+        return html``;
+    }
   }
 
   private _portTypeChanged(ev: CustomEvent): void {
