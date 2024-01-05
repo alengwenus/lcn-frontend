@@ -114,6 +114,7 @@ export class LCNEntitiesPage extends LitElement {
 
   private async _addEntity() {
     showLCNCreateEntityDialog(this, {
+      lcn: this.lcn,
       device: <LcnDeviceConfig>this._deviceConfig,
       createEntity: async (entityParams) => {
         if (!(await addEntity(this.hass, this.lcn.host.id, entityParams))) {

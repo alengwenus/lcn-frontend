@@ -5,7 +5,7 @@ import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { CoverConfig } from "types/lcn";
+import { LCN, CoverConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
@@ -15,6 +15,8 @@ interface ConfigItem {
 @customElement("lcn-config-cover-element")
 export class LCNConfigCoverElement extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public lcn!: LCN;
 
   @property() public software_serial = -1;
 
@@ -27,13 +29,16 @@ export class LCNConfigCoverElement extends LitElement {
 
   @query("#reverse-times-listbox") private _reverseTimesListBox;
 
-  private _motors: ConfigItem[] = [
-    { name: "Motor 1", value: "MOTOR1" },
-    { name: "Motor 2", value: "MOTOR2" },
-    { name: "Motor 3", value: "MOTOR3" },
-    { name: "Motor 4", value: "MOTOR4" },
-    { name: "Outputs", value: "OUTPUTS" },
-  ];
+  private get _motors(): ConfigItem[] {
+    const motor: string = this.lcn.localize("motor");
+    return [
+      { name: motor + " 1", value: "MOTOR1" },
+      { name: motor + " 2", value: "MOTOR2" },
+      { name: motor + " 3", value: "MOTOR3" },
+      { name: motor + " 4", value: "MOTOR4" },
+      { name: this.lcn.localize("outputs"), value: "OUTPUTS" },
+    ];
+  }
 
   private _reverseTimes: ConfigItem[] = [
     { name: "70ms", value: "RT70" },

@@ -14,7 +14,7 @@ import { customElement, property } from "lit/decorators";
 import { HaSwitch } from "@ha/components/ha-switch";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { ClimateConfig } from "types/lcn";
+import { LCN, ClimateConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
@@ -24,6 +24,8 @@ interface ConfigItem {
 @customElement("lcn-config-climate-element")
 export class LCNConfigClimateElement extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public lcn!: LCN;
 
   @property() public softwareSerial = -1;
 
@@ -40,22 +42,26 @@ export class LCNConfigClimateElement extends LitElement {
 
   private get _is2012() {
     return this.softwareSerial >= 0x160000;
-  }
+  };
 
-  private _variablesNew: ConfigItem[] = [
-    { name: "Variable 1", value: "VAR1" },
-    { name: "Variable 2", value: "VAR2" },
-    { name: "Variable 3", value: "VAR3" },
-    { name: "Variable 4", value: "VAR4" },
-    { name: "Variable 5", value: "VAR5" },
-    { name: "Variable 6", value: "VAR6" },
-    { name: "Variable 7", value: "VAR7" },
-    { name: "Variable 8", value: "VAR8" },
-    { name: "Variable 9", value: "VAR9" },
-    { name: "Variable 10", value: "VAR10" },
-    { name: "Variable 11", value: "VAR11" },
-    { name: "Variable 12", value: "VAR12" },
+  private get _variablesNew(): ConfigItem[] {
+    const variable: string = this.lcn.localize("variable");
+    return [
+      { name: variable + " 1", value: "VAR1" },
+      { name: variable + " 2", value: "VAR2" },
+      { name: variable + " 3", value: "VAR3" },
+      { name: variable + " 4", value: "VAR4" },
+      { name: variable + " 5", value: "VAR5" },
+      { name: variable + " 6", value: "VAR6" },
+      { name: variable + " 7", value: "VAR7" },
+      { name: variable + " 8", value: "VAR8" },
+      { name: variable + " 9", value: "VAR9" },
+      { name: variable + " 10", value: "VAR10" },
+      { name: variable + " 11", value: "VAR11" },
+      { name: variable + " 12", value: "VAR12" },
   ];
+};
+
 
   private _variablesOld: ConfigItem[] = [
     { name: "TVar", value: "TVAR" },
@@ -63,10 +69,14 @@ export class LCNConfigClimateElement extends LitElement {
     { name: "R2Var", value: "R2VAR" },
   ];
 
-  private _varSetpoints: ConfigItem[] = [
-    { name: "Setpoint 1", value: "R1VARSETPOINT" },
-    { name: "Setpoint 2", value: "R2VARSETPOINT" },
-  ];
+  private get _varSetpoints(): ConfigItem[] {
+    const setpoint: string = this.lcn.localize("setpoint");
+    return [
+      { name: setpoint + " 1", value: "R1VARSETPOINT" },
+      { name: setpoint + " 2", value: "R2VARSETPOINT" },
+    ];
+  };
+
 
   private _varUnits: ConfigItem[] = [
     { name: "Celsius", value: "°C" },
@@ -111,7 +121,10 @@ export class LCNConfigClimateElement extends LitElement {
   protected render(): TemplateResult {
     return html`
       <form>
-        <paper-dropdown-menu label="Source" .value=${this._sources[0].name}>
+        <paper-dropdown-menu
+          label=${this.lcn.localize("source")}
+          .value=${this._sources[0].name}
+        >
           <paper-listbox
             id="sources-listbox"
             slot="dropdown-content"
@@ -127,7 +140,10 @@ export class LCNConfigClimateElement extends LitElement {
           </paper-listbox>
         </paper-dropdown-menu>
 
-        <paper-dropdown-menu label="Setpoint" .value=${this._setpoints[0].name}>
+        <paper-dropdown-menu
+          label=${this.lcn.localize("setpoint")}
+          .value=${this._setpoints[0].name}
+        >
           <paper-listbox
             id="setpoints-listbox"
             slot="dropdown-content"
@@ -144,7 +160,7 @@ export class LCNConfigClimateElement extends LitElement {
         </paper-dropdown-menu>
 
         <div id="lockable">
-          <label>Lockable:</label>
+          <label>${this.lcn.localize("dashboard-entities-dialog-climate-lockable")}:</label>
           <ha-switch
             .checked=${this.domainData.lockable}
             @change=${this._lockableChanged}
@@ -152,25 +168,25 @@ export class LCNConfigClimateElement extends LitElement {
         </div>
 
         <paper-input
-          label="Minimum temperature"
+          label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
           type="number"
           value="7"
           @value-changed=${this._minTempChanged}
           .invalid=${this._validateMinTemp(this.domainData.min_temp)}
-          error-message="Invalid minimum temperature"
+          error-message=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature-error")}
         ></paper-input>
 
         <paper-input
-          label="Maximum temperature"
+          label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
           type="number"
           value="35"
           @value-changed=${this._maxTempChanged}
           .invalid=${this._validateMaxTemp(this.domainData.max_temp)}
-          error-message="Invalid maximum temperature"
+          error-message=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature-error")}
         ></paper-input>
 
         <paper-dropdown-menu
-          label="Unit of measurement"
+          label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
           .value=${this._varUnits[0].name}
         >
           <paper-listbox

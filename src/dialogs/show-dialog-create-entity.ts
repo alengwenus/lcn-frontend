@@ -1,7 +1,8 @@
 import { fireEvent } from "@ha/common/dom/fire_event";
-import { LcnEntityConfig, LcnDeviceConfig } from "types/lcn";
+import { LCN, LcnEntityConfig, LcnDeviceConfig } from "types/lcn";
 
 export interface LcnEntityDialogParams {
+  lcn: LCN,
   device: LcnDeviceConfig;
   createEntity: (values: Partial<LcnEntityConfig>) => Promise<unknown>;
 }

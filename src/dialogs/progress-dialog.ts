@@ -41,13 +41,8 @@ export class ProgressDialog extends LitElement {
     `;
   }
 
-  // public open() {
-  //   this._dialog.open();
-  // }
-
   public close() {
     this._params = undefined;
-    // this._dialog.close();
   }
 
   static get styles(): CSSResult[] {

@@ -17,16 +17,23 @@ import type { HaRadio } from "@ha/components/ha-radio";
 import { HaSwitch } from "@ha/components/ha-switch";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { LightConfig } from "types/lcn";
+import { LCN, LightConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
   value: string;
 }
 
+interface Ports {
+  output: ConfigItem[];
+  relay: ConfigItem[];
+}
+
 @customElement("lcn-config-light-element")
 export class LCNConfigLightElement extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public lcn!: LCN;
 
   @property() public domainData: LightConfig = {
     output: "OUTPUT1",
@@ -40,25 +47,36 @@ export class LCNConfigLightElement extends LitElement {
 
   private _invalid = false;
 
-  private _outputPorts: ConfigItem[] = [
-    { name: "Output 1", value: "OUTPUT1" },
-    { name: "Output 2", value: "OUTPUT2" },
-    { name: "Output 3", value: "OUTPUT3" },
-    { name: "Output 4", value: "OUTPUT4" },
-  ];
+  private get _outputPorts(): ConfigItem[] {
+    const output: string = this.lcn.localize("output");
+    return [
+      { name: output + " 1", value: "OUTPUT1" },
+      { name: output + " 2", value: "OUTPUT2" },
+      { name: output + " 3", value: "OUTPUT3" },
+      { name: output + " 4", value: "OUTPUT4" },
+    ];
+  };
 
-  private _relayPorts: ConfigItem[] = [
-    { name: "Relay 1", value: "RELAY1" },
-    { name: "Relay 2", value: "RELAY2" },
-    { name: "Relay 3", value: "RELAY3" },
-    { name: "Relay 4", value: "RELAY4" },
-    { name: "Relay 5", value: "RELAY5" },
-    { name: "Relay 6", value: "RELAY6" },
-    { name: "Relay 7", value: "RELAY7" },
-    { name: "Relay 8", value: "RELAY8" },
-  ];
+  private get _relayPorts(): ConfigItem[] {
+    const relay: string = this.lcn.localize("relay");
+    return [
+      { name: relay + " 1", value: "RELAY1" },
+      { name: relay + " 2", value: "RELAY2" },
+      { name: relay + " 3", value: "RELAY3" },
+      { name: relay + " 4", value: "RELAY4" },
+      { name: relay + " 5", value: "RELAY5" },
+      { name: relay + " 6", value: "RELAY6" },
+      { name: relay + " 7", value: "RELAY7" },
+      { name: relay + " 8", value: "RELAY8" },
+    ];
+  };
 
-  private _ports = { output: this._outputPorts, relay: this._relayPorts };
+  private get _ports(): Ports {
+    return {
+      output: this._outputPorts,
+      relay: this._relayPorts,
+    };
+  };
 
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
@@ -80,8 +98,8 @@ export class LCNConfigLightElement extends LitElement {
     return html`
       <div>
         <div>
-          <div>Port:</div>
-          <ha-formfield label="Output">
+          <div>${this.lcn.localize("port-type")}:</div>
+          <ha-formfield label=${this.lcn.localize("output")}>
             <ha-radio
               name="port"
               value="output"
@@ -89,7 +107,7 @@ export class LCNConfigLightElement extends LitElement {
               @change=${this._portTypeChanged}
             ></ha-radio>
           </ha-formfield>
-          <ha-formfield label="Relay">
+          <ha-formfield label=${this.lcn.localize("relay")}>
             <ha-radio
               name="port"
               value="relay"
@@ -99,7 +117,7 @@ export class LCNConfigLightElement extends LitElement {
           </ha-formfield>
         </div>
         <paper-dropdown-menu
-          label="Port"
+          label=${this.lcn.localize("port")}
           .value=${this._ports[this._portType][0].name}
         >
           <paper-listbox
@@ -116,7 +134,7 @@ export class LCNConfigLightElement extends LitElement {
         </paper-dropdown-menu>
 
         <div id="dimmable">
-          <label>Dimmable:</label>
+          <label>${this.lcn.localize("dashboard-entities-dialog-light-dimmable")}:</label>
           <ha-switch
             .checked=${this.domainData.dimmable}
             @change=${this._dimmableChanged}
@@ -124,14 +142,14 @@ export class LCNConfigLightElement extends LitElement {
         </div>
 
         <paper-input
-          label="Transition"
+          label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
           type="number"
           value="0"
           min="0"
           max="486"
           @value-changed=${this._transitionChanged}
           .invalid=${this._validateTransition(this.domainData.transition)}
-          error-message="Transition must be in 0..486."
+          error-message=${this.lcn.localize("dashboard-entities-dialog-light-transition-error")}
         ></paper-input>
       </div>
     `;

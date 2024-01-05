@@ -5,7 +5,7 @@ import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { SwitchConfig } from "types/lcn";
+import { LCN, SwitchConfig } from "types/lcn";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import type { HaRadio } from "@ha/components/ha-radio";
@@ -15,9 +15,16 @@ interface ConfigItem {
   value: string;
 }
 
+interface Port {
+  output: ConfigItem[];
+  relay: ConfigItem[];
+}
+
 @customElement("lcn-config-switch-element")
 export class LCNConfigSwitchElement extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public lcn!: LCN;
 
   @property() public domainData: SwitchConfig = { output: "OUTPUT1" };
 
@@ -25,32 +32,45 @@ export class LCNConfigSwitchElement extends LitElement {
 
   @query("#ports-listbox") private _portsListBox;
 
-  private _outputPorts: ConfigItem[] = [
-    { name: "Output 1", value: "OUTPUT1" },
-    { name: "Output 2", value: "OUTPUT2" },
-    { name: "Output 3", value: "OUTPUT3" },
-    { name: "Output 4", value: "OUTPUT4" },
-  ];
+  private get _outputPorts(): ConfigItem[] {
+    const output: string = this.lcn.localize("output");
+    return [
+      { name: output + " 1", value: "OUTPUT1" },
+      { name: output + " 2", value: "OUTPUT2" },
+      { name: output + " 3", value: "OUTPUT3" },
+      { name: output + " 4", value: "OUTPUT4" },
+    ];
+  };
 
-  private _relayPorts: ConfigItem[] = [
-    { name: "Relay 1", value: "RELAY1" },
-    { name: "Relay 2", value: "RELAY2" },
-    { name: "Relay 3", value: "RELAY3" },
-    { name: "Relay 4", value: "RELAY4" },
-    { name: "Relay 5", value: "RELAY5" },
-    { name: "Relay 6", value: "RELAY6" },
-    { name: "Relay 7", value: "RELAY7" },
-    { name: "Relay 8", value: "RELAY8" },
-  ];
+  private get _relayPorts(): ConfigItem[] {
+    const relay: string = this.lcn.localize("relay");
+    return [
+      { name: relay + " 1", value: "RELAY1" },
+      { name: relay + " 2", value: "RELAY2" },
+      { name: relay + " 3", value: "RELAY3" },
+      { name: relay + " 4", value: "RELAY4" },
+      { name: relay + " 5", value: "RELAY5" },
+      { name: relay + " 6", value: "RELAY6" },
+      { name: relay + " 7", value: "RELAY7" },
+      { name: relay + " 8", value: "RELAY8" },
+    ];
+  };
 
-  private _ports = { output: this._outputPorts, relay: this._relayPorts };
+  private get _ports(): Port {
+    return {
+      output: this._outputPorts,
+      relay: this._relayPorts,
+    }
+  };
 
   protected render(): TemplateResult {
     return html`
       <form>
         <div>
-          <div>Port:</div>
-          <ha-formfield label="Output">
+          <div>${this.lcn.localize("port-type")}:</div>
+          <ha-formfield
+            label=${this.lcn.localize("output")}
+          >
             <ha-radio
               name="port"
               value="output"
@@ -58,7 +78,9 @@ export class LCNConfigSwitchElement extends LitElement {
               @change=${this._portTypeChanged}
             ></ha-radio>
           </ha-formfield>
-          <ha-formfield label="Relay">
+          <ha-formfield
+            label=${this.lcn.localize("relay")}
+          >
             <ha-radio
               name="port"
               value="relay"
@@ -69,7 +91,7 @@ export class LCNConfigSwitchElement extends LitElement {
         </div>
 
         <paper-dropdown-menu
-          label="Port"
+          label=${this.lcn.localize("port")}
           .value=${this._ports[this._portType][0].name}
         >
           <paper-listbox

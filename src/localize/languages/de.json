@@ -8,10 +8,52 @@
   "segment-id": "Segment Id",
   "name": "Name",
   "type": "Typ",
-  "domain": "Domäne",
   "resource": "Ressource",
   "create": "Erstellen",
   "dismiss": "Abbrechen",
+
+  "domain": "Domäne",
+  "binary-sensor": "Binärsensor",
+  "climate": "Klima",
+  "cover": "Abdeckung",
+  "light": "Licht",
+  "scene": "Szene",
+  "sensor": "Sensor",
+  "switch": "Schalter",
+
+  "variable": "Variable",
+  "variables": "Variablen",
+  "setpoint": "Sollwert",
+  "setpoints": "Sollwerte",
+  "motor": "Motor",
+  "output": "Ausgang",
+  "outputs": "Ausgänge",
+  "relay": "Relais",
+  "relays": "Relais",
+  "port": "Anschluss",
+  "port-type": "Anschlusstyp",
+  "register": "Register",
+  "threshold": "Schwellwert",
+  "thresholds": "Schwellwerte",
+  "s0input": "S0 Eingang",
+  "s0inputs": "S0 Eingänge",
+  "led": "Led",
+  "leds": "Leds",
+  "logics": "Logiken",
+
+  "source": "Quelle",
+  "source-type": "Quellentyp",
+
+  "unit-lcn-native": "LCN nativ",
+  "unit-humidity": "Luftfeuchtigkeit",
+  "unit-wind": "Wind",
+  "unit-volts": "Volt",
+  "unit-milliamperes": "Milliampere",
+  "unit-angle": "Winkel",
+
+  "binary-sensor-type-binsensors": "Binärsensoren",
+  "binary-sensor-type-setpoint-locks": "Sperrung Sollwerte",
+  "binary-sensor-type-keys-locks": "Sperrung Tasten",
 
   "dashboard-devices-title": "LCN Konfiguration",
   "dashboard-devices-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard.",
@@ -39,19 +81,36 @@
   "dashboard-devices-dialog-delete-text": "Du möchtest folgendes Gerät löschen:",
   "dashboard-devices-dialog-delete-warning": "Mit dem Löschen des Gerätes werden alle zugehörigen Entitäten gelöscht!",
 
-  "dashboard-devices-dialog-create-title": "Erstelle Modul / Gruppe",
+  "dashboard-devices-dialog-create-title": "Modul / Gruppe erstellen",
   "dashboard-devices-dialog-error-segment": "Segment ID muss 0, 5..128 sein.",
-  "dashboard-devices-dialog-error-module": "Modul ID muss 5..254 sein.",
-  "dashboard-devices-dialog-error-group": "Gruppen ID muss 5..254 sein.",
+  "dashboard-devices-dialog-error-module": "Modul ID muss im Bereich 5..254 liegen.",
+  "dashboard-devices-dialog-error-group": "Gruppen ID muss im Bereich 5..254 liegen.",
 
   "dashboard-entities-title": "Konfiguration Entitäten",
   "dashboard-entities-introduction": "Konfiguration der Entitäten für dieses Modul / Gruppe.",
-  "dahsboard-entities-add": "Entität erstellen",
+  "dashboard-entities-add": "Entität erstellen",
 
   "dashboard-entities-dialog-add-alert-title": "LCN Ressource existiert bereits",
   "dashboard-entities-dialog-add-alert-text": "Die angegebene LCN Ressource ist der Entität bereits zugewiesen.",
   "dashboard-entities-dialog-add-alert-hint": "LCN Ressourcen dürfen für jede Domäne nur einmal existieren.",
 
   "dashboard-entities-table-delete": "Lösche Eintrag",
-  "dashboard-entities-table-no-data": "Keine Entitäten konfiguriert."
+  "dashboard-entities-table-no-data": "Keine Entitäten konfiguriert.",
+
+  "dashboard-entities-dialog-create-title": "Entität erstellen",
+
+  "dashboard-entities-dialog-unit-of-measurement": "Messeinheit",
+
+  "dashboard-entities-dialog-climate-lockable": "Sperrbar",
+  "dashboard-entities-dialog-climate-min-temperature": "Minimale Temperatur",
+  "dashboard-entities-dialog-climate-max-temperature": "Maximale Temperatur",
+  "dashboard-entities-dialog-climate-min-temperature-error": "Ungültige minimale Temperatur",
+  "dashboard-entities-dialog-climate-max-temperature-error": "Ungültige maximale Temperatur",
+
+  "dashboard-entities-dialog-light-dimmable": "Dimmbar",
+  "dashboard-entities-dialog-light-transition": "Rampe",
+  "dashboard-entities-dialog-light-transition-error": "Rampe muss im Bereich 0..486 liegen.",
+
+  "dashboard-entities-dialog-scene-transition": "Rampe",
+  "dashboard-entities-dialog-scene-transition-error": "Rampe muss im Bereich 0..486 liegen."
 }

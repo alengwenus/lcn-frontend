@@ -5,7 +5,7 @@ import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { BinarySensorConfig } from "types/lcn";
+import { LCN,  BinarySensorConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
@@ -21,6 +21,8 @@ interface ConfigItemCollection {
 export class LCNConfigBinarySensorElement extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
+  @property({ attribute: false }) public lcn!: LCN;
+
   @property() public domainData: BinarySensorConfig = {
     source: "BINSENSOR1",
   };
@@ -29,21 +31,27 @@ export class LCNConfigBinarySensorElement extends LitElement {
 
   @query("#sources-listbox") private _sourcesListBox;
 
-  private _binsensorPorts: ConfigItem[] = [
-    { name: "Binary sensor 1", value: "BINSENSOR1" },
-    { name: "Binary sensor 2", value: "BINSENSOR2" },
-    { name: "Binary sensor 3", value: "BINSENSOR3" },
-    { name: "Binary sensor 4", value: "BINSENSOR4" },
-    { name: "Binary sensor 5", value: "BINSENSOR5" },
-    { name: "Binary sensor 6", value: "BINSENSOR6" },
-    { name: "Binary sensor 7", value: "BINSENSOR7" },
-    { name: "Binary sensor 8", value: "BINSENSOR8" },
-  ];
+  private get _binsensorPorts(): ConfigItem[] {
+    const binary_sensor: string = this.lcn.localize("binary-sensor")
+    return [
+      { name: binary_sensor + " 1", value: "BINSENSOR1" },
+      { name: binary_sensor + " 2", value: "BINSENSOR2" },
+      { name: binary_sensor + " 3", value: "BINSENSOR3" },
+      { name: binary_sensor + " 4", value: "BINSENSOR4" },
+      { name: binary_sensor + " 5", value: "BINSENSOR5" },
+      { name: binary_sensor + " 6", value: "BINSENSOR6" },
+      { name: binary_sensor + " 7", value: "BINSENSOR7" },
+      { name: binary_sensor + " 8", value: "BINSENSOR8" },
+    ];
+  };
 
-  private _setpoints: ConfigItem[] = [
-    { name: "Setpoint 1", value: "R1VARSETPOINT" },
-    { name: "Setpoint 2", value: "R2VARSETPOINT" },
-  ];
+  private get _setpoints(): ConfigItem[] {
+    const setpoint: string = this.lcn.localize("setpoint")
+    return [
+      { name: setpoint + " 1", value: "R1VARSETPOINT" },
+      { name: setpoint + " 2", value: "R2VARSETPOINT" },
+    ];
+  };
 
   private _keys: ConfigItem[] = [
     { name: "A1", value: "A1" },
@@ -80,17 +88,19 @@ export class LCNConfigBinarySensorElement extends LitElement {
     { name: "D8", value: "D8" },
   ];
 
-  private _sourceTypes: ConfigItemCollection[] = [
-    { name: "Binary sensors", value: this._binsensorPorts },
-    { name: "Setpoints lock state", value: this._setpoints },
-    { name: "Keys lock state", value: this._keys },
-  ];
+  private get _sourceTypes(): ConfigItemCollection[] {
+    return [
+      { name: this.lcn.localize("binary-sensor-type-binsensors"), value: this._binsensorPorts },
+      { name: this.lcn.localize("binary-sensor-type-setpoint-locks"), value: this._setpoints },
+      { name: this.lcn.localize("binary-sensor-type-keys-locks"), value: this._keys },
+    ];
+  };
 
   protected render(): TemplateResult {
     return html`
       <div>
         <paper-dropdown-menu
-          label="Source type"
+          label=${this.lcn.localize("source-type")}
           .value=${this._sourceTypes[this._sourceType].name}
         >
           <paper-listbox
@@ -109,7 +119,7 @@ export class LCNConfigBinarySensorElement extends LitElement {
       </div>
       <div>
         <paper-dropdown-menu
-          label="Source"
+          label=${this.lcn.localize("source")}
           .value=${this._sourceTypes[this._sourceType].value[0].name}
         >
           <paper-listbox

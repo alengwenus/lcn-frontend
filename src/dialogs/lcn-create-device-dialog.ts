@@ -115,16 +115,17 @@ export class CreateDeviceDialog extends LitElement {
         </form>
 
         <div class="buttons">
-          <mwc-button @click=${this._closeDialog} slot="secondaryAction">
-            ${this.lcn.localize("dismiss")}
-          </mwc-button>
           <mwc-button
+            slot="secondaryAction"
+            @click=${this._closeDialog}
+            .label=${this.lcn.localize("dismiss")}
+          ></mwc-button>
+          <mwc-button
+            slot="primaryAction"
             @click=${this._create}
             .disabled=${this._invalid}
-            slot="primaryAction"
-          >
-          ${this.lcn.localize("create")}
-          </mwc-button>
+            .label=${this.lcn.localize("create")}
+          ></mwc-button>
         </div>
       </ha-dialog>
     `;

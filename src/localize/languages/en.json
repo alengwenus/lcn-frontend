@@ -8,10 +8,53 @@
   "segment-id": "Segment Id",
   "name": "Name",
   "type": "Type",
-  "domain": "Domain",
   "resource": "Resource",
   "create": "Create",
   "dismiss": "Dismiss",
+
+  "domain": "Domain",
+  "binary-sensor": "Binary sensor",
+  "climate": "Climate",
+  "cover": "Cover",
+  "light": "Light",
+  "scene": "Scene",
+  "sensor": "Sensor",
+  "switch": "Switch",
+
+  "variable": "Variable",
+  "variables": "Variables",
+  "setpoint": "Setpoint",
+  "setpoints": "Setpoints",
+  "motor": "Motor",
+  "output": "Output",
+  "outputs": "Outputs",
+  "relay": "Relay",
+  "relays": "Realys",
+  "port": "Port",
+  "port-type": "Port type",
+  "register": "Register",
+  "threshold": "Threshold",
+  "thresholds": "Thresholds",
+  "s0input": "S0 Input",
+  "s0inputs": "S0 Inputs",
+  "led": "Led",
+  "leds": "Leds",
+  "logic": "Logic",
+  "logics": "Logics",
+
+  "source": "Source",
+  "source-type": "Source type",
+
+  "unit-lcn-native": "LCN native",
+  "unit-humidity": "Humidity",
+  "unit-wind": "Wind",
+  "unit-volts": "Volts",
+  "unit-milliamperes": "Milliamperes",
+  "unit-angle": "Angle",
+
+  "binary-sensor-type-binsensors": "Binary sensors",
+  "binary-sensor-type-setpoint-locks": "Setpoints lock state",
+  "binary-sensor-type-keys-locks": "Keys lock state",
 
   "dashboard-devices-title": "LCN Configuration Dashboard",
   "dashboard-devices-introduction": "Welcome to the LCN configuration dashboard.",
@@ -53,5 +96,22 @@
   "dashboard-entities-dialog-add-alert-hint": "LCN resources may only be assigned once within a domain.",
 
   "dashboard-entities-table-delete": "Delete entry",
-  "dashboard-entities-table-no-data": "No entities configured."
+  "dashboard-entities-table-no-data": "No entities configured.",
+
+  "dashboard-entities-dialog-create-title": "Create entity",
+
+  "dashboard-entities-dialog-unit-of-measurement": "Unit of measurement",
+
+  "dashboard-entities-dialog-climate-lockable": "Lockable",
+  "dashboard-entities-dialog-climate-min-temperature": "Minimum temperature",
+  "dashboard-entities-dialog-climate-max-temperature": "Maximum temperature",
+  "dashboard-entities-dialog-climate-min-temperature-error": "Invalid minimum temperature",
+  "dashboard-entities-dialog-climate-max-temperature-error": "Invalid maximum temperature",
+
+  "dashboard-entities-dialog-light-dimmable": "Dimmable",
+  "dashboard-entities-dialog-light-transition": "Transition",
+  "dashboard-entities-dialog-light-transition-error": "Transition must be in 0..486.",
+
+  "dashboard-entities-dialog-scene-transition": "Transition",
+  "dashboard-entities-dialog-scene-transition-error": "Transition must be in 0..486."
 }
