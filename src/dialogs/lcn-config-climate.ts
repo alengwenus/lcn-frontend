@@ -1,7 +1,8 @@
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-import "@polymer/paper-input/paper-input";
+import "@ha/components/ha-select"
+import { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-textfield";
 import {
   css,
@@ -39,6 +40,12 @@ export class LCNConfigClimateElement extends LitElement {
     lockable: false,
     unit_of_measurement: "°C",
   };
+
+  @property() private _source!: ConfigItem;
+
+  @property() private _setpoint!: ConfigItem;
+
+  @property() private _unit!: ConfigItem;
 
   private _invalid = false;
 
@@ -79,7 +86,6 @@ export class LCNConfigClimateElement extends LitElement {
     ];
   };
 
-
   private _varUnits: ConfigItem[] = [
     { name: "Celsius", value: "°C" },
     { name: "Fahrenheit", value: "°F" },
@@ -98,8 +104,12 @@ export class LCNConfigClimateElement extends LitElement {
   protected async firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);
 
-    this.domainData.source = this._sources[0].value;
-    this.domainData.setpoint = this._setpoints[0].value;
+    this._source = this._sources[0];
+    this._setpoint = this._setpoints[0];
+    this._unit = this._varUnits[0];
+
+    // this.domainData.source = this._sources[0].value;
+    // this.domainData.setpoint = this._setpoints[0].value;
   }
 
   public willUpdate(changedProperties: PropertyValues) {
@@ -121,45 +131,44 @@ export class LCNConfigClimateElement extends LitElement {
   }
 
   protected render(): TemplateResult {
+    if (!(this._source || this._setpoint || this._unit)) {
+      return html``;
+    }
     return html`
       <div class="sources">
-        <paper-dropdown-menu
-          label=${this.lcn.localize("source")}
-          .value=${this._sources[0].name}
+        <ha-select
+          id="source-select"
+          .label=${this.lcn.localize("source")}
+          .value=${this._source.value}
+          fixedMenuPosition
+          @selected=${this._sourceChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
-          <paper-listbox
-            id="sources-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._sourceChanged}
-          >
-            ${this._sources.map(
-              (source) => html`
-                <paper-item .itemValue=${source.value}
-                  >${source.name}</paper-item
-                >
-              `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${this._sources.map(
+            (source) => html`
+              <ha-list-item .value=${source.value}>
+                ${source.name}
+              </ha-list-item>
+            `
+          )}
+        </ha-select>
 
-        <paper-dropdown-menu
-          label=${this.lcn.localize("setpoint")}
-          .value=${this._setpoints[0].name}
+        <ha-select
+          id="setpoint-select"
+          .label=${this.lcn.localize("setpoint")}
+          .value=${this._setpoint.value}
+          fixedMenuPosition
+          @selected=${this._setpointChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
-          <paper-listbox
-            id="setpoints-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._setpointChanged}
-          >
-            ${this._setpoints.map(
-              (setpoint) => html`
-                <paper-item .itemValue=${setpoint.value}
-                  >${setpoint.name}</paper-item
-                >
-              `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${this._setpoints.map(
+            (setpoint) => html`
+              <ha-list-item .value=${setpoint.value}>
+                ${setpoint.name}
+              </ha-list-item>
+            `
+          )}
+        </ha-select>
       </div>
 
       <div class="lockable">
@@ -195,34 +204,40 @@ export class LCNConfigClimateElement extends LitElement {
           .validationMessage=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature-error")}
         ></ha-textfield>
 
-        <paper-dropdown-menu
-          label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
-          .value=${this._varUnits[0].name}
+        <ha-select
+          id="unit-select"
+          .label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
+          .value=${this._unit.value}
+          fixedMenuPosition
+          @selected=${this._unitChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
-          <paper-listbox
-            id="units-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._unitChanged}
-          >
-            ${this._varUnits.map(
-              (unit) => html`
-                <paper-item .itemValue=${unit.value}>${unit.name}</paper-item>
-              `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${this._varUnits.map(
+            (unit) => html`
+              <ha-list-item .value=${unit.value}>
+                ${unit.name}
+              </ha-list-item>
+            `
+          )}
+        </ha-select>
       </div>
     `;
   }
 
   private _sourceChanged(ev: ValueChangedEvent<string>): void {
-    const source = this._sources[ev.detail.value];
-    this.domainData.source = source.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._source = this._sources.find((source) => source.value == target.value)!;
+    this.domainData.source = this._source.value;
   }
 
   private _setpointChanged(ev: ValueChangedEvent<string>): void {
-    const setpoint = this._setpoints[ev.detail.value];
-    this.domainData.setpoint = setpoint.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._setpoint = this._setpoints.find((setpoint) => setpoint.value == target.value)!;
+    this.domainData.setpoint = this._setpoint.value;
   }
 
   private _minTempChanged(ev: ValueChangedEvent<string>): void {
@@ -246,8 +261,11 @@ export class LCNConfigClimateElement extends LitElement {
   }
 
   private _unitChanged(ev: ValueChangedEvent<string>): void {
-    const unit = this._varUnits[ev.detail.value];
-    this.domainData.unit_of_measurement = unit.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._unit = this._varUnits.find((unit) => unit.value == target.value)!;
+    this.domainData.unit_of_measurement = this._unit.value;
   }
 
   private _validateMaxTemp(max_temp: number): boolean {
@@ -269,8 +287,9 @@ export class LCNConfigClimateElement extends LitElement {
         .sources > * {
           display: inline-block;
         }
-        #units-listbox {
-          width: 120px;
+        ha-select {
+          display: block;
+          margin-bottom: 8px;
         }
         .lockable {
           margin-top: 10px;

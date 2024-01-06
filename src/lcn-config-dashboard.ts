@@ -1,17 +1,19 @@
+import { haStyle } from "@ha/resources/styles";
 import "@material/mwc-button";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-listbox/paper-listbox";
-import "@ha/components/ha-fab"
+import "@ha/components/ha-fab";
+import "@ha/components/ha-list-item"
+import "@ha/components/ha-select";
+import { HaSelect } from "@ha/components/ha-select";
 import {
   css,
   html,
   LitElement,
   PropertyValues,
   TemplateResult,
-  CSSResult,
+  CSSResultGroup,
 } from "lit";
-import { customElement, property } from "lit/decorators";
+import { customElement, property, query } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import { HomeAssistant, Route } from "@ha/types";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
@@ -21,7 +23,6 @@ import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
-import { haStyle } from "@ha/resources/styles";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -42,6 +43,7 @@ import {
   LcnDeviceConfig,
 } from "types/lcn";
 
+
 @customElement("lcn-config-dashboard")
 export class LCNConfigDashboard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -58,6 +60,8 @@ export class LCNConfigDashboard extends LitElement {
 
   @property() private _deviceConfigs: LcnDeviceConfig[] = [];
 
+  @query("#host-select") private _hostsSelect!: HaSelect;
+
   protected async firstUpdated(
     changedProperties: PropertyValues
   ): Promise<void> {
@@ -65,6 +69,8 @@ export class LCNConfigDashboard extends LitElement {
     await this._fetchHosts();
     loadProgressDialog();
     loadLCNCreateDeviceDialog();
+
+    this._hostsSelect.value = this.lcn.host.id; // invokes this._fetchDevices()
 
     this.addEventListener("lcn-config-changed", async () => {
       this._fetchDevices(this.lcn.host);
@@ -87,41 +93,36 @@ export class LCNConfigDashboard extends LitElement {
           .narrow=${this.narrow}>
           <span slot="header">
             ${this.lcn.localize("dashboard-devices-title")}
-          </span>
+        </span>
 
           <span slot="introduction">
             ${this.lcn.localize("dashboard-devices-introduction")}
           </span>
 
           <div id="box">
-            <div id="hosts-dropdown">
-              <paper-dropdown-menu
-                label=${this.lcn.localize("dashboard-devices-hosts")}
-                @selected-item-changed=${this._hostChanged}
-              >
-                <paper-listbox
-                  slot="dropdown-content"
-                  selected=${this._hosts.findIndex(
-                    (host) => host.id === this.lcn.host.id
-                  )}
-                >
-                  ${this._hosts.map(
-                    (host) => html`
-                      <paper-item .itemValue=${host}>${host.name}</paper-item>
-                    `
-                  )}
-                </paper-listbox>
-              </paper-dropdown-menu>
-            </div>
+            <ha-select
+              id="host-select"
+              .label=${this.lcn.localize("dashboard-devices-hosts")}
+              .value=${this.lcn.host.id}
+              fixedMenuPosition
+              @selected=${this._hostChanged}
+            >
+              ${this._hosts.map(
+                (host) => html`
+                  <ha-list-item .value=${host.id}>
+                    ${host.name}
+                  </ha-list-item>
+                `
+              )}
+            </ha-select>
 
-            <div id="scan-devices">
-              <mwc-button
-                raised
-                @click=${this._scanDevices}
-              >
-                ${this.lcn.localize("dashboard-devices-scan")}
-              </mwc-button>
-            </div>
+            <mwc-button
+              id="scan_devices"
+              raised
+              @click=${this._scanDevices}
+            >
+              ${this.lcn.localize("dashboard-devices-scan")}
+            </mwc-button>
           </div>
 
           <ha-card
@@ -148,10 +149,9 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   private _hostChanged(ev: CustomEvent) {
-    if (!ev.detail.value) {
-      return;
-    }
-    this.lcn.host = ev.detail.value.itemValue;
+    const target = ev.target as HaSelect;
+    const host: LcnHost = this._hosts.find((host) => host.id == target.value)!;
+    this.lcn.host = host;
     this._fetchDevices(this.lcn.host);
   }
 
@@ -209,7 +209,7 @@ export class LCNConfigDashboard extends LitElement {
     this._fetchDevices(this.lcn.host);
   }
 
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup[] {
     return [
       haStyle,
       css`
@@ -217,7 +217,7 @@ export class LCNConfigDashboard extends LitElement {
           display: flex;
           justify-content: space-between;
         }
-        #hosts-dropdown {
+        #host-select {
           width: 40%;
           display: inline-block;
         }
@@ -226,7 +226,6 @@ export class LCNConfigDashboard extends LitElement {
           margin-top: 20px;
           justify-content: center;
         }
-
         `,
       ];
     }

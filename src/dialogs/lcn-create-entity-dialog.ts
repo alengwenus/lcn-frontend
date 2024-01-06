@@ -1,8 +1,10 @@
-import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "@polymer/paper-input/paper-input";
 import "@ha/components/ha-icon-button";
+import "@ha/components/ha-list-item"
+import "@ha/components/ha-select"
+import { fireEvent } from "@ha/common/dom/fire_event";
+import { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, TemplateResult, CSSResultGroup } from "lit";
-import { customElement, property } from "lit/decorators";
+import { customElement, property, query } from "lit/decorators";
 import { createCloseHeading } from "@ha/components/ha-dialog";
 import { haStyleDialog } from "@ha/resources/styles";
 import { HomeAssistant } from "@ha/types";
@@ -15,11 +17,12 @@ import "./lcn-config-light";
 import "./lcn-config-scene";
 import "./lcn-config-sensor";
 import "./lcn-config-switch";
+import { HaTextField } from "@ha/components/ha-textfield";
 
 
 interface DomainItem {
   name: string;
-  value: string;
+  domain: string;
 }
 
 @customElement("lcn-create-entity-dialog")
@@ -32,26 +35,27 @@ export class CreateEntityDialog extends LitElement {
 
   @property() private _name = "";
 
-  @property() public domain = "switch";
+  @property() public domain = "binary_sensor";
 
   @property() private _invalid = false;
 
-  private _domains!: DomainItem[];
+  @query("#name-input") private _nameInput!: HaTextField;
 
-public async showDialog(params: LcnEntityDialogParams): Promise<void> {
-  this._params = params;
-  this.lcn = params.lcn;
+  private get _domains(): DomainItem[] {
+    return [
+      { name: this.lcn.localize("binary-sensor"), domain: "binary_sensor" },
+      { name: this.lcn.localize("climate"), domain: "climate" },
+      { name: this.lcn.localize("cover"), domain: "cover" },
+      { name: this.lcn.localize("light"), domain: "light" },
+      { name: this.lcn.localize("scene"), domain: "scene" },
+      { name: this.lcn.localize("sensor"), domain: "sensor" },
+      { name: this.lcn.localize("switch"), domain: "switch" },
+    ];
+  };
 
-  this._domains = [
-    { name: this.lcn.localize("binary-sensor"), value: "binary_sensor" },
-    { name: this.lcn.localize("climate"), value: "climate" },
-    { name: this.lcn.localize("cover"), value: "cover" },
-    { name: this.lcn.localize("light"), value: "light" },
-    { name: this.lcn.localize("scene"), value: "scene" },
-    { name: this.lcn.localize("sensor"), value: "sensor" },
-    { name: this.lcn.localize("switch"), value: "switch" },
-  ];
-
+  public async showDialog(params: LcnEntityDialogParams): Promise<void> {
+    this._params = params;
+    this.lcn = params.lcn;
     await this.updateComplete;
   }
 
@@ -62,34 +66,39 @@ public async showDialog(params: LcnEntityDialogParams): Promise<void> {
     return html`
       <ha-dialog
         open
+        scrimClickAction
+        escapeKeyAction
         .heading=${createCloseHeading(
           this.hass,
           this.lcn.localize("dashboard-entities-dialog-create-title")
-        )}
+          )}
         @closed=${this._closeDialog}
       >
-        <div class="general-properties">
-          <paper-dropdown-menu
-            label=${this.lcn.localize("domain")}
-            @selected-item-changed=${this._domain_changed}
-          >
-            <paper-listbox slot="dropdown-content" selected="0">
-              ${this._domains.map(
-                (domain) =>
-                  html`<paper-item .itemValue=${domain.value}>${domain.name}</paper-item>`
-              )}
-            </paper-listbox>
-          </paper-dropdown-menu>
+        <ha-select
+          id="domain-select"
+          .label=${this.lcn.localize("domain")}
+          .value=${this.domain}
+          fixedMenuPosition
+          @selected=${this._domainChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+        >
+          ${this._domains.map(
+            (domain) => html`
+              <ha-list-item .value=${domain.domain}>
+                ${domain.name}
+              </ha-list-item>
+            `
+          )}
+        </ha-select>
 
-          <ha-textfield
-            label=${this.lcn.localize("name")}
-            placeholder=${this.domain}
-            type="string"
-            maxLength="20"
-            @change=${this._nameChanged}
-          >
-          </ha-textfield>
-        </div>
+        <ha-textfield
+          id="name-input"
+          label=${this.lcn.localize("name")}
+          placeholder=${this.domain}
+          type="string"
+          maxLength="20"
+          @change=${this._nameChanged}
+        ></ha-textfield>
 
         ${this.renderDomain(this.domain)}
 
@@ -110,7 +119,7 @@ public async showDialog(params: LcnEntityDialogParams): Promise<void> {
     `;
   }
 
-  private renderDomain(domain) {
+  private renderDomain(domain: string): TemplateResult {
     switch (domain) {
       case "binary_sensor":
         return html`<lcn-config-binary-sensor-element
@@ -166,7 +175,8 @@ public async showDialog(params: LcnEntityDialogParams): Promise<void> {
   }
 
   private _nameChanged(ev: CustomEvent): void {
-    this._name = ev.detail.value;
+    const target = ev.target as HaTextField;
+    this._name = target.value;
   }
 
   private _validityChanged(ev: CustomEvent): void {
@@ -188,22 +198,30 @@ public async showDialog(params: LcnEntityDialogParams): Promise<void> {
 
   private _closeDialog(): void {
     this._params = undefined;
+    fireEvent(this, "dialog-closed", { dialog: this.localName });
   }
 
-  private _domain_changed(ev: CustomEvent) {
-    if (!ev.detail.value) {
-      return;
-    }
-    this.domain = ev.detail.value.itemValue;
+  private _domainChanged(ev: CustomEvent) {
+    const target = ev.target as HaSelect;
+    this.domain = target.value;
+    this._nameInput.value = "";
   }
 
   static get styles(): CSSResultGroup {
     return [
       haStyleDialog,
       css`
-        .general-properties > * {
+        ha-dialog {
+          --mdc-dialog-max-width: 500px;
+          --dialog-z-index: 10;
+        }
+        ha-select {
           display: block;
-          margin-top: 16px;
+          margin-bottom: 8px;
+        }
+        ha-textfield {
+          display: block;
+          margin-bottom: 8px;
         }
         .buttons {
           display: flex;
@@ -214,6 +232,8 @@ public async showDialog(params: LcnEntityDialogParams): Promise<void> {
     ];
   }
 }
+
+
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -3,6 +3,7 @@ import "@ha/components/ha-icon-button";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield";
+import { fireEvent } from "@ha/common/dom/fire_event";
 import {
   css,
   html,
@@ -62,6 +63,8 @@ export class CreateDeviceDialog extends LitElement {
     return html`
       <ha-dialog
         open
+        scrimClickAction
+        escapeKeyAction
         .heading=${createCloseHeading(
           this.hass,
           this.lcn.localize("dashboard-devices-dialog-create-title")
@@ -178,6 +181,7 @@ export class CreateDeviceDialog extends LitElement {
 
   private _closeDialog(): void {
     this._params = undefined;
+    fireEvent(this, "dialog-closed", { dialog: this.localName });
   }
 
   static get styles(): CSSResultGroup {

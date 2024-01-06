@@ -1,7 +1,7 @@
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-listbox/paper-listbox";
-import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
+import "@ha/components/ha-list-item"
+import "@ha/components/ha-select"
+import { HaSelect } from "@ha/components/ha-select";
+import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues, PropertyValueMap } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -15,6 +15,7 @@ interface ConfigItem {
 interface ConfigItemCollection {
   name: string;
   value: ConfigItem[];
+  id: string;
 }
 
 @customElement("lcn-config-binary-sensor-element")
@@ -27,9 +28,11 @@ export class LCNConfigBinarySensorElement extends LitElement {
     source: "BINSENSOR1",
   };
 
-  @property() private _sourceType = 0;
+  @property() private _sourceType!: ConfigItemCollection;
 
-  @query("#sources-listbox") private _sourcesListBox;
+  @property() private _source!: ConfigItem;
+
+  @query("#source-select") private _sourceSelect!: HaSelect;
 
   private get _binsensorPorts(): ConfigItem[] {
     const binary_sensor: string = this.lcn.localize("binary-sensor")
@@ -90,65 +93,78 @@ export class LCNConfigBinarySensorElement extends LitElement {
 
   private get _sourceTypes(): ConfigItemCollection[] {
     return [
-      { name: this.lcn.localize("binary-sensor-type-binsensors"), value: this._binsensorPorts },
-      { name: this.lcn.localize("binary-sensor-type-setpoint-locks"), value: this._setpoints },
-      { name: this.lcn.localize("binary-sensor-type-keys-locks"), value: this._keys },
+      { name: this.lcn.localize("binary-sensor-type-binsensors"), value: this._binsensorPorts, id: "binsensors" },
+      { name: this.lcn.localize("binary-sensor-type-setpoint-locks"), value: this._setpoints, id: "setpoint-locks" },
+      { name: this.lcn.localize("binary-sensor-type-keys-locks"), value: this._keys, id: "key-locks" },
     ];
   };
 
+  protected async firstUpdated(
+    changedProperties: PropertyValues
+  ): Promise<void> {
+    super.firstUpdated(changedProperties);
+    this._sourceType = this._sourceTypes[0];
+    this._source = this._sourceType.value[0];
+  }
+
   protected render(): TemplateResult {
+    if (!(this._sourceType)) {
+      return html``;
+    }
     return html`
       <div class="sources">
-        <paper-dropdown-menu
-          label=${this.lcn.localize("source-type")}
-          .value=${this._sourceTypes[this._sourceType].name}
+        <ha-select
+          id="source-type-select"
+          .label=${this.lcn.localize("source-type")}
+          .value=${this._sourceType.id}
+          fixedMenuPosition
+          @selected=${this._sourceTypeChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
-          <paper-listbox
-            id="sources-type-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._sourceTypeChanged}
-          >
-            ${this._sourceTypes.map(
+          ${this._sourceTypes.map(
               (sourceType) => html`
-                <paper-item .itemValue=${sourceType.value}
-                  >${sourceType.name}</paper-item
-                >
+                <ha-list-item .value=${sourceType.id}>
+                  ${sourceType.name}
+                </ha-list-item>
               `
             )}
-        </paper-dropdown-menu>
+          </ha-select>
 
-        <paper-dropdown-menu
-          label=${this.lcn.localize("source")}
-          .value=${this._sourceTypes[this._sourceType].value[0].name}
-        >
-          <paper-listbox
-            id="sources-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._sourceChanged}
+          <ha-select
+            id="source-select"
+            .label=${this.lcn.localize("source")}
+            .value=${this._source.value}
+            fixedMenuPosition
+            @selected=${this._sourceChanged}
+            @closed=${(ev: CustomEvent) => ev.stopPropagation()}
           >
-            ${this._sourceTypes[this._sourceType].value.map(
-              (source) => html`
-                <paper-item .itemValue=${source.value}
-                  >${source.name}</paper-item
-                >
+          ${this._sourceType.value.map(
+            (source) => html`
+              <ha-list-item .value=${source.value}>
+                ${source.name}
+              </ha-list-item>
               `
-            )}
-        </paper-dropdown-menu>
+          )}
+        </ha-select>
       </div>
       `;
   }
 
-  private _sourceTypeChanged(ev: CustomEvent): void {
-    this._sourceType = ev.detail.value;
-    this._sourcesListBox.selectIndex(0);
-    const source =
-      this._sourceTypes[this._sourceType].value[this._sourcesListBox.selected];
-    this.domainData.source = source.value;
+  private async _sourceTypeChanged(ev: CustomEvent): Promise<void> {
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._sourceType = this._sourceTypes.find((sourceType) => sourceType.id == target.value)!;
+    this._source = this._sourceType.value[0];
+    this._sourceSelect.select(-1); // need to change index, so ha-select gets updated
   }
 
   private _sourceChanged(ev: CustomEvent): void {
-    const source = this._sourceTypes[this._sourceType].value[ev.detail.value];
-    this.domainData.source = source.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._source = this._sourceType.value.find((source) => source.value == target.value)!;
+    this.domainData.source = this._source.value;
   }
 
   static get styles(): CSSResult[] {
@@ -159,11 +175,9 @@ export class LCNConfigBinarySensorElement extends LitElement {
           display: block;
           margin-top: 16px;
         }
-        #sources-type-listbox {
-          width: 175px;
-        }
-        #sources-listbox {
-          width: 175px;
+        ha-select {
+          display: block;
+          margin-bottom: 8px;
         }
       `,
     ];

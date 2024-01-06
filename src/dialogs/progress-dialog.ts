@@ -30,7 +30,11 @@ export class ProgressDialog extends LitElement {
       return html``;
     }
     return html`
-      <ha-dialog open @close-dialog=${this.closeDialog}>
+      <ha-dialog
+        open
+        scrimClickAction
+        escapeKeyAction
+        @close-dialog=${this.closeDialog}>
         <h2>${this._params?.title}</h2>
         <p>${this._params?.text}</p>
 

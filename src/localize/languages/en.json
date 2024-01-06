@@ -53,8 +53,8 @@
   "unit-angle": "Angle",
 
   "binary-sensor-type-binsensors": "Binary sensors",
-  "binary-sensor-type-setpoint-locks": "Setpoints lock state",
-  "binary-sensor-type-keys-locks": "Keys lock state",
+  "binary-sensor-type-setpoint-locks": "Lock state setpoints",
+  "binary-sensor-type-keys-locks": "Lock state keys",
 
   "dashboard-devices-title": "LCN Configuration Dashboard",
   "dashboard-devices-introduction": "Welcome to the LCN configuration dashboard.",
