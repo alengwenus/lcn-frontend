@@ -26,6 +26,7 @@
   "setpoint": "Sollwert",
   "setpoints": "Sollwerte",
   "motor": "Motor",
+  "reverse-delay": "Umkehrverzögerung",
   "output": "Ausgang",
   "outputs": "Ausgänge",
   "relay": "Relais",

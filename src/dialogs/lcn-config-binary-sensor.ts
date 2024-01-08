@@ -108,7 +108,7 @@ export class LCNConfigBinarySensorElement extends LitElement {
   }
 
   protected render(): TemplateResult {
-    if (!(this._sourceType)) {
+    if (!(this._sourceType || this._source)) {
       return html``;
     }
     return html`
@@ -150,7 +150,7 @@ export class LCNConfigBinarySensorElement extends LitElement {
       `;
   }
 
-  private async _sourceTypeChanged(ev: CustomEvent): Promise<void> {
+  private _sourceTypeChanged(ev: CustomEvent): void {
     const target = ev.target as HaSelect;
     if (target.index == -1) return;
 

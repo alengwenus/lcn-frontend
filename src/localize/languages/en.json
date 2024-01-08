@@ -26,6 +26,7 @@
   "setpoint": "Setpoint",
   "setpoints": "Setpoints",
   "motor": "Motor",
+  "reverse-delay": "Reverse delay",
   "output": "Output",
   "outputs": "Outputs",
   "relay": "Relay",

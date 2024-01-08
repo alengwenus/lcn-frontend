@@ -1,6 +1,4 @@
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-listbox/paper-listbox";
+import "@ha/components/ha-list-item"
 import "@ha/components/ha-select"
 import { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-textfield";
