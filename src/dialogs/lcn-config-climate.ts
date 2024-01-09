@@ -279,10 +279,7 @@ export class LCNConfigClimateElement extends LitElement {
           grid-template-columns: 1fr 1fr;
           column-gap: 4px;
         }
-        ha-select {
-          display: block;
-          margin-bottom: 8px;
-        }
+        ha-select,
         ha-textfield {
           display: block;
           margin-bottom: 8px;

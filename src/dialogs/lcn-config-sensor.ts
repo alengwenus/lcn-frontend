@@ -1,7 +1,14 @@
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-listbox/paper-listbox";
-import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
+import "@ha/components/ha-list-item"
+import "@ha/components/ha-select"
+import { HaSelect } from "@ha/components/ha-select";
+import {
+  css,
+  html,
+  LitElement,
+  TemplateResult,
+  CSSResult,
+  PropertyValues
+} from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -15,6 +22,7 @@ interface ConfigItem {
 interface ConfigItemCollection {
   name: string;
   value: ConfigItem[];
+  id: string;
 }
 
 @customElement("lcn-config-sensor-element")
@@ -30,9 +38,13 @@ export class LCNConfigSensorElement extends LitElement {
     unit_of_measurement: "NATIVE",
   };
 
-  @property() private _sourceType = 0;
+  @property() private _sourceType!: ConfigItemCollection;
 
-  @query("#sources-listbox") private _sourcesListBox;
+  @property() private _source!: ConfigItem;
+
+  @property() private _unit!: ConfigItem;
+
+  @query("#source-select") private _sourceSelect!: HaSelect;
 
   private get _is2013() {
     return this.softwareSerial >= 0x170206;
@@ -146,17 +158,19 @@ export class LCNConfigSensorElement extends LitElement {
       {
         name: this.lcn.localize("variables"),
         value: this._is2013 ? this._variablesNew : this._variablesOld,
+        id: "variables"
       },
       {
-        name: this.lcn.localize("setpoints"), value: this._setpoints
+        name: this.lcn.localize("setpoints"), value: this._setpoints, id: "setpoints"
       },
       {
         name: this.lcn.localize("thresholds"),
         value: this._is2013 ? this._thresholdsNew : this._thresholdsOld,
+        id: "thresholds"
       },
-      { name: this.lcn.localize("s0inputs"), value: this._s0Inputs },
-      { name: this.lcn.localize("leds"), value: this._ledPorts },
-      { name: this.lcn.localize("logics"), value: this._logicOpPorts },
+      { name: this.lcn.localize("s0inputs"), value: this._s0Inputs, id: "s0inputs" },
+      { name: this.lcn.localize("leds"), value: this._ledPorts, id: "ledports" },
+      { name: this.lcn.localize("logics"), value: this._logicOpPorts, id: "logicopports" },
     ];
   }
 
@@ -177,102 +191,111 @@ export class LCNConfigSensorElement extends LitElement {
     ];
   };
 
-  protected async firstUpdated(changedProperties) {
+  protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
 
-    this.domainData.source = this._sourceTypes[0].value[0].value;
+    this._sourceType = this._sourceTypes[0];
+    this._source = this._sourceType.value[0];
+    this._unit = this._varUnits[0];
   }
 
   protected render(): TemplateResult {
+    if (!(this._sourceType || this._source)) {
+      return html``;
+    }
     return html`
       <div class="sources">
-        <paper-dropdown-menu
-          label=${this.lcn.localize("source-type")}
-          .value=${this._sourceTypes[this._sourceType].name}
+        <ha-select
+          id="source-type-select"
+          .label=${this.lcn.localize("source-type")}
+          .value=${this._sourceType.id}
+          fixedMenuPosition
+          @selected=${this._sourceTypeChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
-          <paper-listbox
-            id="sources-type-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._sourceTypeChanged}
-          >
-            ${this._sourceTypes.map(
-              (sourceType) => html`
-                <paper-item .itemValue=${sourceType.value}
-                  >${sourceType.name}</paper-item
-                >
-              `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${this._sourceTypes.map(
+            (sourceType) => html`
+              <ha-list-item .value=${sourceType.id}>
+                ${sourceType.name}
+              </ha-list-item>
+            `
+          )}
+        </ha-select>
 
-        <paper-dropdown-menu
-          label=${this.lcn.localize("source")}
-          .value=${this._sourceTypes[this._sourceType].value[0].name}
+        <ha-select
+          id="source-select"
+          .label=${this.lcn.localize("source")}
+          .value=${this._source.value}
+          fixedMenuPosition
+          @selected=${this._sourceChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
-          <paper-listbox
-            id="sources-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._sourceChanged}
-          >
-            ${this._sourceTypes[this._sourceType].value.map(
-              (source) => html`
-                <paper-item .itemValue=${source.value}
-                  >${source.name}</paper-item
-                >
+          ${this._sourceType.value.map(
+            (source) => html`
+              <ha-list-item .value=${source.value}>
+                ${source.name}
+              </ha-list-item>
               `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          )}
+        </ha-select>
       </div>
-      <div class="unit">
-        <paper-dropdown-menu
-          label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
-          .value=${this._varUnits[0].name}
-        >
-          <paper-listbox
-            id="units-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._unitChanged}
-          >
-            ${this._varUnits.map(
-              (unit) => html`
-                <paper-item .itemValue=${unit.value}>${unit.name}</paper-item>
-              `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
-      </div>
+
+      <ha-select
+        id="unit-select"
+        .label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
+        .value=${this._unit.value}
+        fixedMenuPosition
+        @selected=${this._unitChanged}
+        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+      >
+        ${this._varUnits.map(
+            (unit) => html`
+              <ha-list-item .value=${unit.value}>
+                ${unit.name}
+              </ha-list-item>
+            `
+          )}
+      </ha-select>
     `;
   }
 
   private _sourceTypeChanged(ev: CustomEvent): void {
-    this._sourceType = ev.detail.value;
-    this._sourcesListBox.selectIndex(0);
-    const source =
-      this._sourceTypes[this._sourceType].value[this._sourcesListBox.selected];
-    this.domainData.source = source.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._sourceType = this._sourceTypes.find((sourceType) => sourceType.id == target.value)!;
+    this._source = this._sourceType.value[0];
+    this._sourceSelect.select(-1); // need to change index, so ha-select gets updated
   }
 
   private _sourceChanged(ev: CustomEvent): void {
-    const source = this._sourceTypes[this._sourceType].value[ev.detail.value];
-    this.domainData.source = source.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._source = this._sourceType.value.find((source) => source.value == target.value)!;
+    this.domainData.source = this._source.value;
   }
 
   private _unitChanged(ev: CustomEvent): void {
-    const unit = this._varUnits[ev.detail.value];
-    this.domainData.unit_of_measurement = unit.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._unit = this._varUnits.find((unit) => unit.value == target.value)!;
+    this.domainData.unit_of_measurement = this._unit.value;
   }
 
   static get styles(): CSSResult[] {
     return [
       haStyleDialog,
       css`
-        .sources > * {
-          display: inline-block;
+        .sources {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          column-gap: 4px;
         }
-        .unit > * {
+        ha-select {
           display: block;
-          margin-top: 16px;
+          margin-bottom: 8px;
         }
       `,
     ];

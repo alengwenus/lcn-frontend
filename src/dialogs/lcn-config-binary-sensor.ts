@@ -112,40 +112,42 @@ export class LCNConfigBinarySensorElement extends LitElement {
       return html``;
     }
     return html`
-      <ha-select
-        id="source-type-select"
-        .label=${this.lcn.localize("source-type")}
-        .value=${this._sourceType.id}
-        fixedMenuPosition
-        @selected=${this._sourceTypeChanged}
-        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
-      >
-        ${this._sourceTypes.map(
-            (sourceType) => html`
-              <ha-list-item .value=${sourceType.id}>
-                ${sourceType.name}
-              </ha-list-item>
-            `
-          )}
-      </ha-select>
+      <div class="sources">
+        <ha-select
+          id="source-type-select"
+          .label=${this.lcn.localize("source-type")}
+          .value=${this._sourceType.id}
+          fixedMenuPosition
+          @selected=${this._sourceTypeChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+        >
+          ${this._sourceTypes.map(
+              (sourceType) => html`
+                <ha-list-item .value=${sourceType.id}>
+                  ${sourceType.name}
+                </ha-list-item>
+              `
+            )}
+        </ha-select>
 
-      <ha-select
-        id="source-select"
-        .label=${this.lcn.localize("source")}
-        .value=${this._source.value}
-        fixedMenuPosition
-        @selected=${this._sourceChanged}
-        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
-      >
-        ${this._sourceType.value.map(
-          (source) => html`
-            <ha-list-item .value=${source.value}>
-              ${source.name}
-            </ha-list-item>
-            `
-        )}
-      </ha-select>
-      `;
+        <ha-select
+          id="source-select"
+          .label=${this.lcn.localize("source")}
+          .value=${this._source.value}
+          fixedMenuPosition
+          @selected=${this._sourceChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+        >
+          ${this._sourceType.value.map(
+            (source) => html`
+              <ha-list-item .value=${source.value}>
+                ${source.name}
+              </ha-list-item>
+              `
+          )}
+        </ha-select>
+      </div>
+    `;
   }
 
   private _sourceTypeChanged(ev: CustomEvent): void {
@@ -169,6 +171,11 @@ export class LCNConfigBinarySensorElement extends LitElement {
     return [
       haStyleDialog,
       css`
+        .sources {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          column-gap: 4px;
+        }
         ha-select {
           display: block;
           margin-bottom: 8px;
