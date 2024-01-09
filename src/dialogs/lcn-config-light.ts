@@ -1,7 +1,6 @@
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-input/paper-input";
-import "@polymer/paper-listbox/paper-listbox";
+import "@ha/components/ha-list-item"
+import "@ha/components/ha-select"
+import { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield"
@@ -26,9 +25,10 @@ interface ConfigItem {
   value: string;
 }
 
-interface Ports {
-  output: ConfigItem[];
-  relay: ConfigItem[];
+interface ConfigItemCollection {
+  name: string;
+  value: ConfigItem[];
+  id: string;
 }
 
 @customElement("lcn-config-light-element")
@@ -43,9 +43,11 @@ export class LCNConfigLightElement extends LitElement {
     transition: 0,
   };
 
-  @property() private _portType = "output";
+  @property() private _portType!: ConfigItemCollection;
 
-  @query("#ports-listbox") private _portsListBox;
+  @property() private _port!: ConfigItem;
+
+  @query("#port-select") private _portSelect;
 
   private _invalid = false;
 
@@ -73,12 +75,20 @@ export class LCNConfigLightElement extends LitElement {
     ];
   };
 
-  private get _ports(): Ports {
-    return {
-      output: this._outputPorts,
-      relay: this._relayPorts,
-    };
+  private get _portTypes(): ConfigItemCollection[] {
+    return [
+      { name: this.lcn.localize("output"), value: this._outputPorts, id: "output" },
+      { name: this.lcn.localize("relay"), value: this._relayPorts, id: "relay" },
+    ];
   };
+
+  protected async firstUpdated(
+    changedProperties: PropertyValues
+  ): Promise<void> {
+    super.firstUpdated(changedProperties);
+    this._portType = this._portTypes[0];
+    this._port = this._portType.value[0];
+  }
 
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
@@ -97,56 +107,55 @@ export class LCNConfigLightElement extends LitElement {
   }
 
   protected render(): TemplateResult {
+    if (!(this._portType || this._port)) {
+      return html``;
+    }
     return html`
       <div id="port-type">
         ${this.lcn.localize("port-type")}:
       </div>
 
-      <div class="type">
-        <ha-formfield label=${this.lcn.localize("output")}>
-          <ha-radio
-            name="port"
-            value="output"
-            .checked=${this._portType === "output"}
-            @change=${this._portTypeChanged}
-          ></ha-radio>
-        </ha-formfield>
+      <ha-formfield label=${this.lcn.localize("output")}>
+        <ha-radio
+          name="port"
+          value="output"
+          .checked=${this._portType.id === "output"}
+          @change=${this._portTypeChanged}
+        ></ha-radio>
+      </ha-formfield>
 
-        <ha-formfield label=${this.lcn.localize("relay")}>
-          <ha-radio
-            name="port"
-            value="relay"
-            .checked=${this._portType === "relay"}
-            @change=${this._portTypeChanged}
-          ></ha-radio>
-        </ha-formfield>
-      </div>
+      <ha-formfield label=${this.lcn.localize("relay")}>
+        <ha-radio
+          name="port"
+          value="relay"
+          .checked=${this._portType.id === "relay"}
+          @change=${this._portTypeChanged}
+        ></ha-radio>
+      </ha-formfield>
 
-      <div class="port">
-        <paper-dropdown-menu
-          label=${this.lcn.localize("port")}
-          .value=${this._ports[this._portType][0].name}
-        >
-          <paper-listbox
-            id="ports-listbox"
-            slot="dropdown-content"
-            @selected-item-changed=${this._portChanged}
-          >
-            ${this._ports[this._portType].map(
-              (port) => html`
-                <paper-item .itemValue=${port.value}>${port.name}</paper-item>
-              `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
-      </div>
+      <ha-select
+        id="port-select"
+        .label=${this.lcn.localize("port")}
+        .value=${this._port.value}
+        fixedMenuPosition
+        @selected=${this._portChanged}
+        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+      >
+        ${this._portType.value.map(
+            (port) => html`
+              <ha-list-item .value=${port.value}>
+                ${port.name}
+              </ha-list-item>
+            `
+          )}
+      </ha-select>
 
       ${this.renderOutputFeatures()}
     `;
   }
 
   private renderOutputFeatures() {
-    switch (this._portType) {
+    switch (this._portType.id) {
       case "output":
         return html`
           <div id="dimmable">
@@ -158,20 +167,19 @@ export class LCNConfigLightElement extends LitElement {
             ></ha-switch>
           </div>
 
-          <div class="transition">
-            <ha-textfield
-              .label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
-              type="number"
-              .value=${this.domainData.transition}
-              min="0"
-              max="486"
-              required
-              autoValidate
-              @input=${this._transitionChanged}
-              .validityTransform=${(value: string) => ({ valid: this._validateTransition(+value) }) }
-              .validationMessage=${this.lcn.localize("dashboard-entities-dialog-light-transition-error")}
-            ></ha-textfield>
-          </div>
+          <ha-textfield
+            id="transition"
+            .label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
+            type="number"
+            .value=${this.domainData.transition}
+            min="0"
+            max="486"
+            required
+            autoValidate
+            @input=${this._transitionChanged}
+            .validityTransform=${(value: string) => ({ valid: this._validateTransition(+value) }) }
+            .validationMessage=${this.lcn.localize("dashboard-entities-dialog-light-transition-error")}
+          ></ha-textfield>
         `;
       case "relay":
         return html``;
@@ -181,19 +189,19 @@ export class LCNConfigLightElement extends LitElement {
   }
 
   private _portTypeChanged(ev: ValueChangedEvent<string>): void {
-    this._portType = (ev.target as HaRadio).value;
-    this._portsListBox.selectIndex(0);
+    const target = ev.target as HaRadio;
 
-    const port = this._ports[this._portType][this._portsListBox.selected];
-    this.domainData.output = port.value;
+    this._portType = this._portTypes.find((portType) => portType.id == target.value)!;
+    this._port = this._portType.value[0];
+    this._portSelect.select(-1); // need to change index, so ha-select gets updated
   }
 
   private _portChanged(ev: ValueChangedEvent<string>): void {
-    if (!ev.detail.value) {
-      return;
-    }
-    const port = this._ports[this._portType][this._portsListBox.selected];
-    this.domainData.output = port.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._port = this._portType.value.find((portType) => portType.value == target.value)!;
+    this.domainData.output = this._port.value;
   }
 
   private _dimmableChanged(ev: ValueChangedEvent<boolean>): void {
@@ -217,15 +225,15 @@ export class LCNConfigLightElement extends LitElement {
         #port-type {
           margin-top: 16px;
         }
+        ha-select,
+        ha-textfield {
+          display: block;
+          margin-bottom: 8px;
+        }
         #dimmable {
           margin-top: 16px;
         }
-        .port > * {
-          display: block;
-          margin-top: 16px;
-        }
-        .transition > * {
-          display: block;
+        #transition {
           margin-top: 16px;
         }
       `,

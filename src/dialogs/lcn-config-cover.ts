@@ -65,45 +65,43 @@ export class LCNConfigCoverElement extends LitElement {
       return html``;
     }
     return html`
-      <div class="motor">
-        <ha-select
-          id="motor-select"
-          .label=${this.lcn.localize("motor")}
-          .value=${this._motor.value}
-          fixedMenuPosition
-          @selected=${this._motorChanged}
-          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
-        >
-          ${this._motors.map(
-            (motor) => html`
-              <ha-list-item .value=${motor.value}>
-                ${motor.name}
-              </ha-list-item>
-            `
-          )}
-        </ha-select>
-
-        ${this._motor.value === "OUTPUTS"
-          ? html`
-            <ha-select
-              id="reverse-delay-select"
-              .label=${this.lcn.localize("reverse-delay")}
-              .value=${this._reverseDelay.value}
-              fixedMenuPosition
-              @selected=${this._reverseDelayChanged}
-              @closed=${(ev: CustomEvent) => ev.stopPropagation()}
-            >
-              ${this._reverseDelays.map(
-                (reverseDelay) => html`
-                  <ha-list-item .value=${reverseDelay.value}>
-                    ${reverseDelay.name}
-                  </ha-list-item>
-                `
-              )}
-            </ha-select>
+      <ha-select
+        id="motor-select"
+        .label=${this.lcn.localize("motor")}
+        .value=${this._motor.value}
+        fixedMenuPosition
+        @selected=${this._motorChanged}
+        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+      >
+        ${this._motors.map(
+          (motor) => html`
+            <ha-list-item .value=${motor.value}>
+              ${motor.name}
+            </ha-list-item>
           `
-          : html``}
-      </div>
+        )}
+      </ha-select>
+
+      ${this._motor.value === "OUTPUTS"
+        ? html`
+          <ha-select
+            id="reverse-delay-select"
+            .label=${this.lcn.localize("reverse-delay")}
+            .value=${this._reverseDelay.value}
+            fixedMenuPosition
+            @selected=${this._reverseDelayChanged}
+            @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+          >
+            ${this._reverseDelays.map(
+              (reverseDelay) => html`
+                <ha-list-item .value=${reverseDelay.value}>
+                  ${reverseDelay.name}
+                </ha-list-item>
+              `
+            )}
+          </ha-select>
+        `
+        : html``}
     `;
   }
 

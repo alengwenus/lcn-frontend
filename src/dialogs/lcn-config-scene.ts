@@ -1,7 +1,10 @@
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-listbox/paper-listbox";
-import "@polymer/paper-input/paper-input";
+import "@ha/components/ha-list-item"
+import "@ha/components/ha-select"
+import { HaSelect } from "@ha/components/ha-select";
+import "@ha/components/ha-textfield"
+import { HaTextField } from "@ha/components/ha-textfield";
+import "@ha/components/ha-checkbox";
+import "@ha/components/ha-formfield";
 import {
   css,
   html,
@@ -11,18 +14,13 @@ import {
   PropertyValues,
 } from "lit";
 import { customElement, property } from "lit/decorators";
-import "@ha/components/ha-switch";
-import "@ha/components/ha-textfield"
-import { HaTextField } from "@ha/components/ha-textfield";
 import { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import "@ha/components/ha-checkbox";
-import "@ha/components/ha-formfield";
 import { LCN, SceneConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
-  value: number | string;
+  value: string;
 }
 
 @customElement("lcn-config-scene-element")
@@ -38,37 +36,41 @@ export class LCNConfigSceneElement extends LitElement {
     transition: 0,
   };
 
+  @property() private _register!: ConfigItem;
+
+  @property() private _scene!: ConfigItem;
+
   private _invalid = false;
 
   private get _registers(): ConfigItem[] {
     const register: string = this.lcn.localize("register");
     return [
-      { name: register + " 0", value: 0 },
-      { name: register + " 1", value: 1 },
-      { name: register + " 2", value: 2 },
-      { name: register + " 3", value: 3 },
-      { name: register + " 4", value: 4 },
-      { name: register + " 5", value: 5 },
-      { name: register + " 6", value: 6 },
-      { name: register + " 7", value: 7 },
-      { name: register + " 8", value: 8 },
-      { name: register + " 9", value: 9 },
+      { name: register + " 0", value: "0" },
+      { name: register + " 1", value: "1" },
+      { name: register + " 2", value: "2" },
+      { name: register + " 3", value: "3" },
+      { name: register + " 4", value: "4" },
+      { name: register + " 5", value: "5" },
+      { name: register + " 6", value: "6" },
+      { name: register + " 7", value: "7" },
+      { name: register + " 8", value: "8" },
+      { name: register + " 9", value: "9" },
     ];
   };
 
   private get _scenes(): ConfigItem[] {
     const scene: string = this.lcn.localize("scene");
     return [
-      { name: scene + " 1", value: 0 },
-      { name: scene + " 2", value: 1 },
-      { name: scene + " 3", value: 2 },
-      { name: scene + " 4", value: 3 },
-      { name: scene + " 5", value: 4 },
-      { name: scene + " 6", value: 5 },
-      { name: scene + " 7", value: 6 },
-      { name: scene + " 8", value: 7 },
-      { name: scene + " 9", value: 8 },
-      { name: scene + " 10", value: 9 },
+      { name: scene + " 1", value: "0" },
+      { name: scene + " 2", value: "1" },
+      { name: scene + " 3", value: "2" },
+      { name: scene + " 4", value: "3" },
+      { name: scene + " 5", value: "4" },
+      { name: scene + " 6", value: "5" },
+      { name: scene + " 7", value: "6" },
+      { name: scene + " 8", value: "7" },
+      { name: scene + " 9", value: "8" },
+      { name: scene + " 10", value: "9" },
     ];
   };
 
@@ -96,6 +98,13 @@ export class LCNConfigSceneElement extends LitElement {
     ];
   };
 
+  protected async firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+
+    this._register = this._registers[0];
+    this._scene = this._scenes[0];
+  }
+
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
     this._invalid = !this._validateTransition(this.domainData.transition);
@@ -113,46 +122,47 @@ export class LCNConfigSceneElement extends LitElement {
   }
 
   protected render(): TemplateResult {
+    if (!(this._register || this._scene)) {
+      return html``;
+    }
     return html`
       <div class="registers">
-        <paper-dropdown-menu
-          label=${this.lcn.localize("register")}
-          .value=${this._registers[0].name}
+        <ha-select
+          id="register-select"
+          .label=${this.lcn.localize("register")}
+          .value=${this._register.value}
+          fixedMenuPosition
+          @selected=${this._registerChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
-          <paper-listbox
-            id="registers-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._registerChanged}
-          >
-            ${this._registers.map(
-              (register) => html`
-                <paper-item .itemValue=${register.value}
-                  >${register.name}</paper-item
-                >
+          ${this._registers.map(
+            (register) => html`
+              <ha-list-item .value=${register.value}>
+                ${register.name}
+              </ha-list-item>
               `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          )}
+        </ha-select>
 
-        <paper-dropdown-menu
-          label=${this.lcn.localize("scene")}
-          .value=${this._scenes[0].name}
+        <ha-select
+          id="scene-select"
+          .label=${this.lcn.localize("scene")}
+          .value=${this._scene.value}
+          fixedMenuPosition
+          @selected=${this._sceneChanged}
+          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
-          <paper-listbox
-            id="scenes-listbox"
-            slot="dropdown-content"
-            @selected-changed=${this._sceneChanged}
-          >
-            ${this._scenes.map(
-              (scene) => html`
-                <paper-item .itemValue=${scene.value}>${scene.name}</paper-item>
+          ${this._scenes.map(
+            (scene) => html`
+              <ha-list-item .value=${scene.value}>
+                ${scene.name}
+              </ha-list-item>
               `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          )}
+        </ha-select>
       </div>
 
-      <div id="output-ports">
+      <div class="ports">
         <label>${this.lcn.localize("outputs")}:</label><br />
         ${this._outputPorts.map(
           (port) => html`
@@ -166,7 +176,7 @@ export class LCNConfigSceneElement extends LitElement {
         )}
       </div>
 
-      <div id="relay-ports">
+      <div class="ports">
         <label>${this.lcn.localize("relays")}:</label><br />
         ${this._relayPorts.map(
           (port) => html`
@@ -180,32 +190,36 @@ export class LCNConfigSceneElement extends LitElement {
         )}
       </div>
 
-      <div class="transition">
-        <ha-textfield
-          .label=${this.lcn.localize("dashboard-entities-dialog-scene-transition")}
-          type="number"
-          .value=${this.domainData.transition}
-          min="0"
-          max="486"
-          required
-          autoValidate
-          @input=${this._transitionChanged}
-          .validityTransform=${(value: string) => ({ valied: this._validateTransition(+value) }) }
-          .disabled=${this._transitionDisabled}
-          .validationMessage=${this.lcn.localize("dashboard-entities-dialog-scene-transition-error")}
-        ></ha-textfield>
-      <div>
+      <ha-textfield
+        .label=${this.lcn.localize("dashboard-entities-dialog-scene-transition")}
+        type="number"
+        .value=${this.domainData.transition}
+        min="0"
+        max="486"
+        required
+        autoValidate
+        @input=${this._transitionChanged}
+        .validityTransform=${(value: string) => ({ valied: this._validateTransition(+value) }) }
+        .disabled=${this._transitionDisabled}
+        .validationMessage=${this.lcn.localize("dashboard-entities-dialog-scene-transition-error")}
+      ></ha-textfield>
     `;
   }
 
   private _registerChanged(ev: ValueChangedEvent<string>): void {
-    const register = this._registers[ev.detail.value];
-    this.domainData.register = +register.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._register = this._registers.find((register) => register.value == target.value)!;
+    this.domainData.register = +this._register.value;
   }
 
   private _sceneChanged(ev: ValueChangedEvent<string>): void {
-    const scene = this._scenes[ev.detail.value];
-    this.domainData.scene = +scene.value;
+    const target = ev.target as HaSelect;
+    if (target.index == -1) return;
+
+    this._scene = this._scenes.find((scene) => scene.value == target.value)!;
+    this.domainData.scene = +this._scene.value;
   }
 
   private _portCheckedChanged(ev: ValueChangedEvent<string> | any): void {
@@ -242,19 +256,19 @@ export class LCNConfigSceneElement extends LitElement {
     return [
       haStyleDialog,
       css`
-      .registers > * {
-        display: inline-block
-      }
-      #output-ports {
-        margin-top: 10px;
-      }
-      #relay-ports {
-        margin-top: 10px;
-      }
-      .transition > * {
-        display: block;
-        margin-top: 16px;
-      }
+        .registers {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          column-gap: 4px;
+        }
+        ha-select,
+        ha-textfield {
+          display: block;
+          margin-bottom: 8px;
+        }
+        .ports {
+          margin-top: 10px;
+        }
       `,
     ];
   }
