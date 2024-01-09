@@ -99,9 +99,7 @@ export class LCNConfigBinarySensorElement extends LitElement {
     ];
   };
 
-  protected async firstUpdated(
-    changedProperties: PropertyValues
-  ): Promise<void> {
+  protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     this._sourceType = this._sourceTypes[0];
     this._source = this._sourceType.value[0];

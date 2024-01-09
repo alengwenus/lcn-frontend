@@ -82,9 +82,7 @@ export class LCNConfigLightElement extends LitElement {
     ];
   };
 
-  protected async firstUpdated(
-    changedProperties: PropertyValues
-  ): Promise<void> {
+  protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     this._portType = this._portTypes[0];
     this._port = this._portType.value[0];
@@ -112,7 +110,7 @@ export class LCNConfigLightElement extends LitElement {
     }
     return html`
       <div id="port-type">
-        ${this.lcn.localize("port-type")}:
+        ${this.lcn.localize("port-type")}
       </div>
 
       <ha-formfield label=${this.lcn.localize("output")}>

@@ -52,9 +52,7 @@ export class LCNConfigCoverElement extends LitElement {
     { name: "1200ms", value: "RT1200" },
   ];
 
-  protected async firstUpdated(
-    changedProperties: PropertyValues
-  ): Promise<void> {
+  protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     this._motor = this._motors[0];
     this._reverseDelay = this._reverseDelays[0];
