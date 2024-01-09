@@ -215,10 +215,7 @@ export class CreateEntityDialog extends LitElement {
           --mdc-dialog-max-width: 500px;
           --dialog-z-index: 10;
         }
-        ha-select {
-          display: block;
-          margin-bottom: 8px;
-        }
+        ha-select,
         ha-textfield {
           display: block;
           margin-bottom: 8px;

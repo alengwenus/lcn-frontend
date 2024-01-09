@@ -72,57 +72,57 @@ export class CreateDeviceDialog extends LitElement {
         @closed=${this._closeDialog}
 
       >
-        ${this.lcn.localize("type")}
-
-        <div class="type">
-          <ha-formfield
-            label=${this.lcn.localize("module")}>
-            <ha-radio
-              name="is_group"
-              value="module"
-              .checked=${this._isGroup === false}
-              @change=${this._isGroupChanged}
-            ></ha-radio>
-          </ha-formfield>
-
-          <ha-formfield
-            label=${this.lcn.localize("group")}>
-            <ha-radio
-              name="is_group"
-              value="group"
-              .checked=${this._isGroup === true}
-              @change=${this._isGroupChanged}
-            ></ha-radio>
-          </ha-formfield>
+        <div id="type">
+          ${this.lcn.localize("type")}
         </div>
 
-        <div class="ids">
-          <ha-textfield
-            .label=${this.lcn.localize("segment-id")}
-            type="number"
-            .value=${this._segmentId}
-            min="0"
-            required
-            autoValidate
-            @input=${this._segmentIdChanged}
-            .validityTransform=${(value: string) => ({ valid: this._validateSegmentId(+value) }) }
-            .validationMessage=${this.lcn.localize("dashboard-devices-dialog-error-segment")}
-          ></ha-textfield>
+        <ha-formfield
+          label=${this.lcn.localize("module")}
+        >
+          <ha-radio
+            name="is_group"
+            value="module"
+            .checked=${this._isGroup === false}
+            @change=${this._isGroupChanged}
+          ></ha-radio>
+        </ha-formfield>
 
-          <ha-textfield
-            .label=${this.lcn.localize("id")}
-            type="number"
-            .value=${this._addressId}
-            min="0"
-            required
-            autoValidate
-            @input=${this._addressIdChanged}
-            .validityTransform=${(value: string) => ({ valid: this._validateAddressId(+value, this._isGroup) }) }
-            .validationMessage=${this._isGroup
-              ? this.lcn.localize("dashboard-devices-dialog-error-group")
-              : this.lcn.localize("dashboard-devices-dialog-error-module")}
-          ></ha-textfield>
-        </div>
+        <ha-formfield
+          label=${this.lcn.localize("group")}
+        >
+          <ha-radio
+            name="is_group"
+            value="group"
+            .checked=${this._isGroup === true}
+            @change=${this._isGroupChanged}
+          ></ha-radio>
+        </ha-formfield>
+
+        <ha-textfield
+          .label=${this.lcn.localize("segment-id")}
+          type="number"
+          .value=${this._segmentId}
+          min="0"
+          required
+          autoValidate
+          @input=${this._segmentIdChanged}
+          .validityTransform=${(value: string) => ({ valid: this._validateSegmentId(+value) }) }
+          .validationMessage=${this.lcn.localize("dashboard-devices-dialog-error-segment")}
+        ></ha-textfield>
+
+        <ha-textfield
+          .label=${this.lcn.localize("id")}
+          type="number"
+          .value=${this._addressId}
+          min="0"
+          required
+          autoValidate
+          @input=${this._addressIdChanged}
+          .validityTransform=${(value: string) => ({ valid: this._validateAddressId(+value, this._isGroup) }) }
+          .validationMessage=${this._isGroup
+            ? this.lcn.localize("dashboard-devices-dialog-error-group")
+            : this.lcn.localize("dashboard-devices-dialog-error-module")}
+        ></ha-textfield>
 
         <div class="buttons">
           <mwc-button
@@ -188,9 +188,12 @@ export class CreateDeviceDialog extends LitElement {
     return [
       haStyleDialog,
       css`
-        .ids > * {
-          display: block;
+        #port-type {
           margin-top: 16px;
+        }
+        ha-textfield {
+          display: block;
+          margin-bottom: 8px;
         }
         .buttons {
             display: flex;
