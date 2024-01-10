@@ -18,7 +18,7 @@ import "./lcn-config-scene";
 import "./lcn-config-sensor";
 import "./lcn-config-switch";
 import { HaTextField } from "@ha/components/ha-textfield";
-
+import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 
 interface DomainItem {
   name: string;
@@ -192,7 +192,17 @@ export class CreateEntityDialog extends LitElement {
       domain: this.domain,
       domain_data: domainElement.domainData,
     };
-    await this._params!.createEntity(values);
+
+
+    if (!await this._params!.createEntity(values)) {
+      await showAlertDialog(this, {
+        title: this.lcn.localize("dashboard-entities-dialog-add-alert-title"),
+        text: `${this.lcn.localize("dashboard-entities-dialog-add-alert-text")}
+              ${this.lcn.localize("dashboard-entities-dialog-add-alert-hint")}`,
+      });
+      return;
+    };
+
     this._closeDialog();
   }
 

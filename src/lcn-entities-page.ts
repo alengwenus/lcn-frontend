@@ -23,7 +23,6 @@ import {
   loadLCNCreateEntityDialog,
   showLCNCreateEntityDialog,
 } from "./dialogs/show-dialog-create-entity";
-import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 
 
 @customElement("lcn-entities-page")
@@ -117,18 +116,14 @@ export class LCNEntitiesPage extends LitElement {
       lcn: this.lcn,
       device: <LcnDeviceConfig>this._deviceConfig,
       createEntity: async (entityParams) => {
-        if (!(await addEntity(this.hass, this.lcn.host.id, entityParams))) {
-          await showAlertDialog(this, {
-            title: this.lcn.localize("dashboard-entities-dialog-add-alert-title"),
-            text: `${this.lcn.localize("dashboard-entities-dialog-add-alert-text")}
-                   ${this.lcn.localize("dashboard-entities-dialog-add-alert-hint")}`,
-          });
-          return;
-        }
-        await this._fetchEntities(this.lcn.host.id, this.lcn.address);
-      },
+        if (await addEntity(this.hass, this.lcn.host.id, entityParams)) {
+          await this._fetchEntities(this.lcn.host.id, this.lcn.address);
+          return true;
+        };
+        return false;
+      }
     });
-  }
+  };
 }
 
 declare global {
