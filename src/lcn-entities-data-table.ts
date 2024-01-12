@@ -13,6 +13,10 @@ import {
   LcnAddress,
 } from "types/lcn";
 import { DataTableColumnContainer } from "@ha/components/data-table/ha-data-table";
+import {
+  loadLCNEditEntityDialog,
+  showLCNEditEntityDialog,
+} from "./dialogs/show-dialog-edit-entity";
 
 export type EntityRowData = LcnEntityConfig & {
   delete: LcnEntityConfig;
@@ -33,6 +37,7 @@ export class LCNEntitiesDataTable extends LitElement {
   private _entities = memoizeOne((entities: LcnEntityConfig[]) => {
     const entityRowData: EntityRowData[] = entities.map((entity) => ({
       ...entity,
+      modify: entity,
       delete: entity,
     }));
     return entityRowData;
@@ -74,7 +79,10 @@ export class LCNEntitiesDataTable extends LitElement {
               sortable: false,
               width: "80px",
               template: (entity: LcnEntityConfig) => {
-                const handler = (ev) => this._onEntityDelete(ev, entity);
+                const handler = (ev) => {
+                  ev.stopPropagation();
+                  this._deleteEntity(entity.address, entity.domain, entity.resource);
+                }
                 return html`
                   <ha-icon-button
                     title=${this.lcn.localize("dashboard-entities-table-delete")}
@@ -87,24 +95,37 @@ export class LCNEntitiesDataTable extends LitElement {
           }
   );
 
+  protected async firstUpdated(changedProperties) {
+    super.firstUpdated(changedProperties);
+    loadLCNEditEntityDialog();
+  }
+
   protected render() {
     return html`
       <ha-data-table
         .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._entities(this.entities)}
-        .id=${"unique_id"}
+        .id=${"modify"}
         .noDataText=${this.lcn.localize("dashboard-entities-table-no-data")}
         .dir=${computeRTLDirection(this.hass)}
         auto-height
         clickable
+        @row-click=${this._editEntity}
       ></ha-data-table>
     `;
   }
 
-  private _onEntityDelete(ev, entity: LcnEntityConfig) {
-    ev.stopPropagation();
-    this._deleteEntity(entity.address, entity.domain, entity.resource);
+  private async _editEntity(ev: CustomEvent) {
+    const entity: LcnEntityConfig = ev.detail.id;
+    showLCNEditEntityDialog(this, {
+      lcn: this.lcn,
+      device: <LcnDeviceConfig>this.device,
+      entity: <LcnEntityConfig>entity,
+      editEntity: async (entityParams) => {
+        console.log(entityParams);
+      }
+    })
   }
 
   private async _deleteEntity(

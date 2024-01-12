@@ -11,6 +11,7 @@
   "resource": "Ressource",
   "create": "Erstellen",
   "dismiss": "Abbrechen",
+  "update": "Aktualisieren",
 
   "domain": "Domäne",
   "binary-sensor": "Binärsensor",
@@ -92,13 +93,14 @@
   "dashboard-entities-add": "Entität erstellen",
 
   "dashboard-entities-dialog-add-alert-title": "LCN Ressource existiert bereits",
-  "dashboard-entities-dialog-add-alert-text": "Die angegebene LCN Ressource ist der Entität bereits zugewiesen.",
+  "dashboard-entities-dialog-add-alert-text": "Die angegebene LCN Ressource ist einer Entität bereits zugewiesen.",
   "dashboard-entities-dialog-add-alert-hint": "LCN Ressourcen dürfen für jede Domäne nur einmal existieren.",
 
   "dashboard-entities-table-delete": "Lösche Eintrag",
   "dashboard-entities-table-no-data": "Keine Entitäten konfiguriert.",
 
   "dashboard-entities-dialog-create-title": "Entität erstellen",
+  "dashboard-entities-dialog-edit-title": "Entität bearbeiten",
 
   "dashboard-entities-dialog-unit-of-measurement": "Messeinheit",
 

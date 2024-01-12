@@ -2,15 +2,13 @@ import "@ha/components/ha-icon-button";
 import "@ha/components/ha-list-item"
 import "@ha/components/ha-select"
 import "@ha/components/ha-textfield";
-import { HaTextField } from "@ha/components/ha-textfield";
 import { fireEvent } from "@ha/common/dom/fire_event";
-import { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { createCloseHeading } from "@ha/components/ha-dialog";
 import { haStyleDialog } from "@ha/resources/styles";
 import { HomeAssistant } from "@ha/types";
-import { LcnEntityDialogParams } from "./show-dialog-create-entity";
+import { LcnEntityDialogParams } from "./show-dialog-edit-entity";
 import { LCN, LcnEntityConfig } from "types/lcn";
 import "./lcn-config-binary-sensor";
 import "./lcn-config-climate";
@@ -26,21 +24,17 @@ interface DomainItem {
   domain: string;
 }
 
-@customElement("lcn-create-entity-dialog")
-export class CreateEntityDialog extends LitElement {
+@customElement("lcn-edit-entity-dialog")
+export class EditEntityDialog extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public lcn!: LCN;
 
   @property() private _params?: LcnEntityDialogParams;
 
-  @property() private _name = "";
-
-  @property() public domain = "binary_sensor";
-
   @property() private _invalid = false;
 
-  @query("#name-input") private _nameInput!: HaTextField;
+  @query("#domain") private _domainElement;
 
   private get _domains(): DomainItem[] {
     return [
@@ -55,7 +49,6 @@ export class CreateEntityDialog extends LitElement {
   };
 
   public async showDialog(params: LcnEntityDialogParams): Promise<void> {
-    console.log(params);
     this._params = params;
     this.lcn = params.lcn;
     await this.updateComplete;
@@ -72,16 +65,16 @@ export class CreateEntityDialog extends LitElement {
         escapeKeyAction
         .heading=${createCloseHeading(
           this.hass,
-          this.lcn.localize("dashboard-entities-dialog-create-title")
+          this.lcn.localize("dashboard-entities-dialog-edit-title")
           )}
         @closed=${this._closeDialog}
       >
         <ha-select
           id="domain-select"
           .label=${this.lcn.localize("domain")}
-          .value=${this.domain}
+          .value=${this._params.entity.domain}
           fixedMenuPosition
-          @selected=${this._domainChanged}
+          .disabled=${true}
           @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
           ${this._domains.map(
@@ -95,14 +88,12 @@ export class CreateEntityDialog extends LitElement {
 
         <ha-textfield
           id="name-input"
-          label=${this.lcn.localize("name")}
-          placeholder=${this.domain}
-          type="string"
-          maxLength="20"
-          @change=${this._nameChanged}
+          .label=${this.lcn.localize("name")}
+          .value=${this._params.entity.name}
+          .disabled=${true}
         ></ha-textfield>
 
-        ${this.renderDomain(this.domain)}
+        ${this.renderDomain(this._params.entity.domain)}
 
         <div class="buttons">
           <mwc-button
@@ -113,8 +104,8 @@ export class CreateEntityDialog extends LitElement {
           <mwc-button
             slot="primaryAction"
             .disabled=${this._invalid}
-            @click=${this._create}
-            .label=${this.lcn.localize("create")}
+            @click=${this._update}
+            .label=${this.lcn.localize("update")}
           ></mwc-button>
         </div>
       </ha-dialog>
@@ -128,12 +119,14 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
+          .domainData =${this._params!.entity.domain_data}
         ></lcn-config-binary-sensor-element>`;
       case "climate":
         return html`<lcn-config-climate-element
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
+          .domainData =${this._params!.entity.domain_data}
           .softwareSerial=${this._params?.device.software_serial}
           @validity-changed=${this._validityChanged}
         ></lcn-config-climate-element>`;
@@ -142,6 +135,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
+          .domainData =${this._params!.entity.domain_data}
           .softwareSerial=${this._params?.device.software_serial}
         ></lcn-config-cover-element>`;
       case "light":
@@ -149,6 +143,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
+          .domainData =${this._params!.entity.domain_data}
           @validity-changed=${this._validityChanged}
         ></lcn-config-light-element>`;
       case "scene":
@@ -156,6 +151,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
+          .domainData =${this._params!.entity.domain_data}
           @validity-changed=${this._validityChanged}
         ></lcn-config-scene-element>`;
       case "sensor":
@@ -163,6 +159,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
+          .domainData =${this._params!.entity.domain_data}
           .softwareSerial=${this._params?.device.software_serial}
         ></lcn-config-sensor-element>`;
       case "switch":
@@ -170,33 +167,27 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
+          .domainData =${this._params!.entity.domain_data}
         ></lcn-config-switch-element>`;
       default:
         return html``;
     }
   }
 
-  private _nameChanged(ev: CustomEvent): void {
-    const target = ev.target as HaTextField;
-    this._name = target.value;
-  }
-
   private _validityChanged(ev: CustomEvent): void {
     this._invalid = ev.detail;
   }
 
-  private async _create(): Promise<void> {
-    const domainElement = this.shadowRoot?.querySelector<any>("#domain");
-
+  private async _update(): Promise<void> {
     const values: Partial<LcnEntityConfig> = {
-      name: this._name ? this._name : this.domain,
+      name: this._params!.entity.name,
       address: this._params!.device.address,
-      domain: this.domain,
-      domain_data: domainElement.domainData,
+      domain: this._params!.entity.domain,
+      domain_data: this._domainElement.domainData,
     };
 
 
-    if (!await this._params!.createEntity(values)) {
+    if (!await this._params!.editEntity(values)) {
       await showAlertDialog(this, {
         title: this.lcn.localize("dashboard-entities-dialog-add-alert-title"),
         text: `${this.lcn.localize("dashboard-entities-dialog-add-alert-text")}
@@ -211,12 +202,6 @@ export class CreateEntityDialog extends LitElement {
   private _closeDialog(): void {
     this._params = undefined;
     fireEvent(this, "dialog-closed", { dialog: this.localName });
-  }
-
-  private _domainChanged(ev: CustomEvent) {
-    const target = ev.target as HaSelect;
-    this.domain = target.value;
-    this._nameInput.value = "";
   }
 
   static get styles(): CSSResultGroup {
@@ -246,6 +231,6 @@ export class CreateEntityDialog extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "lcn-create-entity-dialog": CreateEntityDialog;
+    "lcn-edit-entity-dialog": EditEntityDialog;
   }
 }

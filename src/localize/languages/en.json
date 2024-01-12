@@ -11,6 +11,7 @@
   "resource": "Resource",
   "create": "Create",
   "dismiss": "Dismiss",
+  "update": "Update",
 
   "domain": "Domain",
   "binary-sensor": "Binary sensor",
@@ -93,13 +94,14 @@
   "dashboard-entities-add": "Create entity",
 
   "dashboard-entities-dialog-add-alert-title": "LCN resource already assigned",
-  "dashboard-entities-dialog-add-alert-text": "The specified LCN resource is already assigned to this entity.",
+  "dashboard-entities-dialog-add-alert-text": "The specified LCN resource is already assigned to an entity.",
   "dashboard-entities-dialog-add-alert-hint": "LCN resources may only be assigned once within a domain.",
 
   "dashboard-entities-table-delete": "Delete entry",
   "dashboard-entities-table-no-data": "No entities configured.",
 
   "dashboard-entities-dialog-create-title": "Create entity",
+  "dashboard-entities-dialog-edit-title": "Edit entity",
 
   "dashboard-entities-dialog-unit-of-measurement": "Unit of measurement",
 

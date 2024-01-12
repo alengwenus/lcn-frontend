@@ -101,8 +101,20 @@ export class LCNConfigBinarySensorElement extends LitElement {
 
   protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
-    this._sourceType = this._sourceTypes[0];
-    this._source = this._sourceType.value[0];
+
+    for (const sourceType of this._sourceTypes) {
+      for (const source of sourceType.value) {
+        if (source.value === this.domainData.source) {
+          this._sourceType = sourceType;
+          this._source = source;
+          break;
+        }
+      }
+    }
+    console.log(this._sourceType);
+    console.log(this._source);
+    // this._sourceType = this._sourceTypes[0];
+    // this._source = this._sourceType.value[0];
   }
 
   protected render(): TemplateResult {
