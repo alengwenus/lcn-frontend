@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name         = "lcn_frontend"
-version      = "0.0.1"
-license      = {text = "MIT Livense"}
+version      = "0.1.0"
+license      = {text = "MIT License"}
 description  = "LCN panel for Home Assistant"
 readme       = "README.md"
 authors      = [
