@@ -1,5 +1,5 @@
 import { html, LitElement, TemplateResult } from "lit";
-import { customElement, property } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import "@ha/layouts/hass-tabs-subpage";
@@ -30,15 +30,15 @@ export class LCNEntitiesPage extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public narrow!: boolean;
+  @property({ attribute: false }) public narrow!: boolean;
 
-  @property() public route!: Route;
+  @property({ attribute: false }) public route!: Route;
 
   @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
-  @property() private _deviceConfig!: LcnDeviceConfig;
+  @state() private _deviceConfig!: LcnDeviceConfig;
 
-  @property() private _entityConfigs: LcnEntityConfig[] = [];
+  @state() private _entityConfigs: LcnEntityConfig[] = [];
 
   protected async firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);

@@ -6,7 +6,7 @@ import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
-import { customElement, property, query } from "lit/decorators";
+import { customElement, property, query, state } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
@@ -39,15 +39,15 @@ export class LCNConfigDashboard extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public narrow!: boolean;
+  @property({ type: Boolean }) public narrow!: boolean;
 
-  @property() public route!: Route;
+  @property({ attribute: false }) public route!: Route;
 
   @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
-  @property() private _hosts: LcnHost[] = [];
+  @state() private _hosts: LcnHost[] = [];
 
-  @property() private _deviceConfigs: LcnDeviceConfig[] = [];
+  @state() private _deviceConfigs: LcnDeviceConfig[] = [];
 
   @query("#host-select") private _hostsSelect!: HaSelect;
 

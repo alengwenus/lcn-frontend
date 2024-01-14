@@ -2,7 +2,7 @@ import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
-import { customElement, property, query } from "lit/decorators";
+import { customElement, property, query, state } from "lit/decorators";
 import type { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
@@ -25,18 +25,18 @@ export class LCNConfigSensorElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public softwareSerial = -1;
+  @property({ type: Number }) public softwareSerial: number = -1;
 
-  @property() public domainData: SensorConfig = {
+  @property({ attribute: false }) public domainData: SensorConfig = {
     source: "VAR1",
     unit_of_measurement: "NATIVE",
   };
 
-  @property() private _sourceType!: ConfigItemCollection;
+  @state() private _sourceType!: ConfigItemCollection;
 
-  @property() private _source!: ConfigItem;
+  @state() private _source!: ConfigItem;
 
-  @property() private _unit!: ConfigItem;
+  @state() private _unit!: ConfigItem;
 
   @query("#source-select") private _sourceSelect!: HaSelect;
 
@@ -287,5 +287,11 @@ export class LCNConfigSensorElement extends LitElement {
         }
       `,
     ];
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "lcn-config-sensor-element": LCNConfigSensorElement;
   }
 }

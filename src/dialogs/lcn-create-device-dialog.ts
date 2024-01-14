@@ -5,7 +5,7 @@ import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import { css, html, LitElement, PropertyValues, CSSResultGroup, nothing } from "lit";
-import { customElement, property } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import { createCloseHeading } from "@ha/components/ha-dialog";
 import type { HaRadio } from "@ha/components/ha-radio";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -21,13 +21,13 @@ export class CreateDeviceDialog extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() private _params?: LcnDeviceDialogParams;
+  @state() private _params?: LcnDeviceDialogParams;
 
-  @property() private _isGroup: boolean = false;
+  @state() private _isGroup: boolean = false;
 
-  @property() private _segmentId: number = 0;
+  @state() private _segmentId: number = 0;
 
-  @property() private _addressId: number = 5;
+  @state() private _addressId: number = 5;
 
   private _invalid = false;
 
@@ -61,7 +61,7 @@ export class CreateDeviceDialog extends LitElement {
         .heading=${createCloseHeading(
           this.hass,
           this.lcn.localize("dashboard-devices-dialog-create-title"),
-        )}
+        ) as unknown as string}
         @closed=${this._closeDialog}
       >
         <div id="type">${this.lcn.localize("type")}</div>
@@ -87,7 +87,7 @@ export class CreateDeviceDialog extends LitElement {
         <ha-textfield
           .label=${this.lcn.localize("segment-id")}
           type="number"
-          .value=${this._segmentId}
+          .value=${this._segmentId.toString()}
           min="0"
           required
           autoValidate
@@ -99,7 +99,7 @@ export class CreateDeviceDialog extends LitElement {
         <ha-textfield
           .label=${this.lcn.localize("id")}
           type="number"
-          .value=${this._addressId}
+          .value=${this._addressId.toString()}
           min="0"
           required
           autoValidate

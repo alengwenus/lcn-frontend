@@ -4,7 +4,7 @@ import "@ha/components/ha-select";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
-import { customElement, property, query } from "lit/decorators";
+import { customElement, property, query, state } from "lit/decorators";
 import { createCloseHeading } from "@ha/components/ha-dialog";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -32,13 +32,13 @@ export class CreateEntityDialog extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() private _params?: LcnEntityDialogParams;
+  @state() private _params?: LcnEntityDialogParams;
 
-  @property() private _name = "";
+  @state() private _name: string = "";
 
-  @property() public domain = "binary_sensor";
+  @state() public domain: string = "binary_sensor";
 
-  @property() private _invalid = false;
+  @state() private _invalid: boolean = false;
 
   @query("#name-input") private _nameInput!: HaTextField;
 
@@ -72,7 +72,7 @@ export class CreateEntityDialog extends LitElement {
         .heading=${createCloseHeading(
           this.hass,
           this.lcn.localize("dashboard-entities-dialog-create-title"),
-        )}
+        ) as unknown as string}
         @closed=${this._closeDialog}
       >
         <ha-select
@@ -119,6 +119,9 @@ export class CreateEntityDialog extends LitElement {
   }
 
   private renderDomain(domain: string) {
+    if (!this._params) {
+      return nothing;
+    }
     switch (domain) {
       case "binary_sensor":
         return html`<lcn-config-binary-sensor-element
@@ -131,7 +134,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
-          .softwareSerial=${this._params?.device.software_serial}
+          .softwareSerial=${this._params.device.software_serial!}
           @validity-changed=${this._validityChanged}
         ></lcn-config-climate-element>`;
       case "cover":
@@ -139,7 +142,6 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
-          .softwareSerial=${this._params?.device.software_serial}
         ></lcn-config-cover-element>`;
       case "light":
         return html`<lcn-config-light-element
@@ -160,7 +162,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
-          .softwareSerial=${this._params?.device.software_serial}
+          .softwareSerial=${this._params.device.software_serial!}
         ></lcn-config-sensor-element>`;
       case "switch":
         return html`<lcn-config-switch-element

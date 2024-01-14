@@ -6,7 +6,10 @@ import { mdiDelete } from "@mdi/js";
 import { computeRTLDirection } from "@ha/common/util/compute_rtl";
 import type { HomeAssistant } from "@ha/types";
 import { LCN, LcnEntityConfig, deleteEntity, LcnDeviceConfig, LcnAddress } from "types/lcn";
-import { DataTableColumnContainer } from "@ha/components/data-table/ha-data-table";
+import {
+  DataTableColumnContainer,
+  DataTableRowData,
+} from "@ha/components/data-table/ha-data-table";
 
 export type EntityRowData = LcnEntityConfig & {
   delete: LcnEntityConfig;
@@ -18,11 +21,11 @@ export class LCNEntitiesDataTable extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public narrow!: boolean;
+  @property({ attribute: false }) public narrow!: boolean;
 
-  @property() public device!: LcnDeviceConfig;
+  @property({ attribute: false }) public device!: LcnDeviceConfig;
 
-  @property() public entities: LcnEntityConfig[] = [];
+  @property({ attribute: false }) public entities: LcnEntityConfig[] = [];
 
   private _entities = memoizeOne((entities: LcnEntityConfig[]) => {
     const entityRowData: EntityRowData[] = entities.map((entity) => ({
@@ -86,7 +89,7 @@ export class LCNEntitiesDataTable extends LitElement {
       <ha-data-table
         .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
-        .data=${this._entities(this.entities)}
+        .data=${this._entities(this.entities) as DataTableRowData[]}
         .id=${"unique_id"}
         .noDataText=${this.lcn.localize("dashboard-entities-table-no-data")}
         .dir=${computeRTLDirection(this.hass)}

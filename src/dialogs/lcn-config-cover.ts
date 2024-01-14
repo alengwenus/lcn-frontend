@@ -5,7 +5,7 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import { css, html, LitElement, CSSResult, PropertyValues, nothing } from "lit";
-import { customElement, property } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import type { HomeAssistant } from "@ha/types";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -22,16 +22,14 @@ export class LCNConfigCoverElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public software_serial = -1;
-
-  @property() public domainData: CoverConfig = {
+  @property({ attribute: false }) public domainData: CoverConfig = {
     motor: "MOTOR1",
     reverse_time: "RT1200",
   };
 
-  @property() private _motor!: ConfigItem;
+  @state() private _motor!: ConfigItem;
 
-  @property() private _reverseDelay!: ConfigItem;
+  @state() private _reverseDelay!: ConfigItem;
 
   private get _motors(): ConfigItem[] {
     const motor: string = this.lcn.localize("motor");
@@ -124,5 +122,11 @@ export class LCNConfigCoverElement extends LitElement {
         }
       `,
     ];
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "lcn-config-cover-element": LCNConfigCoverElement;
   }
 }

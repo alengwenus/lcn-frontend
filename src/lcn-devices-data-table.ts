@@ -4,7 +4,10 @@ import memoizeOne from "memoize-one";
 import { mdiDelete } from "@mdi/js";
 import { computeRTLDirection } from "@ha/common/util/compute_rtl";
 import "@ha/components/data-table/ha-data-table";
-import type { DataTableColumnContainer } from "@ha/components/data-table/ha-data-table";
+import type {
+  DataTableColumnContainer,
+  DataTableRowData,
+} from "@ha/components/data-table/ha-data-table";
 import type { HomeAssistant, Route } from "@ha/types";
 import { showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import { navigate } from "@ha/common/navigate";
@@ -25,11 +28,11 @@ export class LCNDevicesDataTable extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public narrow!: boolean;
+  @property({ attribute: false }) public narrow!: boolean;
 
-  @property() public route!: Route;
+  @property({ attribute: false }) public route!: Route;
 
-  @property() public devices: LcnDeviceConfig[] = [];
+  @property({ attribute: false }) public devices: LcnDeviceConfig[] = [];
 
   private _devices = memoizeOne((devices: LcnDeviceConfig[]) => {
     const deviceRowData: DeviceRowData[] = devices.map((device) => ({
@@ -107,7 +110,7 @@ export class LCNDevicesDataTable extends LitElement {
       <ha-data-table
         .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
-        .data=${this._devices(this.devices)}
+        .data=${this._devices(this.devices) as DataTableRowData[]}
         .id=${"address"}
         .noDataText=${this.lcn.localize("dashboard-devices-table-no-data")}
         .dir=${computeRTLDirection(this.hass)}

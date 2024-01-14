@@ -6,7 +6,7 @@ import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
 import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
-import { customElement, property } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -23,16 +23,16 @@ export class LCNConfigSceneElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public domainData: SceneConfig = {
+  @property({ attribute: false }) public domainData: SceneConfig = {
     register: 0,
     scene: 0,
     outputs: [],
     transition: 0,
   };
 
-  @property() private _register!: ConfigItem;
+  @state() private _register!: ConfigItem;
 
-  @property() private _scene!: ConfigItem;
+  @state() private _scene!: ConfigItem;
 
   private _invalid = false;
 
@@ -175,7 +175,7 @@ export class LCNConfigSceneElement extends LitElement {
       <ha-textfield
         .label=${this.lcn.localize("dashboard-entities-dialog-scene-transition")}
         type="number"
-        .value=${this.domainData.transition}
+        .value=${this.domainData.transition.toString()}
         min="0"
         max="486"
         required
@@ -224,7 +224,7 @@ export class LCNConfigSceneElement extends LitElement {
   }
 
   private get _validityTransformTransition() {
-    return (value: string) => ({ valied: this._validateTransition(+value) });
+    return (value: string) => ({ valid: this._validateTransition(+value) });
   }
 
   private get _transitionDisabled(): boolean {
@@ -253,5 +253,11 @@ export class LCNConfigSceneElement extends LitElement {
         }
       `,
     ];
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "lcn-config-scene-element": LCNConfigSceneElement;
   }
 }

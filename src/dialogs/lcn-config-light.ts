@@ -5,7 +5,7 @@ import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield";
 import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
-import { customElement, property, query } from "lit/decorators";
+import { customElement, property, query, state } from "lit/decorators";
 import type { HaRadio } from "@ha/components/ha-radio";
 import type { HaSwitch } from "@ha/components/ha-switch";
 import type { HaTextField } from "@ha/components/ha-textfield";
@@ -31,15 +31,15 @@ export class LCNConfigLightElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public domainData: LightConfig = {
+  @property({ attribute: false }) public domainData: LightConfig = {
     output: "OUTPUT1",
     dimmable: false,
     transition: 0,
   };
 
-  @property() private _portType!: ConfigItemCollection;
+  @state() private _portType!: ConfigItemCollection;
 
-  @property() private _port!: ConfigItem;
+  @state() private _port!: ConfigItem;
 
   @query("#port-select") private _portSelect;
 
@@ -157,7 +157,7 @@ export class LCNConfigLightElement extends LitElement {
             id="transition"
             .label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
             type="number"
-            .value=${this.domainData.transition}
+            .value=${this.domainData.transition.toString()}
             min="0"
             max="486"
             required
@@ -230,5 +230,10 @@ export class LCNConfigLightElement extends LitElement {
         }
       `,
     ];
+  }
+}
+declare global {
+  interface HTMLElementTagNameMap {
+    "lcn-config-light-element": LCNConfigLightElement;
   }
 }

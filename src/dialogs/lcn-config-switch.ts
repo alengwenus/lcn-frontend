@@ -2,7 +2,7 @@ import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
-import { customElement, property, query } from "lit/decorators";
+import { customElement, property, query, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { LCN, SwitchConfig } from "types/lcn";
@@ -28,11 +28,11 @@ export class LCNConfigSwitchElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public domainData: SwitchConfig = { output: "OUTPUT1" };
+  @property({ attribute: false }) public domainData: SwitchConfig = { output: "OUTPUT1" };
 
-  @property() private _portType!: ConfigItemCollection;
+  @state() private _portType!: ConfigItemCollection;
 
-  @property() private _port!: ConfigItem;
+  @state() private _port!: ConfigItem;
 
   @query("#port-select") private _portSelect;
 
@@ -142,5 +142,11 @@ export class LCNConfigSwitchElement extends LitElement {
         }
       `,
     ];
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "lcn-config-switch-element": LCNConfigSwitchElement;
   }
 }

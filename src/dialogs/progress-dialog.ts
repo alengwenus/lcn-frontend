@@ -1,6 +1,6 @@
 import "@ha/components/ha-circular-progress";
 import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
-import { customElement, property, query } from "lit/decorators";
+import { customElement, property, query, state } from "lit/decorators";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { HomeAssistant } from "@ha/types";
 import { fireEvent } from "@ha/common/dom/fire_event";
@@ -11,7 +11,7 @@ import type { ProgressDialogParams } from "./show-dialog-progress";
 export class ProgressDialog extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() private _params?: ProgressDialogParams;
+  @state() private _params?: ProgressDialogParams;
 
   @query("ha-dialog", true) private _dialog!: HaDialog;
 
@@ -30,16 +30,12 @@ export class ProgressDialog extends LitElement {
       return nothing;
     }
     return html`
-      <ha-dialog
-        open
-        scrimClickAction
-        escapeKeyAction
-        @close-dialog=${this.closeDialog}>
+      <ha-dialog open scrimClickAction escapeKeyAction @close-dialog=${this.closeDialog}>
         <h2>${this._params?.title}</h2>
         <p>${this._params?.text}</p>
 
         <div id="dialog-content">
-          <ha-circular-progress active></ha-circluar-progress>
+          <ha-circular-progress active></ha-circular-progress>
         </div>
       </ha-dialog>
     `;

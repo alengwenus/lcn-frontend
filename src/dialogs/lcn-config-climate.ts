@@ -6,7 +6,7 @@ import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-switch";
 import type { HaSwitch } from "@ha/components/ha-switch";
 import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
-import { customElement, property } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -23,9 +23,9 @@ export class LCNConfigClimateElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public softwareSerial = -1;
+  @property({ type: Number }) public softwareSerial: number = -1;
 
-  @property() public domainData: ClimateConfig = {
+  @property({ attribute: false }) public domainData: ClimateConfig = {
     source: "VAR1",
     setpoint: "R1VARSETPOINT",
     max_temp: 35,
@@ -34,11 +34,11 @@ export class LCNConfigClimateElement extends LitElement {
     unit_of_measurement: "°C",
   };
 
-  @property() private _source!: ConfigItem;
+  @state() private _source!: ConfigItem;
 
-  @property() private _setpoint!: ConfigItem;
+  @state() private _setpoint!: ConfigItem;
 
-  @property() private _unit!: ConfigItem;
+  @state() private _unit!: ConfigItem;
 
   private _invalid = false;
 
@@ -166,7 +166,7 @@ export class LCNConfigClimateElement extends LitElement {
         id="min-textfield"
         .label=${this.lcn.localize("dashboard-entities-dialog-climate-min-temperature")}
         type="number"
-        .value=${this.domainData.min_temp}
+        .value=${this.domainData.min_temp.toString()}
         required
         autoValidate
         @input=${this._minTempChanged}
@@ -180,7 +180,7 @@ export class LCNConfigClimateElement extends LitElement {
         id="max-textfield"
         .label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
         type="number"
-        .value=${this.domainData.max_temp}
+        .value=${this.domainData.max_temp.toString()}
         required
         autoValidate
         @input=${this._maxTempChanged}
@@ -287,5 +287,10 @@ export class LCNConfigClimateElement extends LitElement {
         }
       `,
     ];
+  }
+}
+declare global {
+  interface HTMLElementTagNameMap {
+    "lcn-config-climate-element": LCNConfigClimateElement;
   }
 }

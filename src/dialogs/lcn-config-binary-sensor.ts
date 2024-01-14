@@ -3,7 +3,7 @@ import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, CSSResult, PropertyValues, nothing } from "lit";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
-import { customElement, property, query } from "lit/decorators";
+import { customElement, property, query, state } from "lit/decorators";
 import type { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { LCN, BinarySensorConfig } from "types/lcn";
@@ -25,13 +25,13 @@ export class LCNConfigBinarySensorElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property() public domainData: BinarySensorConfig = {
+  @property({ attribute: false }) public domainData: BinarySensorConfig = {
     source: "BINSENSOR1",
   };
 
-  @property() private _sourceType!: ConfigItemCollection;
+  @state() private _sourceType!: ConfigItemCollection;
 
-  @property() private _source!: ConfigItem;
+  @state() private _source!: ConfigItem;
 
   @query("#source-select") private _sourceSelect!: HaSelect;
 
@@ -189,5 +189,11 @@ export class LCNConfigBinarySensorElement extends LitElement {
         }
       `,
     ];
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "lcn-config-binary-sensor-element": LCNConfigBinarySensorElement;
   }
 }
