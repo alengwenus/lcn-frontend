@@ -103,10 +103,6 @@ export class LCNDevicesDataTable extends LitElement {
   }
 
   protected render(): TemplateResult {
-    const handler = (ev) => {
-      this.lcn.address = ev.detail.id;
-      this._openDevice();
-    };
     return html`
       <ha-data-table
         .hass=${this.hass}
@@ -117,9 +113,14 @@ export class LCNDevicesDataTable extends LitElement {
         .dir=${computeRTLDirection(this.hass)}
         auto-height
         clickable
-        @row-click=${handler}
+        @row-click=${this._rowClicked}
       ></ha-data-table>
     `;
+  }
+
+  private _rowClicked(ev: CustomEvent) {
+    this.lcn.address = ev.detail.id;
+    this._openDevice();
   }
 
   private _onDeviceDelete(ev, device: LcnDeviceConfig) {

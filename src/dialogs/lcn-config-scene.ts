@@ -1,15 +1,16 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
-import { HaSelect } from "@ha/components/ha-select";
+import type { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-textfield";
-import { HaTextField } from "@ha/components/ha-textfield";
+import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
-import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
+import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
 import { customElement, property } from "lit/decorators";
-import { HomeAssistant, ValueChangedEvent } from "@ha/types";
+import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
+import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
-import { LCN, SceneConfig } from "types/lcn";
+import type { LCN, SceneConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
@@ -114,9 +115,9 @@ export class LCNConfigSceneElement extends LitElement {
     );
   }
 
-  protected render(): TemplateResult {
+  protected render() {
     if (!(this._register || this._scene)) {
-      return html``;
+      return nothing;
     }
     return html`
       <div class="registers">
@@ -126,7 +127,7 @@ export class LCNConfigSceneElement extends LitElement {
           .value=${this._register.value}
           fixedMenuPosition
           @selected=${this._registerChanged}
-          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+          @closed=${stopPropagation}
         >
           ${this._registers.map(
             (register) => html`
@@ -141,7 +142,7 @@ export class LCNConfigSceneElement extends LitElement {
           .value=${this._scene.value}
           fixedMenuPosition
           @selected=${this._sceneChanged}
-          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+          @closed=${stopPropagation}
         >
           ${this._scenes.map(
             (scene) => html` <ha-list-item .value=${scene.value}> ${scene.name} </ha-list-item> `,
@@ -180,7 +181,7 @@ export class LCNConfigSceneElement extends LitElement {
         required
         autoValidate
         @input=${this._transitionChanged}
-        .validityTransform=${(value: string) => ({ valied: this._validateTransition(+value) })}
+        .validityTransform=${this._validityTransformTransition}
         .disabled=${this._transitionDisabled}
         .validationMessage=${this.lcn.localize("dashboard-entities-dialog-scene-transition-error")}
       ></ha-textfield>
@@ -189,17 +190,17 @@ export class LCNConfigSceneElement extends LitElement {
 
   private _registerChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._register = this._registers.find((register) => register.value == target.value)!;
+    this._register = this._registers.find((register) => register.value === target.value)!;
     this.domainData.register = +this._register.value;
   }
 
   private _sceneChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._scene = this._scenes.find((scene) => scene.value == target.value)!;
+    this._scene = this._scenes.find((scene) => scene.value === target.value)!;
     this.domainData.scene = +this._scene.value;
   }
 
@@ -222,6 +223,10 @@ export class LCNConfigSceneElement extends LitElement {
     return transition >= 0 && transition <= 486;
   }
 
+  private get _validityTransformTransition() {
+    return (value: string) => ({ valied: this._validateTransition(+value) });
+  }
+
   private get _transitionDisabled(): boolean {
     const outputPortValues = this._outputPorts.map((port) => port.value);
     return (
@@ -229,7 +234,7 @@ export class LCNConfigSceneElement extends LitElement {
     );
   }
 
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup[] {
     return [
       haStyleDialog,
       css`

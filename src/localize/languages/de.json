@@ -83,7 +83,7 @@
   "dashboard-devices-dialog-delete-warning": "Mit dem Löschen des Gerätes werden alle zugehörigen Entitäten gelöscht!",
 
   "dashboard-devices-dialog-create-title": "Modul / Gruppe erstellen",
-  "dashboard-devices-dialog-error-segment": "Segment ID muss 0, 5..128 sein.",
+  "dashboard-devices-dialog-error-segment": "Segment ID muss im Bereich 0, 5..128 liegen.",
   "dashboard-devices-dialog-error-module": "Modul ID muss im Bereich 5..254 liegen.",
   "dashboard-devices-dialog-error-group": "Gruppen ID muss im Bereich 5..254 liegen.",
 

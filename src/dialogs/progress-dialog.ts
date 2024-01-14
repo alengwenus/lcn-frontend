@@ -1,11 +1,11 @@
 import "@ha/components/ha-circular-progress";
-import { css, html, LitElement, TemplateResult, CSSResult } from "lit";
+import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { haStyleDialog } from "@ha/resources/styles";
-import { HomeAssistant } from "@ha/types";
-import { ProgressDialogParams } from "./show-dialog-progress";
+import type { HomeAssistant } from "@ha/types";
 import { fireEvent } from "@ha/common/dom/fire_event";
-import { HaDialog } from "@ha/components/ha-dialog";
+import type { HaDialog } from "@ha/components/ha-dialog";
+import type { ProgressDialogParams } from "./show-dialog-progress";
 
 @customElement("progress-dialog")
 export class ProgressDialog extends LitElement {
@@ -25,9 +25,9 @@ export class ProgressDialog extends LitElement {
     this.close();
   }
 
-  protected render(): TemplateResult {
+  protected render() {
     if (!this._params) {
-      return html``;
+      return nothing;
     }
     return html`
       <ha-dialog
@@ -49,7 +49,7 @@ export class ProgressDialog extends LitElement {
     this._params = undefined;
   }
 
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup[] {
     return [
       haStyleDialog,
       css`

@@ -1,14 +1,15 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
-import { HaSelect } from "@ha/components/ha-select";
+import type { HaSelect } from "@ha/components/ha-select";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
-import { customElement, property, query } from "lit/decorators";
-import { HomeAssistant } from "@ha/types";
+import { css, html, LitElement, CSSResult, PropertyValues, nothing } from "lit";
+import { customElement, property } from "lit/decorators";
+import type { HomeAssistant } from "@ha/types";
+import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
-import { LCN, CoverConfig } from "types/lcn";
+import type { LCN, CoverConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
@@ -31,8 +32,6 @@ export class LCNConfigCoverElement extends LitElement {
   @property() private _motor!: ConfigItem;
 
   @property() private _reverseDelay!: ConfigItem;
-
-  @query("#reverse-delay-select") private _reverseDelaySelect;
 
   private get _motors(): ConfigItem[] {
     const motor: string = this.lcn.localize("motor");
@@ -57,9 +56,9 @@ export class LCNConfigCoverElement extends LitElement {
     this._reverseDelay = this._reverseDelays[0];
   }
 
-  protected render(): TemplateResult {
+  protected render() {
     if (!(this._motor || this._reverseDelay)) {
-      return html``;
+      return nothing;
     }
     return html`
       <ha-select
@@ -68,7 +67,7 @@ export class LCNConfigCoverElement extends LitElement {
         .value=${this._motor.value}
         fixedMenuPosition
         @selected=${this._motorChanged}
-        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+        @closed=${stopPropagation}
       >
         ${this._motors.map(
           (motor) => html` <ha-list-item .value=${motor.value}> ${motor.name} </ha-list-item> `,
@@ -83,7 +82,7 @@ export class LCNConfigCoverElement extends LitElement {
               .value=${this._reverseDelay.value}
               fixedMenuPosition
               @selected=${this._reverseDelayChanged}
-              @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+              @closed=${stopPropagation}
             >
               ${this._reverseDelays.map(
                 (reverseDelay) => html`
@@ -92,25 +91,25 @@ export class LCNConfigCoverElement extends LitElement {
               )}
             </ha-select>
           `
-        : html``}
+        : nothing}
     `;
   }
 
   private _motorChanged(ev: CustomEvent): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._motor = this._motors.find((motor) => motor.value == target.value)!;
+    this._motor = this._motors.find((motor) => motor.value === target.value)!;
     this._reverseDelay = this._reverseDelays[0];
     this.domainData.motor = this._motor.value;
   }
 
   private _reverseDelayChanged(ev: CustomEvent): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
     this._reverseDelay = this._reverseDelays.find(
-      (reverseDelay) => reverseDelay.value == target.value,
+      (reverseDelay) => reverseDelay.value === target.value,
     )!;
     this.domainData.reverse_time = this._reverseDelay.value;
   }

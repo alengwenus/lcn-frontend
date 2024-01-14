@@ -1,11 +1,12 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
-import { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
+import type { HaSelect } from "@ha/components/ha-select";
+import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
 import { customElement, property, query } from "lit/decorators";
-import { HomeAssistant } from "@ha/types";
+import type { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { LCN, SensorConfig } from "types/lcn";
+import { stopPropagation } from "@ha/common/dom/stop_propagation";
+import type { LCN, SensorConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
@@ -194,9 +195,9 @@ export class LCNConfigSensorElement extends LitElement {
     this._unit = this._varUnits[0];
   }
 
-  protected render(): TemplateResult {
+  protected render() {
     if (!(this._sourceType || this._source)) {
-      return html``;
+      return nothing;
     }
     return html`
       <div class="sources">
@@ -206,7 +207,7 @@ export class LCNConfigSensorElement extends LitElement {
           .value=${this._sourceType.id}
           fixedMenuPosition
           @selected=${this._sourceTypeChanged}
-          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+          @closed=${stopPropagation}
         >
           ${this._sourceTypes.map(
             (sourceType) => html`
@@ -221,7 +222,7 @@ export class LCNConfigSensorElement extends LitElement {
           .value=${this._source.value}
           fixedMenuPosition
           @selected=${this._sourceChanged}
-          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+          @closed=${stopPropagation}
         >
           ${this._sourceType.value.map(
             (source) => html`
@@ -237,7 +238,7 @@ export class LCNConfigSensorElement extends LitElement {
         .value=${this._unit.value}
         fixedMenuPosition
         @selected=${this._unitChanged}
-        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+        @closed=${stopPropagation}
       >
         ${this._varUnits.map(
           (unit) => html` <ha-list-item .value=${unit.value}> ${unit.name} </ha-list-item> `,
@@ -248,30 +249,30 @@ export class LCNConfigSensorElement extends LitElement {
 
   private _sourceTypeChanged(ev: CustomEvent): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._sourceType = this._sourceTypes.find((sourceType) => sourceType.id == target.value)!;
+    this._sourceType = this._sourceTypes.find((sourceType) => sourceType.id === target.value)!;
     this._source = this._sourceType.value[0];
     this._sourceSelect.select(-1); // need to change index, so ha-select gets updated
   }
 
   private _sourceChanged(ev: CustomEvent): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._source = this._sourceType.value.find((source) => source.value == target.value)!;
+    this._source = this._sourceType.value.find((source) => source.value === target.value)!;
     this.domainData.source = this._source.value;
   }
 
   private _unitChanged(ev: CustomEvent): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._unit = this._varUnits.find((unit) => unit.value == target.value)!;
+    this._unit = this._varUnits.find((unit) => unit.value === target.value)!;
     this.domainData.unit_of_measurement = this._unit.value;
   }
 
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup[] {
     return [
       haStyleDialog,
       css`

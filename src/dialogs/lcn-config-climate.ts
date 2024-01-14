@@ -1,13 +1,14 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
-import { HaSelect } from "@ha/components/ha-select";
+import type { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-textfield";
-import { HaTextField } from "@ha/components/ha-textfield";
+import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-switch";
-import { HaSwitch } from "@ha/components/ha-switch";
-import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
+import type { HaSwitch } from "@ha/components/ha-switch";
+import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
 import { customElement, property } from "lit/decorators";
-import { HomeAssistant, ValueChangedEvent } from "@ha/types";
+import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
+import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
 import { LCN, ClimateConfig } from "types/lcn";
 
@@ -116,9 +117,9 @@ export class LCNConfigClimateElement extends LitElement {
     );
   }
 
-  protected render(): TemplateResult {
+  protected render() {
     if (!(this._source || this._setpoint || this._unit)) {
-      return html``;
+      return nothing;
     }
     return html`
       <div class="sources">
@@ -128,7 +129,7 @@ export class LCNConfigClimateElement extends LitElement {
           .value=${this._source.value}
           fixedMenuPosition
           @selected=${this._sourceChanged}
-          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+          @closed=${stopPropagation}
         >
           ${this._sources.map(
             (source) => html`
@@ -143,7 +144,7 @@ export class LCNConfigClimateElement extends LitElement {
           .value=${this._setpoint.value}
           fixedMenuPosition
           @selected=${this._setpointChanged}
-          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+          @closed=${stopPropagation}
         >
           ${this._setpoints.map(
             (setpoint) => html`
@@ -169,7 +170,7 @@ export class LCNConfigClimateElement extends LitElement {
         required
         autoValidate
         @input=${this._minTempChanged}
-        .validityTransform=${(value: string) => ({ valid: this._validateMinTemp(+value) })}
+        .validityTransform=${this._validityTransformMinTemp}
         .validationMessage=${this.lcn.localize(
           "dashboard-entities-dialog-climate-min-temperature-error",
         )}
@@ -183,7 +184,7 @@ export class LCNConfigClimateElement extends LitElement {
         required
         autoValidate
         @input=${this._maxTempChanged}
-        .validityTransform=${(value: string) => ({ valid: this._validateMaxTemp(+value) })}
+        .validityTransform=${this._validityTransformMaxTemp}
         .validationMessage=${this.lcn.localize(
           "dashboard-entities-dialog-climate-max-temperature-error",
         )}
@@ -195,7 +196,7 @@ export class LCNConfigClimateElement extends LitElement {
         .value=${this._unit.value}
         fixedMenuPosition
         @selected=${this._unitChanged}
-        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+        @closed=${stopPropagation}
       >
         ${this._varUnits.map(
           (unit) => html` <ha-list-item .value=${unit.value}> ${unit.name} </ha-list-item> `,
@@ -206,17 +207,17 @@ export class LCNConfigClimateElement extends LitElement {
 
   private _sourceChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._source = this._sources.find((source) => source.value == target.value)!;
+    this._source = this._sources.find((source) => source.value === target.value)!;
     this.domainData.source = this._source.value;
   }
 
   private _setpointChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._setpoint = this._setpoints.find((setpoint) => setpoint.value == target.value)!;
+    this._setpoint = this._setpoints.find((setpoint) => setpoint.value === target.value)!;
     this.domainData.setpoint = this._setpoint.value;
   }
 
@@ -242,9 +243,9 @@ export class LCNConfigClimateElement extends LitElement {
 
   private _unitChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._unit = this._varUnits.find((unit) => unit.value == target.value)!;
+    this._unit = this._varUnits.find((unit) => unit.value === target.value)!;
     this.domainData.unit_of_measurement = this._unit.value;
   }
 
@@ -256,7 +257,15 @@ export class LCNConfigClimateElement extends LitElement {
     return min_temp < this.domainData.max_temp;
   }
 
-  static get styles(): CSSResult[] {
+  private get _validityTransformMaxTemp() {
+    return (value: string) => ({ valid: this._validateMaxTemp(+value) });
+  }
+
+  private get _validityTransformMinTemp() {
+    return (value: string) => ({ valid: this._validateMinTemp(+value) });
+  }
+
+  static get styles(): CSSResultGroup[] {
     return [
       haStyleDialog,
       css`

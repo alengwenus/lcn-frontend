@@ -1,13 +1,14 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
-import { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
+import type { HaSelect } from "@ha/components/ha-select";
+import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
 import { customElement, property, query } from "lit/decorators";
-import { HomeAssistant, ValueChangedEvent } from "@ha/types";
+import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { LCN, SwitchConfig } from "types/lcn";
+import type { LCN, SwitchConfig } from "types/lcn";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
+import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import type { HaRadio } from "@ha/components/ha-radio";
 
 interface ConfigItem {
@@ -72,9 +73,9 @@ export class LCNConfigSwitchElement extends LitElement {
     this._port = this._portType.value[0];
   }
 
-  protected render(): TemplateResult {
+  protected render() {
     if (!(this._portType || this._port)) {
-      return html``;
+      return nothing;
     }
     return html`
       <div id="port-type">${this.lcn.localize("port-type")}</div>
@@ -103,7 +104,7 @@ export class LCNConfigSwitchElement extends LitElement {
         .value=${this._port.value}
         fixedMenuPosition
         @selected=${this._portChanged}
-        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+        @closed=${stopPropagation}
       >
         ${this._portType.value.map(
           (port) => html` <ha-list-item .value=${port.value}> ${port.name} </ha-list-item> `,
@@ -115,20 +116,20 @@ export class LCNConfigSwitchElement extends LitElement {
   private _portTypeChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaRadio;
 
-    this._portType = this._portTypes.find((portType) => portType.id == target.value)!;
+    this._portType = this._portTypes.find((portType) => portType.id === target.value)!;
     this._port = this._portType.value[0];
     this._portSelect.select(-1); // need to change index, so ha-select gets updated
   }
 
   private _portChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._port = this._portType.value.find((portType) => portType.value == target.value)!;
+    this._port = this._portType.value.find((portType) => portType.value === target.value)!;
     this.domainData.output = this._port.value;
   }
 
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup[] {
     return [
       haStyleDialog,
       css`

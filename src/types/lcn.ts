@@ -1,4 +1,4 @@
-import { HomeAssistant } from "@ha/types";
+import type { HomeAssistant } from "@ha/types";
 import { ConfigEntry } from "@ha/data/config_entries";
 
 export interface LCN {

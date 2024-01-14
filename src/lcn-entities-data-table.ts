@@ -4,7 +4,7 @@ import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import { mdiDelete } from "@mdi/js";
 import { computeRTLDirection } from "@ha/common/util/compute_rtl";
-import { HomeAssistant } from "@ha/types";
+import type { HomeAssistant } from "@ha/types";
 import { LCN, LcnEntityConfig, deleteEntity, LcnDeviceConfig, LcnAddress } from "types/lcn";
 import { DataTableColumnContainer } from "@ha/components/data-table/ha-data-table";
 

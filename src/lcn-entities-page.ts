@@ -1,7 +1,7 @@
 import { html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
-import { HomeAssistant, Route } from "@ha/types";
+import type { HomeAssistant, Route } from "@ha/types";
 import "@ha/layouts/hass-tabs-subpage";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import "@ha/panels/config/ha-config-section";

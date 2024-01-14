@@ -2,14 +2,14 @@ import "@ha/components/ha-icon-button";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import { fireEvent } from "@ha/common/dom/fire_event";
-import { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, TemplateResult, CSSResultGroup } from "lit";
+import type { HaSelect } from "@ha/components/ha-select";
+import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { createCloseHeading } from "@ha/components/ha-dialog";
+import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
-import { HomeAssistant } from "@ha/types";
-import { LcnEntityDialogParams } from "./show-dialog-create-entity";
-import { LCN, LcnEntityConfig } from "types/lcn";
+import type { HomeAssistant } from "@ha/types";
+import type { LCN, LcnEntityConfig } from "types/lcn";
 import "./lcn-config-binary-sensor";
 import "./lcn-config-climate";
 import "./lcn-config-cover";
@@ -17,8 +17,9 @@ import "./lcn-config-light";
 import "./lcn-config-scene";
 import "./lcn-config-sensor";
 import "./lcn-config-switch";
-import { HaTextField } from "@ha/components/ha-textfield";
+import type { HaTextField } from "@ha/components/ha-textfield";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
+import type { LcnEntityDialogParams } from "./show-dialog-create-entity";
 
 interface DomainItem {
   name: string;
@@ -59,9 +60,9 @@ export class CreateEntityDialog extends LitElement {
     await this.updateComplete;
   }
 
-  protected render(): TemplateResult {
+  protected render() {
     if (!this._params) {
-      return html``;
+      return nothing;
     }
     return html`
       <ha-dialog
@@ -80,7 +81,7 @@ export class CreateEntityDialog extends LitElement {
           .value=${this.domain}
           fixedMenuPosition
           @selected=${this._domainChanged}
-          @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+          @closed=${stopPropagation}
         >
           ${this._domains.map(
             (domain) => html`
@@ -117,7 +118,7 @@ export class CreateEntityDialog extends LitElement {
     `;
   }
 
-  private renderDomain(domain: string): TemplateResult {
+  private renderDomain(domain: string) {
     switch (domain) {
       case "binary_sensor":
         return html`<lcn-config-binary-sensor-element
@@ -168,7 +169,7 @@ export class CreateEntityDialog extends LitElement {
           .lcn=${this.lcn}
         ></lcn-config-switch-element>`;
       default:
-        return html``;
+        return nothing;
     }
   }
 

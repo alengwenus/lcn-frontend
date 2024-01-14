@@ -7,11 +7,11 @@ import { navigate } from "@ha/common/navigate";
 import { makeDialogManager } from "@ha/dialogs/make-dialog-manager";
 import "@ha/resources/ha-style";
 import { getConfigEntries } from "@ha/data/config_entries";
-import { HomeAssistant, Route } from "@ha/types";
+import type { HomeAssistant, Route } from "@ha/types";
 
 import "./lcn-router";
-import { localize } from "./localize/localize";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
+import { localize } from "./localize/localize";
 import { LCN, LcnHost, LcnAddress } from "./types/lcn";
 import { LocationChangedEvent } from "./types/navigation";
 

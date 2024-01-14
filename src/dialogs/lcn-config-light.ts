@@ -1,17 +1,18 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
-import { HaSelect } from "@ha/components/ha-select";
+import type { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield";
-import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
+import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import type { HaRadio } from "@ha/components/ha-radio";
-import { HaSwitch } from "@ha/components/ha-switch";
-import { HaTextField } from "@ha/components/ha-textfield";
-import { HomeAssistant, ValueChangedEvent } from "@ha/types";
+import type { HaSwitch } from "@ha/components/ha-switch";
+import type { HaTextField } from "@ha/components/ha-textfield";
+import { stopPropagation } from "@ha/common/dom/stop_propagation";
+import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { LCN, LightConfig } from "types/lcn";
+import type { LCN, LightConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
@@ -97,9 +98,9 @@ export class LCNConfigLightElement extends LitElement {
     );
   }
 
-  protected render(): TemplateResult {
+  protected render() {
     if (!(this._portType || this._port)) {
-      return html``;
+      return nothing;
     }
     return html`
       <div id="port-type">${this.lcn.localize("port-type")}</div>
@@ -128,7 +129,7 @@ export class LCNConfigLightElement extends LitElement {
         .value=${this._port.value}
         fixedMenuPosition
         @selected=${this._portChanged}
-        @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+        @closed=${stopPropagation}
       >
         ${this._portType.value.map(
           (port) => html` <ha-list-item .value=${port.value}> ${port.name} </ha-list-item> `,
@@ -162,32 +163,32 @@ export class LCNConfigLightElement extends LitElement {
             required
             autoValidate
             @input=${this._transitionChanged}
-            .validityTransform=${(value: string) => ({ valid: this._validateTransition(+value) })}
+            .validityTransform=${this._validityTransformTransition}
             .validationMessage=${this.lcn.localize(
               "dashboard-entities-dialog-light-transition-error",
             )}
           ></ha-textfield>
         `;
       case "relay":
-        return html``;
+        return nothing;
       default:
-        return html``;
+        return nothing;
     }
   }
 
   private _portTypeChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaRadio;
 
-    this._portType = this._portTypes.find((portType) => portType.id == target.value)!;
+    this._portType = this._portTypes.find((portType) => portType.id === target.value)!;
     this._port = this._portType.value[0];
     this._portSelect.select(-1); // need to change index, so ha-select gets updated
   }
 
   private _portChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaSelect;
-    if (target.index == -1) return;
+    if (target.index === -1) return;
 
-    this._port = this._portType.value.find((portType) => portType.value == target.value)!;
+    this._port = this._portType.value.find((portType) => portType.value === target.value)!;
     this.domainData.output = this._port.value;
   }
 
@@ -205,7 +206,11 @@ export class LCNConfigLightElement extends LitElement {
     return transition >= 0 && transition <= 486;
   }
 
-  static get styles(): CSSResult[] {
+  private get _validityTransformTransition() {
+    return (value: string) => ({ valid: this._validateTransition(+value) });
+  }
+
+  static get styles(): CSSResultGroup[] {
     return [
       haStyleDialog,
       css`

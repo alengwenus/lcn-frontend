@@ -4,11 +4,11 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@ha/components/ha-fab";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
-import { HaSelect } from "@ha/components/ha-select";
+import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
-import { HomeAssistant, Route } from "@ha/types";
+import type { HomeAssistant, Route } from "@ha/types";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/layouts/hass-tabs-subpage";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
@@ -16,13 +16,6 @@ import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
-import { ProgressDialog } from "./dialogs/progress-dialog";
-import {
-  loadLCNCreateDeviceDialog,
-  showLCNCreateDeviceDialog,
-} from "./dialogs/show-dialog-create-device";
-import { loadProgressDialog, showProgressDialog } from "./dialogs/show-dialog-progress";
-import "./lcn-devices-data-table";
 import {
   LCN,
   fetchHosts,
@@ -32,6 +25,13 @@ import {
   LcnHost,
   LcnDeviceConfig,
 } from "types/lcn";
+import { ProgressDialog } from "./dialogs/progress-dialog";
+import {
+  loadLCNCreateDeviceDialog,
+  showLCNCreateDeviceDialog,
+} from "./dialogs/show-dialog-create-device";
+import { loadProgressDialog, showProgressDialog } from "./dialogs/show-dialog-progress";
+import "./lcn-devices-data-table";
 
 @customElement("lcn-config-dashboard")
 export class LCNConfigDashboard extends LitElement {
@@ -124,7 +124,7 @@ export class LCNConfigDashboard extends LitElement {
 
   private _hostChanged(ev: CustomEvent) {
     const target = ev.target as HaSelect;
-    const host: LcnHost = this._hosts.find((host) => host.id == target.value)!;
+    const host: LcnHost = this._hosts.find((el) => el.id === target.value)!;
     this.lcn.host = host;
     this._fetchDevices(this.lcn.host);
   }
