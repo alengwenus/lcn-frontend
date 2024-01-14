@@ -1,9 +1,6 @@
 import { mdiFolderMultipleOutline } from "@mdi/js";
 import { customElement, property, state } from "lit/decorators";
-import {
-  HassRouterPage,
-  RouterOptions,
-} from "@ha/layouts/hass-router-page";
+import { HassRouterPage, RouterOptions } from "@ha/layouts/hass-router-page";
 import { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import { HomeAssistant, Route } from "@ha/types";
 import { LCN } from "./types/lcn";

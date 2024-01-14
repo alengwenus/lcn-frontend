@@ -1,14 +1,7 @@
-import "@ha/components/ha-list-item"
-import "@ha/components/ha-select"
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
-import {
-  css,
-  html,
-  LitElement,
-  TemplateResult,
-  CSSResult,
-  PropertyValues
-} from "lit";
+import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -50,7 +43,7 @@ export class LCNConfigSwitchElement extends LitElement {
       { name: output + " 3", value: "OUTPUT3" },
       { name: output + " 4", value: "OUTPUT4" },
     ];
-  };
+  }
 
   private get _relayPorts(): ConfigItem[] {
     const relay: string = this.lcn.localize("relay");
@@ -64,14 +57,14 @@ export class LCNConfigSwitchElement extends LitElement {
       { name: relay + " 7", value: "RELAY7" },
       { name: relay + " 8", value: "RELAY8" },
     ];
-  };
+  }
 
   private get _portTypes(): ConfigItemCollection[] {
     return [
       { name: this.lcn.localize("output"), value: this._outputPorts, id: "output" },
       { name: this.lcn.localize("relay"), value: this._relayPorts, id: "relay" },
     ];
-  };
+  }
 
   protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -84,13 +77,9 @@ export class LCNConfigSwitchElement extends LitElement {
       return html``;
     }
     return html`
-      <div id="port-type">
-        ${this.lcn.localize("port-type")}
-      </div>
+      <div id="port-type">${this.lcn.localize("port-type")}</div>
 
-      <ha-formfield
-        label=${this.lcn.localize("output")}
-      >
+      <ha-formfield label=${this.lcn.localize("output")}>
         <ha-radio
           name="port"
           value="output"
@@ -99,9 +88,7 @@ export class LCNConfigSwitchElement extends LitElement {
         ></ha-radio>
       </ha-formfield>
 
-      <ha-formfield
-        label=${this.lcn.localize("relay")}
-      >
+      <ha-formfield label=${this.lcn.localize("relay")}>
         <ha-radio
           name="port"
           value="relay"
@@ -119,12 +106,8 @@ export class LCNConfigSwitchElement extends LitElement {
         @closed=${(ev: CustomEvent) => ev.stopPropagation()}
       >
         ${this._portType.value.map(
-            (port) => html`
-              <ha-list-item .value=${port.value}>
-                ${port.name}
-              </ha-list-item>
-            `
-          )}
+          (port) => html` <ha-list-item .value=${port.value}> ${port.name} </ha-list-item> `,
+        )}
       </ha-select>
     `;
   }
@@ -149,13 +132,13 @@ export class LCNConfigSwitchElement extends LitElement {
     return [
       haStyleDialog,
       css`
-      #port-type {
-        margin-top: 16px;
-      }
-      ha-select {
-        display: block;
-        margin-bottom: 8px;
-      }
+        #port-type {
+          margin-top: 16px;
+        }
+        ha-select {
+          display: block;
+          margin-bottom: 8px;
+        }
       `,
     ];
   }

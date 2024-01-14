@@ -1,14 +1,7 @@
-import "@ha/components/ha-list-item"
-import "@ha/components/ha-select"
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
-import {
-  css,
-  html,
-  LitElement,
-  TemplateResult,
-  CSSResult,
-  PropertyValues
-} from "lit";
+import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -72,7 +65,7 @@ export class LCNConfigSensorElement extends LitElement {
       { name: variable + " 11", value: "VAR11" },
       { name: variable + " 12", value: "VAR12" },
     ];
-  };
+  }
 
   private get _setpoints(): ConfigItem[] {
     const setpoint: string = this.lcn.localize("setpoint");
@@ -80,7 +73,7 @@ export class LCNConfigSensorElement extends LitElement {
       { name: setpoint + " 1", value: "R1VARSETPOINT" },
       { name: setpoint + " 2", value: "R2VARSETPOINT" },
     ];
-  };
+  }
 
   private get _thresholdsOld(): ConfigItem[] {
     const threshold: string = this.lcn.localize("threshold");
@@ -91,7 +84,7 @@ export class LCNConfigSensorElement extends LitElement {
       { name: threshold + " 4", value: "THRS4" },
       { name: threshold + " 5", value: "THRS5" },
     ];
-  };
+  }
 
   private get _thresholdsNew(): ConfigItem[] {
     const threshold: string = this.lcn.localize("threshold");
@@ -113,7 +106,7 @@ export class LCNConfigSensorElement extends LitElement {
       { name: threshold + " 4-3", value: "THRS4_3" },
       { name: threshold + " 4-4", value: "THRS4_4" },
     ];
-  };
+  }
 
   private get _s0Inputs(): ConfigItem[] {
     const s0input: string = this.lcn.localize("s0input");
@@ -123,7 +116,7 @@ export class LCNConfigSensorElement extends LitElement {
       { name: s0input + " 3", value: "S0INPUT3" },
       { name: s0input + " 4", value: "S0INPUT4" },
     ];
-  };
+  }
 
   private get _ledPorts(): ConfigItem[] {
     const led: string = this.lcn.localize("led");
@@ -141,7 +134,7 @@ export class LCNConfigSensorElement extends LitElement {
       { name: led + " 11", value: "LED11" },
       { name: led + " 12", value: "LED12" },
     ];
-  };
+  }
 
   private get _logicOpPorts(): ConfigItem[] {
     const logic: string = this.lcn.localize("logic");
@@ -151,22 +144,24 @@ export class LCNConfigSensorElement extends LitElement {
       { name: logic + " 3", value: "LOGICOP3" },
       { name: logic + " 4", value: "LOGICOP4" },
     ];
-  };
+  }
 
   private get _sourceTypes(): ConfigItemCollection[] {
     return [
       {
         name: this.lcn.localize("variables"),
         value: this._is2013 ? this._variablesNew : this._variablesOld,
-        id: "variables"
+        id: "variables",
       },
       {
-        name: this.lcn.localize("setpoints"), value: this._setpoints, id: "setpoints"
+        name: this.lcn.localize("setpoints"),
+        value: this._setpoints,
+        id: "setpoints",
       },
       {
         name: this.lcn.localize("thresholds"),
         value: this._is2013 ? this._thresholdsNew : this._thresholdsOld,
-        id: "thresholds"
+        id: "thresholds",
       },
       { name: this.lcn.localize("s0inputs"), value: this._s0Inputs, id: "s0inputs" },
       { name: this.lcn.localize("leds"), value: this._ledPorts, id: "ledports" },
@@ -189,7 +184,7 @@ export class LCNConfigSensorElement extends LitElement {
       { name: this.lcn.localize("unit-milliamperes"), value: "AMPERE" },
       { name: this.lcn.localize("unit-angle") + " (°)", value: "DEGREE" },
     ];
-  };
+  }
 
   protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -215,10 +210,8 @@ export class LCNConfigSensorElement extends LitElement {
         >
           ${this._sourceTypes.map(
             (sourceType) => html`
-              <ha-list-item .value=${sourceType.id}>
-                ${sourceType.name}
-              </ha-list-item>
-            `
+              <ha-list-item .value=${sourceType.id}> ${sourceType.name} </ha-list-item>
+            `,
           )}
         </ha-select>
 
@@ -232,10 +225,8 @@ export class LCNConfigSensorElement extends LitElement {
         >
           ${this._sourceType.value.map(
             (source) => html`
-              <ha-list-item .value=${source.value}>
-                ${source.name}
-              </ha-list-item>
-              `
+              <ha-list-item .value=${source.value}> ${source.name} </ha-list-item>
+            `,
           )}
         </ha-select>
       </div>
@@ -249,12 +240,8 @@ export class LCNConfigSensorElement extends LitElement {
         @closed=${(ev: CustomEvent) => ev.stopPropagation()}
       >
         ${this._varUnits.map(
-            (unit) => html`
-              <ha-list-item .value=${unit.value}>
-                ${unit.name}
-              </ha-list-item>
-            `
-          )}
+          (unit) => html` <ha-list-item .value=${unit.value}> ${unit.name} </ha-list-item> `,
+        )}
       </ha-select>
     `;
   }

@@ -1,18 +1,11 @@
-import "@ha/components/ha-list-item"
-import "@ha/components/ha-select"
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-textfield";
 import { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-switch";
 import { HaSwitch } from "@ha/components/ha-switch";
-import {
-  css,
-  html,
-  LitElement,
-  TemplateResult,
-  CSSResult,
-  PropertyValues,
-} from "lit";
+import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators";
 import { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -50,7 +43,7 @@ export class LCNConfigClimateElement extends LitElement {
 
   private get _is2012() {
     return this.softwareSerial >= 0x160000;
-  };
+  }
 
   private get _variablesNew(): ConfigItem[] {
     const variable: string = this.lcn.localize("variable");
@@ -67,9 +60,8 @@ export class LCNConfigClimateElement extends LitElement {
       { name: variable + " 10", value: "VAR10" },
       { name: variable + " 11", value: "VAR11" },
       { name: variable + " 12", value: "VAR12" },
-  ];
-};
-
+    ];
+  }
 
   private _variablesOld: ConfigItem[] = [
     { name: "TVar", value: "TVAR" },
@@ -83,7 +75,7 @@ export class LCNConfigClimateElement extends LitElement {
       { name: setpoint + " 1", value: "R1VARSETPOINT" },
       { name: setpoint + " 2", value: "R2VARSETPOINT" },
     ];
-  };
+  }
 
   private _varUnits: ConfigItem[] = [
     { name: "Celsius", value: "°C" },
@@ -95,9 +87,7 @@ export class LCNConfigClimateElement extends LitElement {
   }
 
   private get _setpoints(): ConfigItem[] {
-    return this._is2012
-      ? this._varSetpoints.concat(this._variablesNew)
-      : this._varSetpoints;
+    return this._is2012 ? this._varSetpoints.concat(this._variablesNew) : this._varSetpoints;
   }
 
   protected async firstUpdated(changedProperties: PropertyValues) {
@@ -122,7 +112,7 @@ export class LCNConfigClimateElement extends LitElement {
         detail: this._invalid,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -142,10 +132,8 @@ export class LCNConfigClimateElement extends LitElement {
         >
           ${this._sources.map(
             (source) => html`
-              <ha-list-item .value=${source.value}>
-                ${source.name}
-              </ha-list-item>
-            `
+              <ha-list-item .value=${source.value}> ${source.name} </ha-list-item>
+            `,
           )}
         </ha-select>
 
@@ -159,10 +147,8 @@ export class LCNConfigClimateElement extends LitElement {
         >
           ${this._setpoints.map(
             (setpoint) => html`
-              <ha-list-item .value=${setpoint.value}>
-                ${setpoint.name}
-              </ha-list-item>
-            `
+              <ha-list-item .value=${setpoint.value}> ${setpoint.name} </ha-list-item>
+            `,
           )}
         </ha-select>
       </div>
@@ -183,8 +169,10 @@ export class LCNConfigClimateElement extends LitElement {
         required
         autoValidate
         @input=${this._minTempChanged}
-        .validityTransform=${(value: string) => ({ valid: this._validateMinTemp(+value) }) }
-        .validationMessage=${this.lcn.localize("dashboard-entities-dialog-climate-min-temperature-error")}
+        .validityTransform=${(value: string) => ({ valid: this._validateMinTemp(+value) })}
+        .validationMessage=${this.lcn.localize(
+          "dashboard-entities-dialog-climate-min-temperature-error",
+        )}
       ></ha-textfield>
 
       <ha-textfield
@@ -195,8 +183,10 @@ export class LCNConfigClimateElement extends LitElement {
         required
         autoValidate
         @input=${this._maxTempChanged}
-        .validityTransform=${(value: string) => ({ valid: this._validateMaxTemp(+value) }) }
-        .validationMessage=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature-error")}
+        .validityTransform=${(value: string) => ({ valid: this._validateMaxTemp(+value) })}
+        .validationMessage=${this.lcn.localize(
+          "dashboard-entities-dialog-climate-max-temperature-error",
+        )}
       ></ha-textfield>
 
       <ha-select
@@ -208,11 +198,7 @@ export class LCNConfigClimateElement extends LitElement {
         @closed=${(ev: CustomEvent) => ev.stopPropagation()}
       >
         ${this._varUnits.map(
-          (unit) => html`
-            <ha-list-item .value=${unit.value}>
-              ${unit.name}
-            </ha-list-item>
-          `
+          (unit) => html` <ha-list-item .value=${unit.value}> ${unit.name} </ha-list-item> `,
         )}
       </ha-select>
     `;
@@ -237,7 +223,7 @@ export class LCNConfigClimateElement extends LitElement {
   private _minTempChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaTextField;
     this.domainData.min_temp = +target.value;
-    const maxTextfield: HaTextField = this.shadowRoot!.querySelector('#max-textfield')!;
+    const maxTextfield: HaTextField = this.shadowRoot!.querySelector("#max-textfield")!;
     maxTextfield.reportValidity();
     this.requestUpdate();
   }
@@ -245,7 +231,7 @@ export class LCNConfigClimateElement extends LitElement {
   private _maxTempChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaTextField;
     this.domainData.max_temp = +target.value;
-    const minTextfield: HaTextField = this.shadowRoot!.querySelector('#min-textfield')!;
+    const minTextfield: HaTextField = this.shadowRoot!.querySelector("#min-textfield")!;
     minTextfield.reportValidity();
     this.requestUpdate();
   }

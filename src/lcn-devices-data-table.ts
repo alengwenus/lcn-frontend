@@ -8,12 +8,7 @@ import type { DataTableColumnContainer } from "@ha/components/data-table/ha-data
 import type { HomeAssistant, Route } from "@ha/types";
 import { showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import { navigate } from "@ha/common/navigate";
-import {
-  LCN,
-  LcnDeviceConfig,
-  deleteDevice,
-  LcnAddress,
-} from "types/lcn";
+import { LCN, LcnDeviceConfig, deleteDevice, LcnAddress } from "types/lcn";
 import "@ha/components/ha-icon-button";
 import { loadLCNCreateDeviceDialog } from "./dialogs/show-dialog-create-device";
 
@@ -41,9 +36,7 @@ export class LCNDevicesDataTable extends LitElement {
       ...device,
       segment_id: device.address[0],
       address_id: device.address[1],
-      type: device.address[2]
-        ? this.lcn.localize("group")
-        : this.lcn.localize("module"),
+      type: device.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
       delete: device,
     }));
     return deviceRowData;
@@ -66,7 +59,7 @@ export class LCNDevicesDataTable extends LitElement {
               sortable: true,
               direction: "asc",
               grows: true,
-              width: "40%"
+              width: "40%",
             },
             segment_id: {
               title: this.lcn.localize("segment"),
@@ -101,7 +94,7 @@ export class LCNDevicesDataTable extends LitElement {
                 `;
               },
             },
-          }
+          },
   );
 
   protected firstUpdated(changedProperties) {
@@ -139,7 +132,7 @@ export class LCNDevicesDataTable extends LitElement {
       new CustomEvent("lcn-config-changed", {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -152,23 +145,24 @@ export class LCNDevicesDataTable extends LitElement {
       (device) =>
         device.address[0] === address[0] &&
         device.address[1] === address[1] &&
-        device.address[2] === address[2]
+        device.address[2] === address[2],
     )!;
 
     if (
       !(await showConfirmationDialog(this, {
         title: `
-          ${device_to_delete.address[2]
-          ? this.lcn.localize("dashboard-devices-dialog-delete-group-title")
-          : this.lcn.localize("dashboard-devices-dialog-delete-module-title")
-        }`,
+          ${
+            device_to_delete.address[2]
+              ? this.lcn.localize("dashboard-devices-dialog-delete-group-title")
+              : this.lcn.localize("dashboard-devices-dialog-delete-module-title")
+          }`,
         text: html`${this.lcn.localize("dashboard-devices-dialog-delete-text")}
           ${device_to_delete.name ? `'${device_to_delete.name}'` : ""}
           (${device_to_delete.address[2]
             ? this.lcn.localize("group")
             : this.lcn.localize("module")}:
-          ${this.lcn.localize("segment")} ${device_to_delete.address[0]},
-          ${this.lcn.localize("id")} ${device_to_delete.address[1]})
+          ${this.lcn.localize("segment")} ${device_to_delete.address[0]}, ${this.lcn.localize("id")}
+          ${device_to_delete.address[1]})
           <br />
           ${this.lcn.localize("dashboard-devices-dialog-delete-warning")}`,
       }))

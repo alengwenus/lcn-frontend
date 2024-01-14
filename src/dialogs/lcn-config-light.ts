@@ -1,17 +1,10 @@
-import "@ha/components/ha-list-item"
-import "@ha/components/ha-select"
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
-import "@ha/components/ha-textfield"
-import {
-  css,
-  html,
-  LitElement,
-  TemplateResult,
-  CSSResult,
-  PropertyValues,
-} from "lit";
+import "@ha/components/ha-textfield";
+import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import type { HaRadio } from "@ha/components/ha-radio";
 import { HaSwitch } from "@ha/components/ha-switch";
@@ -59,7 +52,7 @@ export class LCNConfigLightElement extends LitElement {
       { name: output + " 3", value: "OUTPUT3" },
       { name: output + " 4", value: "OUTPUT4" },
     ];
-  };
+  }
 
   private get _relayPorts(): ConfigItem[] {
     const relay: string = this.lcn.localize("relay");
@@ -73,14 +66,14 @@ export class LCNConfigLightElement extends LitElement {
       { name: relay + " 7", value: "RELAY7" },
       { name: relay + " 8", value: "RELAY8" },
     ];
-  };
+  }
 
   private get _portTypes(): ConfigItemCollection[] {
     return [
       { name: this.lcn.localize("output"), value: this._outputPorts, id: "output" },
       { name: this.lcn.localize("relay"), value: this._relayPorts, id: "relay" },
     ];
-  };
+  }
 
   protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -100,7 +93,7 @@ export class LCNConfigLightElement extends LitElement {
         detail: this._invalid,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -109,9 +102,7 @@ export class LCNConfigLightElement extends LitElement {
       return html``;
     }
     return html`
-      <div id="port-type">
-        ${this.lcn.localize("port-type")}
-      </div>
+      <div id="port-type">${this.lcn.localize("port-type")}</div>
 
       <ha-formfield label=${this.lcn.localize("output")}>
         <ha-radio
@@ -140,12 +131,8 @@ export class LCNConfigLightElement extends LitElement {
         @closed=${(ev: CustomEvent) => ev.stopPropagation()}
       >
         ${this._portType.value.map(
-            (port) => html`
-              <ha-list-item .value=${port.value}>
-                ${port.name}
-              </ha-list-item>
-            `
-          )}
+          (port) => html` <ha-list-item .value=${port.value}> ${port.name} </ha-list-item> `,
+        )}
       </ha-select>
 
       ${this.renderOutputFeatures()}
@@ -175,8 +162,10 @@ export class LCNConfigLightElement extends LitElement {
             required
             autoValidate
             @input=${this._transitionChanged}
-            .validityTransform=${(value: string) => ({ valid: this._validateTransition(+value) }) }
-            .validationMessage=${this.lcn.localize("dashboard-entities-dialog-light-transition-error")}
+            .validityTransform=${(value: string) => ({ valid: this._validateTransition(+value) })}
+            .validationMessage=${this.lcn.localize(
+              "dashboard-entities-dialog-light-transition-error",
+            )}
           ></ha-textfield>
         `;
       case "relay":
@@ -213,7 +202,7 @@ export class LCNConfigLightElement extends LitElement {
   }
 
   private _validateTransition(transition: number): boolean {
-    return (transition >= 0 && transition <= 486);
+    return transition >= 0 && transition <= 486;
   }
 
   static get styles(): CSSResult[] {

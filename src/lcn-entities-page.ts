@@ -8,7 +8,7 @@ import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
-import "@ha/components/ha-fab"
+import "@ha/components/ha-fab";
 import "./lcn-entities-data-table";
 import {
   LCN,
@@ -23,7 +23,6 @@ import {
   loadLCNCreateEntityDialog,
   showLCNCreateEntityDialog,
 } from "./dialogs/show-dialog-create-entity";
-
 
 @customElement("lcn-entities-page")
 export class LCNEntitiesPage extends LitElement {
@@ -60,8 +59,7 @@ export class LCNEntitiesPage extends LitElement {
         back-path="/lcn/devices"
         .tabs=${this.tabs}
       >
-        <ha-config-section
-          .narrow=${this.narrow} >
+        <ha-config-section .narrow=${this.narrow}>
           <span slot="header"> ${this.lcn.localize("dashboard-entities-title")} </span>
 
           <span slot="introduction"> ${this.lcn.localize("dashboard-entities-introduction")} </span>
@@ -84,7 +82,6 @@ export class LCNEntitiesPage extends LitElement {
               @lcn-configuration-changed=${this._configurationChanged}
             ></lcn-entities-data-table>
           </ha-card>
-
         </ha-config-section>
         <ha-fab
           slot="fab"
@@ -104,10 +101,15 @@ export class LCNEntitiesPage extends LitElement {
 
   private async _fetchEntities(host: string, address: LcnAddress) {
     const deviceConfigs = await fetchDevices(this.hass!, host);
-    const deviceConfig = deviceConfigs.find((el) => el.address[0] === address[0] && el.address[1] === address[1] && el.address[2] === address[2]);
+    const deviceConfig = deviceConfigs.find(
+      (el) =>
+        el.address[0] === address[0] &&
+        el.address[1] === address[1] &&
+        el.address[2] === address[2],
+    );
     if (deviceConfig !== undefined) {
       this._deviceConfig = deviceConfig;
-    };
+    }
     this._entityConfigs = await fetchEntities(this.hass!, host, address);
   }
 
@@ -119,11 +121,11 @@ export class LCNEntitiesPage extends LitElement {
         if (await addEntity(this.hass, this.lcn.host.id, entityParams)) {
           await this._fetchEntities(this.lcn.host.id, this.lcn.address);
           return true;
-        };
+        }
         return false;
-      }
+      },
     });
-  };
+  }
 }
 
 declare global {

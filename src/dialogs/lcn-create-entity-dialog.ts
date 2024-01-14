@@ -1,6 +1,6 @@
 import "@ha/components/ha-icon-button";
-import "@ha/components/ha-list-item"
-import "@ha/components/ha-select"
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-select";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, TemplateResult, CSSResultGroup } from "lit";
@@ -51,7 +51,7 @@ export class CreateEntityDialog extends LitElement {
       { name: this.lcn.localize("sensor"), domain: "sensor" },
       { name: this.lcn.localize("switch"), domain: "switch" },
     ];
-  };
+  }
 
   public async showDialog(params: LcnEntityDialogParams): Promise<void> {
     this._params = params;
@@ -70,8 +70,8 @@ export class CreateEntityDialog extends LitElement {
         escapeKeyAction
         .heading=${createCloseHeading(
           this.hass,
-          this.lcn.localize("dashboard-entities-dialog-create-title")
-          )}
+          this.lcn.localize("dashboard-entities-dialog-create-title"),
+        )}
         @closed=${this._closeDialog}
       >
         <ha-select
@@ -84,10 +84,8 @@ export class CreateEntityDialog extends LitElement {
         >
           ${this._domains.map(
             (domain) => html`
-              <ha-list-item .value=${domain.domain}>
-                ${domain.name}
-              </ha-list-item>
-            `
+              <ha-list-item .value=${domain.domain}> ${domain.name} </ha-list-item>
+            `,
           )}
         </ha-select>
 
@@ -193,15 +191,14 @@ export class CreateEntityDialog extends LitElement {
       domain_data: domainElement.domainData,
     };
 
-
-    if (!await this._params!.createEntity(values)) {
+    if (!(await this._params!.createEntity(values))) {
       await showAlertDialog(this, {
         title: this.lcn.localize("dashboard-entities-dialog-add-alert-title"),
         text: `${this.lcn.localize("dashboard-entities-dialog-add-alert-text")}
               ${this.lcn.localize("dashboard-entities-dialog-add-alert-hint")}`,
       });
       return;
-    };
+    }
 
     this._closeDialog();
   }
@@ -239,8 +236,6 @@ export class CreateEntityDialog extends LitElement {
     ];
   }
 }
-
-
 
 declare global {
   interface HTMLElementTagNameMap {

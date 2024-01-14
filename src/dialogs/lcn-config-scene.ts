@@ -1,18 +1,11 @@
-import "@ha/components/ha-list-item"
-import "@ha/components/ha-select"
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
-import "@ha/components/ha-textfield"
+import "@ha/components/ha-textfield";
 import { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
-import {
-  css,
-  html,
-  LitElement,
-  TemplateResult,
-  CSSResult,
-  PropertyValues,
-} from "lit";
+import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators";
 import { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -56,7 +49,7 @@ export class LCNConfigSceneElement extends LitElement {
       { name: register + " 8", value: "8" },
       { name: register + " 9", value: "9" },
     ];
-  };
+  }
 
   private get _scenes(): ConfigItem[] {
     const scene: string = this.lcn.localize("scene");
@@ -72,7 +65,7 @@ export class LCNConfigSceneElement extends LitElement {
       { name: scene + " 9", value: "8" },
       { name: scene + " 10", value: "9" },
     ];
-  };
+  }
 
   private get _outputPorts(): ConfigItem[] {
     const output: string = this.lcn.localize("output");
@@ -82,7 +75,7 @@ export class LCNConfigSceneElement extends LitElement {
       { name: output + " 3", value: "OUTPUT3" },
       { name: output + " 4", value: "OUTPUT4" },
     ];
-  };
+  }
 
   private get _relayPorts(): ConfigItem[] {
     const relay: string = this.lcn.localize("relay");
@@ -96,7 +89,7 @@ export class LCNConfigSceneElement extends LitElement {
       { name: relay + " 7", value: "RELAY7" },
       { name: relay + " 8", value: "RELAY8" },
     ];
-  };
+  }
 
   protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -117,7 +110,7 @@ export class LCNConfigSceneElement extends LitElement {
         detail: this._invalid,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -137,10 +130,8 @@ export class LCNConfigSceneElement extends LitElement {
         >
           ${this._registers.map(
             (register) => html`
-              <ha-list-item .value=${register.value}>
-                ${register.name}
-              </ha-list-item>
-              `
+              <ha-list-item .value=${register.value}> ${register.name} </ha-list-item>
+            `,
           )}
         </ha-select>
 
@@ -153,11 +144,7 @@ export class LCNConfigSceneElement extends LitElement {
           @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
           ${this._scenes.map(
-            (scene) => html`
-              <ha-list-item .value=${scene.value}>
-                ${scene.name}
-              </ha-list-item>
-              `
+            (scene) => html` <ha-list-item .value=${scene.value}> ${scene.name} </ha-list-item> `,
           )}
         </ha-select>
       </div>
@@ -167,12 +154,9 @@ export class LCNConfigSceneElement extends LitElement {
         ${this._outputPorts.map(
           (port) => html`
             <ha-formfield label=${port.name}>
-              <ha-checkbox
-                .value=${port.value}
-                @change=${this._portCheckedChanged}
-              ></ha-checkbox>
+              <ha-checkbox .value=${port.value} @change=${this._portCheckedChanged}></ha-checkbox>
             </ha-formfield>
-          `
+          `,
         )}
       </div>
 
@@ -181,12 +165,9 @@ export class LCNConfigSceneElement extends LitElement {
         ${this._relayPorts.map(
           (port) => html`
             <ha-formfield label=${port.name}>
-              <ha-checkbox
-                .value=${port.value}
-                @change=${this._portCheckedChanged}
-              ></ha-checkbox>
+              <ha-checkbox .value=${port.value} @change=${this._portCheckedChanged}></ha-checkbox>
             </ha-formfield>
-          `
+          `,
         )}
       </div>
 
@@ -199,7 +180,7 @@ export class LCNConfigSceneElement extends LitElement {
         required
         autoValidate
         @input=${this._transitionChanged}
-        .validityTransform=${(value: string) => ({ valied: this._validateTransition(+value) }) }
+        .validityTransform=${(value: string) => ({ valied: this._validateTransition(+value) })}
         .disabled=${this._transitionDisabled}
         .validationMessage=${this.lcn.localize("dashboard-entities-dialog-scene-transition-error")}
       ></ha-textfield>
@@ -226,9 +207,7 @@ export class LCNConfigSceneElement extends LitElement {
     if (ev.target.checked) {
       this.domainData.outputs.push(ev.target.value);
     } else {
-      this.domainData.outputs = this.domainData.outputs.filter(
-        (port) => ev.target.value !== port
-      );
+      this.domainData.outputs = this.domainData.outputs.filter((port) => ev.target.value !== port);
     }
     this.requestUpdate();
   }
@@ -240,15 +219,13 @@ export class LCNConfigSceneElement extends LitElement {
   }
 
   private _validateTransition(transition: number): boolean {
-    return (transition >= 0 && transition <= 486);
+    return transition >= 0 && transition <= 486;
   }
 
   private get _transitionDisabled(): boolean {
     const outputPortValues = this._outputPorts.map((port) => port.value);
     return (
-      this.domainData.outputs.filter((output) =>
-        outputPortValues.includes(output)
-      ).length === 0
+      this.domainData.outputs.filter((output) => outputPortValues.includes(output)).length === 0
     );
   }
 

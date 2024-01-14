@@ -15,7 +15,6 @@ import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
 import { LCN, LcnHost, LcnAddress } from "./types/lcn";
 import { LocationChangedEvent } from "./types/navigation";
 
-
 @customElement("lcn-frontend")
 class LcnFrontend extends ProvideHassLitMixin(LitElement) {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -27,7 +26,7 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
   @property({ attribute: false }) public route!: Route;
 
   protected firstUpdated(changedProps) {
-    super.firstUpdated(changedProps)
+    super.firstUpdated(changedProps);
     if (!this.hass) {
       return;
     }
@@ -51,30 +50,30 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       return nothing;
     }
     return html`
-    <lcn-router
-      .hass=${this.hass}
-      .lcn=${this.lcn}
-      .route=${this.route}
-      .narrow=${this.narrow}
-    ></lcn-router>
+      <lcn-router
+        .hass=${this.hass}
+        .lcn=${this.lcn}
+        .route=${this.route}
+        .narrow=${this.narrow}
+      ></lcn-router>
     `;
   }
 
   protected _initLCN() {
     getConfigEntries(this.hass, { domain: "lcn" }).then((configEntries) => {
-      const configEntry = configEntries.find((el) => el.disabled_by === null)
+      const configEntry = configEntries.find((el) => el.disabled_by === null);
 
-      if (configEntry === undefined) return
+      if (configEntry === undefined) return;
 
       this.lcn = {
         language: this.hass.language,
         config_entries: configEntries,
         localize: (string, replace) => localize(this.hass.language || "en", string, replace),
-        host: <LcnHost>({
+        host: <LcnHost>{
           name: configEntry.title,
-          id: configEntry.entry_id
-        }),
-        address: <LcnAddress>[0, 0, false]
+          id: configEntry.entry_id,
+        },
+        address: <LcnAddress>[0, 0, false],
       };
     });
   }
@@ -93,16 +92,16 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       this.parentElement,
       this.hass.themes,
       this.hass.selectedTheme?.theme ||
-      (this.hass.themes.darkMode && this.hass.themes.default_dark_theme
-        ? this.hass.themes.default_dark_theme!
-        : this.hass.themes.default_theme),
-        {
-          ...this.hass.selectedTheme,
-          dark: this.hass.themes.darkMode,
-        },
-        );
-        this.parentElement!.style.backgroundColor = "var(--primary-background-color)";
-        this.parentElement!.style.color = "var(--primary-text-color)";
+        (this.hass.themes.darkMode && this.hass.themes.default_dark_theme
+          ? this.hass.themes.default_dark_theme!
+          : this.hass.themes.default_theme),
+      {
+        ...this.hass.selectedTheme,
+        dark: this.hass.themes.darkMode,
+      },
+    );
+    this.parentElement!.style.backgroundColor = "var(--primary-background-color)";
+    this.parentElement!.style.color = "var(--primary-text-color)";
   }
 }
 

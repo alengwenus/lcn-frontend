@@ -1,5 +1,5 @@
-import "@ha/components/ha-list-item"
-import "@ha/components/ha-select"
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
@@ -34,7 +34,6 @@ export class LCNConfigCoverElement extends LitElement {
 
   @query("#reverse-delay-select") private _reverseDelaySelect;
 
-
   private get _motors(): ConfigItem[] {
     const motor: string = this.lcn.localize("motor");
     return [
@@ -59,7 +58,7 @@ export class LCNConfigCoverElement extends LitElement {
   }
 
   protected render(): TemplateResult {
-    if (!(this._motor || this._reverseDelay )) {
+    if (!(this._motor || this._reverseDelay)) {
       return html``;
     }
     return html`
@@ -72,33 +71,27 @@ export class LCNConfigCoverElement extends LitElement {
         @closed=${(ev: CustomEvent) => ev.stopPropagation()}
       >
         ${this._motors.map(
-          (motor) => html`
-            <ha-list-item .value=${motor.value}>
-              ${motor.name}
-            </ha-list-item>
-          `
+          (motor) => html` <ha-list-item .value=${motor.value}> ${motor.name} </ha-list-item> `,
         )}
       </ha-select>
 
       ${this._motor.value === "OUTPUTS"
         ? html`
-          <ha-select
-            id="reverse-delay-select"
-            .label=${this.lcn.localize("reverse-delay")}
-            .value=${this._reverseDelay.value}
-            fixedMenuPosition
-            @selected=${this._reverseDelayChanged}
-            @closed=${(ev: CustomEvent) => ev.stopPropagation()}
-          >
-            ${this._reverseDelays.map(
-              (reverseDelay) => html`
-                <ha-list-item .value=${reverseDelay.value}>
-                  ${reverseDelay.name}
-                </ha-list-item>
-              `
-            )}
-          </ha-select>
-        `
+            <ha-select
+              id="reverse-delay-select"
+              .label=${this.lcn.localize("reverse-delay")}
+              .value=${this._reverseDelay.value}
+              fixedMenuPosition
+              @selected=${this._reverseDelayChanged}
+              @closed=${(ev: CustomEvent) => ev.stopPropagation()}
+            >
+              ${this._reverseDelays.map(
+                (reverseDelay) => html`
+                  <ha-list-item .value=${reverseDelay.value}> ${reverseDelay.name} </ha-list-item>
+                `,
+              )}
+            </ha-select>
+          `
         : html``}
     `;
   }
@@ -108,7 +101,7 @@ export class LCNConfigCoverElement extends LitElement {
     if (target.index == -1) return;
 
     this._motor = this._motors.find((motor) => motor.value == target.value)!;
-    this._reverseDelay = this._reverseDelays[0]
+    this._reverseDelay = this._reverseDelays[0];
     this.domainData.motor = this._motor.value;
   }
 
@@ -116,7 +109,9 @@ export class LCNConfigCoverElement extends LitElement {
     const target = ev.target as HaSelect;
     if (target.index == -1) return;
 
-    this._reverseDelay = this._reverseDelays.find((reverseDelay) => reverseDelay.value == target.value)!;
+    this._reverseDelay = this._reverseDelays.find(
+      (reverseDelay) => reverseDelay.value == target.value,
+    )!;
     this.domainData.reverse_time = this._reverseDelay.value;
   }
 

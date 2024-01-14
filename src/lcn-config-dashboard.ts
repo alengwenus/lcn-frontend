@@ -2,17 +2,10 @@ import { haStyle } from "@ha/resources/styles";
 import "@material/mwc-button";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@ha/components/ha-fab";
-import "@ha/components/ha-list-item"
+import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
-import {
-  css,
-  html,
-  LitElement,
-  PropertyValues,
-  TemplateResult,
-  CSSResultGroup,
-} from "lit";
+import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import { HomeAssistant, Route } from "@ha/types";
@@ -28,10 +21,7 @@ import {
   loadLCNCreateDeviceDialog,
   showLCNCreateDeviceDialog,
 } from "./dialogs/show-dialog-create-device";
-import {
-  loadProgressDialog,
-  showProgressDialog,
-} from "./dialogs/show-dialog-progress";
+import { loadProgressDialog, showProgressDialog } from "./dialogs/show-dialog-progress";
 import "./lcn-devices-data-table";
 import {
   LCN,
@@ -42,7 +32,6 @@ import {
   LcnHost,
   LcnDeviceConfig,
 } from "types/lcn";
-
 
 @customElement("lcn-config-dashboard")
 export class LCNConfigDashboard extends LitElement {
@@ -62,9 +51,7 @@ export class LCNConfigDashboard extends LitElement {
 
   @query("#host-select") private _hostsSelect!: HaSelect;
 
-  protected async firstUpdated(
-    changedProperties: PropertyValues
-  ): Promise<void> {
+  protected async firstUpdated(changedProperties: PropertyValues): Promise<void> {
     super.firstUpdated(changedProperties);
     await this._fetchHosts();
     loadProgressDialog();
@@ -89,15 +76,10 @@ export class LCNConfigDashboard extends LitElement {
         .route=${this.route}
         .tabs=${this.tabs}
       >
-        <ha-config-section
-          .narrow=${this.narrow}>
-          <span slot="header">
-            ${this.lcn.localize("dashboard-devices-title")}
-        </span>
+        <ha-config-section .narrow=${this.narrow}>
+          <span slot="header"> ${this.lcn.localize("dashboard-devices-title")} </span>
 
-          <span slot="introduction">
-            ${this.lcn.localize("dashboard-devices-introduction")}
-          </span>
+          <span slot="introduction"> ${this.lcn.localize("dashboard-devices-introduction")} </span>
 
           <div id="box">
             <ha-select
@@ -108,25 +90,18 @@ export class LCNConfigDashboard extends LitElement {
               @selected=${this._hostChanged}
             >
               ${this._hosts.map(
-                (host) => html`
-                  <ha-list-item .value=${host.id}>
-                    ${host.name}
-                  </ha-list-item>
-                `
+                (host) => html` <ha-list-item .value=${host.id}> ${host.name} </ha-list-item> `,
               )}
             </ha-select>
 
-            <mwc-button
-              id="scan_devices"
-              raised
-              @click=${this._scanDevices}
-            >
+            <mwc-button id="scan_devices" raised @click=${this._scanDevices}>
               ${this.lcn.localize("dashboard-devices-scan")}
             </mwc-button>
           </div>
 
           <ha-card
-            header="${this.lcn.localize("dashboard-devices-for-host")}: ${this.lcn.host.name}">
+            header="${this.lcn.localize("dashboard-devices-for-host")}: ${this.lcn.host.name}"
+          >
             <lcn-devices-data-table
               .hass=${this.hass}
               .lcn=${this.lcn}
@@ -134,7 +109,6 @@ export class LCNConfigDashboard extends LitElement {
               .narrow=${this.narrow}
             ></lcn-devices-data-table>
           </ha-card>
-
         </ha-config-section>
         <ha-fab
           slot="fab"
@@ -145,7 +119,7 @@ export class LCNConfigDashboard extends LitElement {
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
       </hass-tabs-subpage>
-        `;
+    `;
   }
 
   private _hostChanged(ev: CustomEvent) {
@@ -166,7 +140,7 @@ export class LCNConfigDashboard extends LitElement {
   private async _scanDevices() {
     const dialog: () => ProgressDialog | undefined = showProgressDialog(this, {
       title: this.lcn.localize("dashboard-dialog-scan-devices-title"),
-      text: this.lcn.localize("dashboard-dialog-scan-devices-text")
+      text: this.lcn.localize("dashboard-dialog-scan-devices-text"),
     });
 
     this._deviceConfigs = await scanDevices(this.hass!, this.lcn.host.id);
@@ -190,18 +164,16 @@ export class LCNConfigDashboard extends LitElement {
       `,
     });
 
-    if (!await addDevice(this.hass, this.lcn.host.id, deviceParams)) {
+    if (!(await addDevice(this.hass, this.lcn.host.id, deviceParams))) {
       dialog()!.closeDialog();
       await showAlertDialog(this, {
         title: this.lcn.localize("dashboard-devices-dialog-add-alert-title"),
         text: html`${this.lcn.localize("dashboard-devices-dialog-add-alert-text")}
-              (${deviceParams.address![2]
-                ? this.lcn.localize("group")
-                : this.lcn.localize("module")}:
-              ${this.lcn.localize("segment")} ${deviceParams.address![0]},
-              ${this.lcn.localize("id")} ${deviceParams.address![1]})
-              <br />
-              ${this.lcn.localize("dashboard-devices-dialog-add-alert-hint")}`,
+          (${deviceParams.address![2] ? this.lcn.localize("group") : this.lcn.localize("module")}:
+          ${this.lcn.localize("segment")} ${deviceParams.address![0]}, ${this.lcn.localize("id")}
+          ${deviceParams.address![1]})
+          <br />
+          ${this.lcn.localize("dashboard-devices-dialog-add-alert-hint")}`,
       });
       return;
     }
@@ -226,10 +198,10 @@ export class LCNConfigDashboard extends LitElement {
           margin-top: 20px;
           justify-content: center;
         }
-        `,
-      ];
-    }
+      `,
+    ];
   }
+}
 
 declare global {
   interface HTMLElementTagNameMap {

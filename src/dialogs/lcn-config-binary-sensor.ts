@@ -1,11 +1,19 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues, PropertyValueMap } from "lit";
+import {
+  css,
+  html,
+  LitElement,
+  TemplateResult,
+  CSSResult,
+  PropertyValues,
+  PropertyValueMap,
+} from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { LCN,  BinarySensorConfig } from "types/lcn";
+import { LCN, BinarySensorConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;
@@ -35,7 +43,7 @@ export class LCNConfigBinarySensorElement extends LitElement {
   @query("#source-select") private _sourceSelect!: HaSelect;
 
   private get _binsensorPorts(): ConfigItem[] {
-    const binary_sensor: string = this.lcn.localize("binary-sensor")
+    const binary_sensor: string = this.lcn.localize("binary-sensor");
     return [
       { name: binary_sensor + " 1", value: "BINSENSOR1" },
       { name: binary_sensor + " 2", value: "BINSENSOR2" },
@@ -46,15 +54,15 @@ export class LCNConfigBinarySensorElement extends LitElement {
       { name: binary_sensor + " 7", value: "BINSENSOR7" },
       { name: binary_sensor + " 8", value: "BINSENSOR8" },
     ];
-  };
+  }
 
   private get _setpoints(): ConfigItem[] {
-    const setpoint: string = this.lcn.localize("setpoint")
+    const setpoint: string = this.lcn.localize("setpoint");
     return [
       { name: setpoint + " 1", value: "R1VARSETPOINT" },
       { name: setpoint + " 2", value: "R2VARSETPOINT" },
     ];
-  };
+  }
 
   private _keys: ConfigItem[] = [
     { name: "A1", value: "A1" },
@@ -93,11 +101,23 @@ export class LCNConfigBinarySensorElement extends LitElement {
 
   private get _sourceTypes(): ConfigItemCollection[] {
     return [
-      { name: this.lcn.localize("binary-sensor-type-binsensors"), value: this._binsensorPorts, id: "binsensors" },
-      { name: this.lcn.localize("binary-sensor-type-setpoint-locks"), value: this._setpoints, id: "setpoint-locks" },
-      { name: this.lcn.localize("binary-sensor-type-keys-locks"), value: this._keys, id: "key-locks" },
+      {
+        name: this.lcn.localize("binary-sensor-type-binsensors"),
+        value: this._binsensorPorts,
+        id: "binsensors",
+      },
+      {
+        name: this.lcn.localize("binary-sensor-type-setpoint-locks"),
+        value: this._setpoints,
+        id: "setpoint-locks",
+      },
+      {
+        name: this.lcn.localize("binary-sensor-type-keys-locks"),
+        value: this._keys,
+        id: "key-locks",
+      },
     ];
-  };
+  }
 
   protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -120,12 +140,10 @@ export class LCNConfigBinarySensorElement extends LitElement {
           @closed=${(ev: CustomEvent) => ev.stopPropagation()}
         >
           ${this._sourceTypes.map(
-              (sourceType) => html`
-                <ha-list-item .value=${sourceType.id}>
-                  ${sourceType.name}
-                </ha-list-item>
-              `
-            )}
+            (sourceType) => html`
+              <ha-list-item .value=${sourceType.id}> ${sourceType.name} </ha-list-item>
+            `,
+          )}
         </ha-select>
 
         <ha-select
@@ -138,10 +156,8 @@ export class LCNConfigBinarySensorElement extends LitElement {
         >
           ${this._sourceType.value.map(
             (source) => html`
-              <ha-list-item .value=${source.value}>
-                ${source.name}
-              </ha-list-item>
-              `
+              <ha-list-item .value=${source.value}> ${source.name} </ha-list-item>
+            `,
           )}
         </ha-select>
       </div>

@@ -4,14 +4,7 @@ import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield";
 import { fireEvent } from "@ha/common/dom/fire_event";
-import {
-  css,
-  html,
-  LitElement,
-  PropertyValues,
-  TemplateResult,
-  CSSResultGroup
-} from "lit";
+import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property } from "lit/decorators";
 import { createCloseHeading } from "@ha/components/ha-dialog";
 import type { HaRadio } from "@ha/components/ha-radio";
@@ -67,18 +60,13 @@ export class CreateDeviceDialog extends LitElement {
         escapeKeyAction
         .heading=${createCloseHeading(
           this.hass,
-          this.lcn.localize("dashboard-devices-dialog-create-title")
+          this.lcn.localize("dashboard-devices-dialog-create-title"),
         )}
         @closed=${this._closeDialog}
-
       >
-        <div id="type">
-          ${this.lcn.localize("type")}
-        </div>
+        <div id="type">${this.lcn.localize("type")}</div>
 
-        <ha-formfield
-          label=${this.lcn.localize("module")}
-        >
+        <ha-formfield label=${this.lcn.localize("module")}>
           <ha-radio
             name="is_group"
             value="module"
@@ -87,9 +75,7 @@ export class CreateDeviceDialog extends LitElement {
           ></ha-radio>
         </ha-formfield>
 
-        <ha-formfield
-          label=${this.lcn.localize("group")}
-        >
+        <ha-formfield label=${this.lcn.localize("group")}>
           <ha-radio
             name="is_group"
             value="group"
@@ -106,7 +92,7 @@ export class CreateDeviceDialog extends LitElement {
           required
           autoValidate
           @input=${this._segmentIdChanged}
-          .validityTransform=${(value: string) => ({ valid: this._validateSegmentId(+value) }) }
+          .validityTransform=${(value: string) => ({ valid: this._validateSegmentId(+value) })}
           .validationMessage=${this.lcn.localize("dashboard-devices-dialog-error-segment")}
         ></ha-textfield>
 
@@ -118,7 +104,9 @@ export class CreateDeviceDialog extends LitElement {
           required
           autoValidate
           @input=${this._addressIdChanged}
-          .validityTransform=${(value: string) => ({ valid: this._validateAddressId(+value, this._isGroup) }) }
+          .validityTransform=${(value: string) => ({
+            valid: this._validateAddressId(+value, this._isGroup),
+          })}
           .validationMessage=${this._isGroup
             ? this.lcn.localize("dashboard-devices-dialog-error-group")
             : this.lcn.localize("dashboard-devices-dialog-error-module")}
@@ -158,16 +146,16 @@ export class CreateDeviceDialog extends LitElement {
 
   private _validateSegmentId(segment_id: number): boolean {
     // segement_id: 0, 5-128
-    return (segment_id == 0 || (segment_id >= 5 && segment_id <= 128));
+    return segment_id == 0 || (segment_id >= 5 && segment_id <= 128);
   }
 
   private _validateAddressId(address_id: number, is_group: boolean): boolean {
     // module_id: 5-254
     // group_id: 5-254
     if (is_group) {
-      return (address_id >= 5 && address_id <= 254);
+      return address_id >= 5 && address_id <= 254;
     }
-    return (address_id >= 5 && address_id <= 254);
+    return address_id >= 5 && address_id <= 254;
   }
 
   private async _create(): Promise<void> {
@@ -196,9 +184,9 @@ export class CreateDeviceDialog extends LitElement {
           margin-bottom: 8px;
         }
         .buttons {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px;
+          display: flex;
+          justify-content: space-between;
+          padding: 8px;
         }
       `,
     ];
