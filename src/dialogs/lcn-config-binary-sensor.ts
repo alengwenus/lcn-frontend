@@ -1,5 +1,5 @@
-import "@ha/components/ha-list-item"
-import "@ha/components/ha-select"
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-select";
 import { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, TemplateResult, CSSResult, PropertyValues, PropertyValueMap } from "lit";
 import { customElement, property, query } from "lit/decorators";
