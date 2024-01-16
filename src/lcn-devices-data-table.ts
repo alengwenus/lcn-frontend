@@ -55,6 +55,21 @@ export class LCNDevicesDataTable extends LitElement {
               direction: "asc",
               grows: true,
             },
+            delete: {
+              title: "",
+              sortable: false,
+              width: "80px",
+              template: (device: LcnDeviceConfig) => {
+                const handler = (ev) => this._onDeviceDelete(ev, device);
+                return html`
+                  <ha-icon-button
+                    .label=${this.lcn.localize("dashboard-devices-table-delete")}
+                    .path=${mdiDelete}
+                    @click=${handler}
+                  ></ha-icon-button>
+                `;
+              },
+            },
           }
         : {
             name: {

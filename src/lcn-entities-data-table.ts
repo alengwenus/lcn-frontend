@@ -40,15 +40,30 @@ export class LCNEntitiesDataTable extends LitElement {
       narrow
         ? {
             name: {
-              title: this.lcn.localize("name"),
+              title: this.lcn.localize("entity-id"),
               sortable: true,
               direction: "asc",
               grows: true,
             },
+            delete: {
+              title: "",
+              sortable: false,
+              width: "80px",
+              template: (entity: LcnEntityConfig) => {
+                const handler = (ev) => this._onEntityDelete(ev, entity);
+                return html`
+                  <ha-icon-button
+                    title=${this.lcn.localize("dashboard-entities-table-delete")}
+                    .path=${mdiDelete}
+                    @click=${handler}
+                  ></ha-icon-button>
+                `;
+              },
+            },
           }
         : {
             name: {
-              title: this.lcn.localize("name"),
+              title: this.lcn.localize("entity-id"),
               sortable: true,
               direction: "asc",
               grows: true,

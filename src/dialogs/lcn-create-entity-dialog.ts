@@ -4,7 +4,7 @@ import "@ha/components/ha-select";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
-import { customElement, property, query, state } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import { createCloseHeading } from "@ha/components/ha-dialog";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -38,9 +38,7 @@ export class CreateEntityDialog extends LitElement {
 
   @state() public domain: string = "binary_sensor";
 
-  @state() private _invalid: boolean = false;
-
-  @query("#name-input") private _nameInput!: HaTextField;
+  @state() private _invalid: boolean = true;
 
   private get _domains(): DomainItem[] {
     return [
@@ -57,6 +55,8 @@ export class CreateEntityDialog extends LitElement {
   public async showDialog(params: LcnEntityDialogParams): Promise<void> {
     this._params = params;
     this.lcn = params.lcn;
+    this._name = "";
+    this._invalid = true;
     await this.updateComplete;
   }
 
@@ -92,11 +92,11 @@ export class CreateEntityDialog extends LitElement {
 
         <ha-textfield
           id="name-input"
-          label=${this.lcn.localize("name")}
-          placeholder=${this.domain}
+          label=${this.lcn.localize("entity-id")}
           type="string"
+          prefix=${this.domain + "."}
           maxLength="20"
-          @change=${this._nameChanged}
+          @input=${this._nameChanged}
         ></ha-textfield>
 
         ${this.renderDomain(this.domain)}
@@ -178,6 +178,11 @@ export class CreateEntityDialog extends LitElement {
   private _nameChanged(ev: CustomEvent): void {
     const target = ev.target as HaTextField;
     this._name = target.value;
+    this._validityChanged(
+      new CustomEvent("validity-changed", {
+        detail: !this._name,
+      }),
+    );
   }
 
   private _validityChanged(ev: CustomEvent): void {
@@ -214,7 +219,6 @@ export class CreateEntityDialog extends LitElement {
   private _domainChanged(ev: CustomEvent) {
     const target = ev.target as HaSelect;
     this.domain = target.value;
-    this._nameInput.value = "";
   }
 
   static get styles(): CSSResultGroup {
