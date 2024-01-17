@@ -24,11 +24,10 @@ module.exports = {
   },
   version() {
     const version = fs
-      .readFileSync(path.resolve(paths.polymer_dir, "pyproject.toml"), "utf8")
-      .match(/version\W+=\W"(.*?)"/);
+      .readFileSync(path.resolve(paths.polymer_dir, "VERSION"), "utf8")
     if (!version) {
       throw Error("Version not found");
     }
-    return version[1];
+    return version.trim();
   },
 };

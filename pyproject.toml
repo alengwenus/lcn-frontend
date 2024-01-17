@@ -4,17 +4,21 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name         = "lcn_frontend"
-version      = "0.1.0"
 license      = {text = "MIT License"}
 description  = "LCN panel for Home Assistant"
+keywords     = ["Home Assistant", "LCN"]
 readme       = "README.md"
 authors      = [
     {name = "Andre Lengwenus", email = "alengwenus@gmail.com"},
 ]
 requires-python = ">=3.10.0"
+dynamic = ["version"]
 
 [project.urls]
 Repository = "https://github.com/alengwenus/lcn-frontend.git"
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
 
 [tool.setuptools]
 platforms = ["any"]
