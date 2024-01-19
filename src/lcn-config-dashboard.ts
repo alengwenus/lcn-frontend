@@ -5,7 +5,7 @@ import "@ha/components/ha-fab";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
+import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
@@ -72,12 +72,12 @@ export class LCNConfigDashboard extends LitElement {
       <hass-tabs-subpage
         .hass=${this.hass}
         .narrow=${this.narrow}
-        back-path="/lcn"
         .route=${this.route}
         .tabs=${this.tabs}
+        main-page
       >
+        <span slot="header"> ${this.lcn.localize("dashboard-devices-title")} </span>
         <ha-config-section .narrow=${this.narrow}>
-          <span slot="header"> ${this.lcn.localize("dashboard-devices-title")} </span>
 
           <span slot="introduction"> ${this.lcn.localize("dashboard-devices-introduction")} </span>
 

@@ -11,7 +11,7 @@ class LCNRouter extends HassRouterPage {
 
   @property({ attribute: false }) public route!: Route;
 
-  @property({ attribute: false }) public narrow!: boolean;
+  @property({ type: Boolean }) public narrow!: boolean;
 
   protected routerOptions: RouterOptions = {
     defaultPage: "devices",

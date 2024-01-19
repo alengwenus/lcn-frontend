@@ -46,7 +46,7 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
   }
 
   protected render() {
-    if (!this.hass) {
+    if (!this.hass || !this.lcn) {
       return nothing;
     }
     return html`
