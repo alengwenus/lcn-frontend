@@ -58,15 +58,14 @@ export class LCNEntitiesPage extends LitElement {
         .route=${this.route}
         .tabs=${this.tabs}
       >
+        <span slot="header"> ${this.lcn.localize("dashboard-entities-title")} </span>
         <ha-config-section .narrow=${this.narrow}>
-          <span slot="header"> ${this.lcn.localize("dashboard-entities-title")} </span>
-
-          <span slot="introduction"> ${this.lcn.localize("dashboard-entities-introduction")} </span>
+          <span slot="introduction"> ${this.renderIntro()} </span>
 
           <ha-card
-            header="Entities for ${this._deviceConfig.address[2]
-              ? this.lcn.localize("group")
-              : this.lcn.localize("module")}
+            header="${this._deviceConfig.address[2]
+              ? this.lcn.localize("dashboard-entities-entities-for-group")
+              : this.lcn.localize("dashboard-entities-entities-for-module")}:
               (${this.lcn.host.name}, ${this._deviceConfig.address[0]},
               ${this._deviceConfig.address[1]})
               ${this._deviceConfig.name ? " - " + this._deviceConfig.name : ""}
@@ -91,6 +90,22 @@ export class LCNEntitiesPage extends LitElement {
           <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
       </hass-tabs-subpage>
+    `;
+  }
+
+  private renderIntro(): TemplateResult {
+    return html`
+      <h3>${this.lcn.localize("dashboard-entities-introduction")}</h3>
+      <details>
+        <summary>${this.lcn.localize("more-help")}</summary>
+        <ul>
+          <li>${this.lcn.localize("dashboard-entities-introduction-help-1")}</li>
+          <li>${this.lcn.localize("dashboard-entities-introduction-help-2")}</li>
+          <li>${this.lcn.localize("dashboard-entities-introduction-help-3")}</li>
+          <li>${this.lcn.localize("dashboard-entities-introduction-help-4")}</li>
+          <li>${this.lcn.localize("dashboard-entities-introduction-help-5")}</li>
+        </ul>
+      </details>
     `;
   }
 

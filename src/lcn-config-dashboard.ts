@@ -5,7 +5,7 @@ import "@ha/components/ha-fab";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup, nothing } from "lit";
+import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
@@ -78,8 +78,7 @@ export class LCNConfigDashboard extends LitElement {
       >
         <span slot="header"> ${this.lcn.localize("dashboard-devices-title")} </span>
         <ha-config-section .narrow=${this.narrow}>
-
-          <span slot="introduction"> ${this.lcn.localize("dashboard-devices-introduction")} </span>
+          <span slot="introduction"> ${this.renderIntro()} </span>
 
           <div id="box">
             <ha-select
@@ -119,6 +118,22 @@ export class LCNConfigDashboard extends LitElement {
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
       </hass-tabs-subpage>
+    `;
+  }
+
+  private renderIntro(): TemplateResult {
+    return html`
+      <h2>${this.lcn.localize("dashboard-devices-introduction")}</h2>
+      ${this.lcn.localize("dashboard-devices-introduction-help-1")} <br />
+      <details>
+        <summary>${this.lcn.localize("more-help")}</summary>
+        <ul>
+          <li>${this.lcn.localize("dashboard-devices-introduction-help-2")}</li>
+          <li>${this.lcn.localize("dashboard-devices-introduction-help-3")}</li>
+          <li>${this.lcn.localize("dashboard-devices-introduction-help-4")}</li>
+          <li>${this.lcn.localize("dashboard-devices-introduction-help-5")}</li>
+        </ul>
+      </details>
     `;
   }
 
@@ -197,6 +212,9 @@ export class LCNConfigDashboard extends LitElement {
           display: inline-block;
           margin-top: 20px;
           justify-content: center;
+        }
+        summary:hover {
+          text-decoration: underline;
         }
       `,
     ];
