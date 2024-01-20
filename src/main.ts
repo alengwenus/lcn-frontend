@@ -11,8 +11,9 @@ import type { HomeAssistant, Route } from "@ha/types";
 
 import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
+import { LCNLogger } from "./lcn-logger";
 import { localize } from "./localize/localize";
-import { LCN, LcnHost, LcnAddress } from "./types/lcn";
+import type { LCN, LcnHost, LcnAddress } from "./types/lcn";
 import { LocationChangedEvent } from "./types/navigation";
 
 @customElement("lcn-frontend")
@@ -69,6 +70,7 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
         language: this.hass.language,
         config_entries: configEntries,
         localize: (string, replace) => localize(this.hass.language || "en", string, replace),
+        log: new LCNLogger(),
         host: <LcnHost>{
           name: configEntry.title,
           id: configEntry.entry_id,

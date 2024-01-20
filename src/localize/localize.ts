@@ -1,4 +1,5 @@
 import IntlMessageFormat from "intl-messageformat";
+import { LCNLogger } from "lcn-logger";
 import * as de from "./languages/de.json";
 import * as en from "./languages/en.json";
 
@@ -7,6 +8,7 @@ const languages = {
   en,
 };
 const DEFAULT_LANGUAGE = "en";
+const logger = new LCNLogger("localize");
 const warnings: { language: string[]; sting: Record<string, string[]> } = {
   language: [],
   sting: {},
@@ -29,7 +31,7 @@ export function localize(language: string, key: string, replace?: Record<string,
   const translatedValue = languages[lang]?.[key] || languages[DEFAULT_LANGUAGE][key];
 
   if (!translatedValue) {
-    console.error(`Translation problem with '${key}' for '${lang}'`);
+    logger.error(`Translation problem with '${key}' for '${lang}'`);
     return "";
   }
 
@@ -41,7 +43,7 @@ export function localize(language: string, key: string, replace?: Record<string,
     try {
       translatedMessage = new IntlMessageFormat(translatedValue, language);
     } catch (err: any) {
-      console.warn(`Translation problem with '${key}' for '${lang}'`);
+      logger.warn(`Translation problem with '${key}' for '${lang}'`);
       return "";
     }
     _localizationCache[messageKey] = translatedMessage;
@@ -50,7 +52,7 @@ export function localize(language: string, key: string, replace?: Record<string,
   try {
     return translatedMessage.format<string>(replace) as string;
   } catch (err: any) {
-    console.warn(`Translation problem with '${key}' for '${lang}'`);
+    logger.warn(`Translation problem with '${key}' for '${lang}'`);
     return "";
   }
 }

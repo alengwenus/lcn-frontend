@@ -1,10 +1,12 @@
 import type { HomeAssistant } from "@ha/types";
-import { ConfigEntry } from "@ha/data/config_entries";
+import type { ConfigEntry } from "@ha/data/config_entries";
+import type { LCNLogger } from "lcn-logger";
 
 export interface LCN {
   language: string;
   config_entries: ConfigEntry[];
   localize(string: string, replace?: Record<string, any>): string;
+  log: LCNLogger;
   host: LcnHost;
   address: LcnAddress;
 }

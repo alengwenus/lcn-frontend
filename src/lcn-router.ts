@@ -1,7 +1,10 @@
 import { customElement, property } from "lit/decorators";
 import { HassRouterPage, RouterOptions } from "@ha/layouts/hass-router-page";
 import type { HomeAssistant, Route } from "@ha/types";
-import { LCN } from "./types/lcn";
+import { LCNLogger } from "lcn-logger";
+import type { LCN } from "./types/lcn";
+
+const logger = new LCNLogger("router");
 
 @customElement("lcn-router")
 class LCNRouter extends HassRouterPage {
@@ -20,14 +23,14 @@ class LCNRouter extends HassRouterPage {
       devices: {
         tag: "lcn-config-dashboard",
         load: () => {
-          console.log("Importing lcn-config-dashboard");
+          logger.debug("Importing lcn-config-dashboard");
           return import("./lcn-config-dashboard");
         },
       },
       entities: {
         tag: "lcn-entities-page",
         load: () => {
-          console.log("Importing lcn-entities-page");
+          logger.debug("Importing lcn-entities-page");
           return import("./lcn-entities-page");
         },
       },
@@ -40,7 +43,7 @@ class LCNRouter extends HassRouterPage {
     el.route = this.routeTail;
     el.narrow = this.narrow;
 
-    console.log(`Current Page: ${this._currentPage} Route: ${this.route.path}`);
+    logger.debug(`Current Page: ${this._currentPage} Route: ${this.route.path}`);
   }
 }
 
