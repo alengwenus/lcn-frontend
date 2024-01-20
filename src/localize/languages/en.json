@@ -96,7 +96,7 @@
   "dashboard-devices-dialog-error-module": "Module ID must be 5..254.",
   "dashboard-devices-dialog-error-group": "Group ID must be 5..254.",
 
-  "dashboard-entities-title": "LCN entities",
+  "dashboard-entities-title": "LCN Entities",
   "dashboard-entities-introduction": "Configure the entities for this module / group.",
   "dashboard-entities-introduction-help-1": "Add new entities provided by this module/group to your configuration.",
   "dashboard-entities-introduction-help-2": "Click on \"Create entity\", select the domain and configure the parameters according to your LCN installation.",

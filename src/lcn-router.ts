@@ -1,8 +1,8 @@
-import { customElement, property } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import { HassRouterPage, RouterOptions } from "@ha/layouts/hass-router-page";
 import type { HomeAssistant, Route } from "@ha/types";
 import { LCNLogger } from "lcn-logger";
-import type { LCN } from "./types/lcn";
+import { LCN, fetchHosts, LcnHost } from "./types/lcn";
 
 const logger = new LCNLogger("router");
 
@@ -15,6 +15,8 @@ class LCNRouter extends HassRouterPage {
   @property({ attribute: false }) public route!: Route;
 
   @property({ type: Boolean }) public narrow!: boolean;
+
+  @state() private hosts!: LcnHost[];
 
   protected routerOptions: RouterOptions = {
     defaultPage: "devices",
@@ -35,6 +37,7 @@ class LCNRouter extends HassRouterPage {
         },
       },
     },
+    initialLoad: () => this._fetchHosts(),
   };
 
   protected updatePageEl(el): void {
@@ -43,7 +46,15 @@ class LCNRouter extends HassRouterPage {
     el.route = this.routeTail;
     el.narrow = this.narrow;
 
+    if (this._currentPage === "devices") {
+      el.hosts = this.hosts;
+    }
+
     logger.debug(`Current Page: ${this._currentPage} Route: ${this.route.path}`);
+  }
+
+  private async _fetchHosts() {
+    this.hosts = await fetchHosts(this.hass!);
   }
 }
 

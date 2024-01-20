@@ -92,9 +92,8 @@ export class LCNConfigSceneElement extends LitElement {
     ];
   }
 
-  protected async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-
+  public connectedCallback(): void {
+    super.connectedCallback();
     this._register = this._registers[0];
     this._scene = this._scenes[0];
   }

@@ -1,7 +1,7 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, CSSResult, PropertyValues, nothing } from "lit";
+import { css, html, LitElement, CSSResult, nothing } from "lit";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { customElement, property, query, state } from "lit/decorators";
 import type { HomeAssistant } from "@ha/types";
@@ -112,8 +112,8 @@ export class LCNConfigBinarySensorElement extends LitElement {
     ];
   }
 
-  protected async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
+  public connectedCallback(): void {
+    super.connectedCallback();
     this._sourceType = this._sourceTypes[0];
     this._source = this._sourceType.value[0];
   }

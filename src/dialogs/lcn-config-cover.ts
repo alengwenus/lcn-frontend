@@ -4,7 +4,7 @@ import type { HaSelect } from "@ha/components/ha-select";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-import { css, html, LitElement, CSSResult, PropertyValues, nothing } from "lit";
+import { css, html, LitElement, CSSResult, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import type { HomeAssistant } from "@ha/types";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
@@ -48,8 +48,8 @@ export class LCNConfigCoverElement extends LitElement {
     { name: "1200ms", value: "RT1200" },
   ];
 
-  protected async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
+  public connectedCallback(): void {
+    super.connectedCallback();
     this._motor = this._motors[0];
     this._reverseDelay = this._reverseDelays[0];
   }

@@ -76,8 +76,8 @@ export class LCNConfigLightElement extends LitElement {
     ];
   }
 
-  protected async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
+  public connectedCallback(): void {
+    super.connectedCallback();
     this._portType = this._portTypes[0];
     this._port = this._portType.value[0];
   }
