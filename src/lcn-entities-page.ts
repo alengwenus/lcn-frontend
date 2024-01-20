@@ -57,6 +57,7 @@ export class LCNEntitiesPage extends LitElement {
         .narrow=${this.narrow}
         .route=${this.route}
         .tabs=${this.tabs}
+        back-path="/lcn/devices"
       >
         <span slot="header"> ${this.lcn.localize("dashboard-entities-title")} </span>
         <ha-config-section .narrow=${this.narrow}>
