@@ -91,9 +91,8 @@ export class LCNConfigClimateElement extends LitElement {
     return this._is2012 ? this._varSetpoints.concat(this._variablesNew) : this._varSetpoints;
   }
 
-  protected async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-
+  public connectedCallback(): void {
+    super.connectedCallback();
     this._source = this._sources[0];
     this._setpoint = this._setpoints[0];
     this._unit = this._varUnits[0];

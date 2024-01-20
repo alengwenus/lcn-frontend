@@ -6,7 +6,7 @@ import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
-import { customElement, property, query, state } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
@@ -16,15 +16,7 @@ import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
-import {
-  LCN,
-  fetchHosts,
-  fetchDevices,
-  scanDevices,
-  addDevice,
-  LcnHost,
-  LcnDeviceConfig,
-} from "types/lcn";
+import { LCN, fetchDevices, scanDevices, addDevice, LcnHost, LcnDeviceConfig } from "types/lcn";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -43,21 +35,16 @@ export class LCNConfigDashboard extends LitElement {
 
   @property({ attribute: false }) public route!: Route;
 
-  @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
+  @property({ attribute: false }) public hosts!: LcnHost[];
 
-  @state() private _hosts: LcnHost[] = [];
+  @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
   @state() private _deviceConfigs: LcnDeviceConfig[] = [];
 
-  @query("#host-select") private _hostsSelect!: HaSelect;
-
   protected async firstUpdated(changedProperties: PropertyValues): Promise<void> {
     super.firstUpdated(changedProperties);
-    await this._fetchHosts();
     loadProgressDialog();
     loadLCNCreateDeviceDialog();
-
-    this._hostsSelect.value = this.lcn.host.id; // invokes this._fetchDevices()
 
     this.addEventListener("lcn-config-changed", async () => {
       this._fetchDevices(this.lcn.host);
@@ -65,7 +52,7 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   protected render(): TemplateResult {
-    if (!(this.hass && this.lcn)) {
+    if (!(this.hass && this.lcn && this.hosts)) {
       return html` <hass-loading-screen></hass-loading-screen> `;
     }
     return html`
@@ -88,7 +75,7 @@ export class LCNConfigDashboard extends LitElement {
               fixedMenuPosition
               @selected=${this._hostChanged}
             >
-              ${this._hosts.map(
+              ${this.hosts.map(
                 (host) => html` <ha-list-item .value=${host.id}> ${host.name} </ha-list-item> `,
               )}
             </ha-select>
@@ -137,15 +124,11 @@ export class LCNConfigDashboard extends LitElement {
     `;
   }
 
-  private _hostChanged(ev: CustomEvent) {
+  private async _hostChanged(ev: CustomEvent) {
     const target = ev.target as HaSelect;
-    const host: LcnHost = this._hosts.find((el) => el.id === target.value)!;
+    const host: LcnHost = this.hosts.find((el) => el.id === target.value)!;
     this.lcn.host = host;
-    this._fetchDevices(this.lcn.host);
-  }
-
-  private async _fetchHosts() {
-    this._hosts = await fetchHosts(this.hass!);
+    await this._fetchDevices(this.lcn.host);
   }
 
   private async _fetchDevices(host: LcnHost) {

@@ -29,7 +29,7 @@ export class CreateDeviceDialog extends LitElement {
 
   @state() private _addressId: number = 5;
 
-  private _invalid = false;
+  @state() private _invalid: boolean = false;
 
   public async showDialog(params: LcnDeviceDialogParams): Promise<void> {
     this._params = params;
@@ -43,10 +43,11 @@ export class CreateDeviceDialog extends LitElement {
   }
 
   public willUpdate(changedProperties: PropertyValues) {
-    super.willUpdate(changedProperties);
-    this._invalid =
-      !this._validateSegmentId(this._segmentId) ||
-      !this._validateAddressId(this._addressId, this._isGroup);
+    if (changedProperties.has("_invalid")) {
+      this._invalid =
+        !this._validateSegmentId(this._segmentId) ||
+        !this._validateAddressId(this._addressId, this._isGroup);
+    }
   }
 
   protected render() {

@@ -1,7 +1,7 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
+import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -67,8 +67,8 @@ export class LCNConfigSwitchElement extends LitElement {
     ];
   }
 
-  protected async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
+  public connectedCallback(): void {
+    super.connectedCallback();
     this._portType = this._portTypes[0];
     this._port = this._portType.value[0];
   }
