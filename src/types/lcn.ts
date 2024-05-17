@@ -138,7 +138,6 @@ export const addDevice = (
     type: "lcn/devices/add",
     host_id: hostId,
     address: device.address,
-    name: device.name,
   });
 
 export const deleteDevice = (
