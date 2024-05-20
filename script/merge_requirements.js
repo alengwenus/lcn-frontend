@@ -6,10 +6,17 @@ const rawPackageLcn = fs.readFileSync("./package.json");
 const packageCore = JSON.parse(rawPackageCore);
 const packageLcn = JSON.parse(rawPackageLcn);
 
+const subdir_dependencies = Object.fromEntries(
+  Object.entries(packageCore.dependencies).map(([key, value]) => [
+    key,
+    value.replace(/\.yarn\//g, "homeassistant-frontend/.yarn/"),
+  ])
+);
+
 const subdir_resolutions = Object.fromEntries(
   Object.entries(packageCore.resolutions).map(([key, value]) => [
     key,
-    value.replace(/#\.\//g, "#./homeassistant-frontend/"),
+    value.replace(/\.yarn\//g, "homeassistant-frontend/.yarn/"),
   ])
 );
 
@@ -18,7 +25,7 @@ fs.writeFileSync(
   JSON.stringify(
     {
       ...packageLcn,
-      dependencies: { ...packageCore.dependencies, ...packageLcn.dependenciesOverride },
+      dependencies: { ...subdir_dependencies, ...packageLcn.dependenciesOverride },
       devDependencies: {
         ...packageCore.devDependencies,
         ...packageLcn.devDependenciesOverride,

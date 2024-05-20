@@ -69,7 +69,7 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       this.lcn = {
         language: this.hass.language,
         config_entries: configEntries,
-        localize: (string, replace) => localize(this.hass.language || "en", string, replace),
+        localize: (string, replace) => localize(this.hass, string, replace),
         log: new LCNLogger(),
         host: <LcnHost>{
           name: configEntry.title,
