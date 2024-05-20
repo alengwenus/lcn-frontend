@@ -61,7 +61,7 @@ export class LCNConfigDashboard extends LitElement {
         .narrow=${this.narrow}
         .route=${this.route}
         .tabs=${this.tabs}
-        main-page
+        back-path="/config/integrations/integration/lcn"
       >
         <span slot="header"> ${this.lcn.localize("dashboard-devices-title")} </span>
         <ha-config-section .narrow=${this.narrow}>
