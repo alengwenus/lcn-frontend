@@ -5,7 +5,7 @@ import memoizeOne from "memoize-one";
 import { mdiDelete } from "@mdi/js";
 import { computeRTLDirection } from "@ha/common/util/compute_rtl";
 import type { HomeAssistant } from "@ha/types";
-import { LCN, LcnEntityConfig, deleteEntity, LcnDeviceConfig, LcnAddress } from "types/lcn";
+import { LCN, LcnEntityConfig, deleteEntity, LcnDeviceConfig } from "types/lcn";
 import {
   DataTableColumnContainer,
   DataTableRowData,
@@ -105,32 +105,18 @@ export class LCNEntitiesDataTable extends LitElement {
         .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._entities(this.entities) as DataTableRowData[]}
-        .id=${"unique_id"}
         .noDataText=${this.lcn.localize("dashboard-entities-table-no-data")}
         .dir=${computeRTLDirection(this.hass)}
         auto-height
         clickable
+        .id=${"entity_id"}
       ></ha-data-table>
     `;
   }
 
-  private _onEntityDelete(ev, entity: LcnEntityConfig) {
+  private async _onEntityDelete(ev, entity: LcnEntityConfig) {
     ev.stopPropagation();
-    this._deleteEntity(entity.address, entity.domain, entity.resource);
-  }
-
-  private async _deleteEntity(address: LcnAddress, domain: string, resource: string) {
-    const entity_to_delete = this.entities.find(
-      (entity) =>
-        entity.address[0] === address[0] &&
-        entity.address[1] === address[1] &&
-        entity.address[2] === address[2] &&
-        entity.domain === domain &&
-        entity.resource === resource,
-    )!;
-
-    await deleteEntity(this.hass, this.lcn.host.id, entity_to_delete);
-
+    await deleteEntity(this.hass, this.lcn.host.id, entity);
     this.dispatchEvent(
       new CustomEvent("lcn-configuration-changed", {
         bubbles: true,
