@@ -2,8 +2,8 @@ import { customElement, property, state } from "lit/decorators";
 import { HassRouterPage, RouterOptions } from "@ha/layouts/hass-router-page";
 import type { HomeAssistant, Route } from "@ha/types";
 import { LCNLogger } from "lcn-logger";
-import { LCN } from "./types/lcn";
 import { getConfigEntry } from "@ha/data/config_entries";
+import { LCN } from "./types/lcn";
 
 const logger = new LCNLogger("router");
 
@@ -54,7 +54,7 @@ class LCNRouter extends HassRouterPage {
     const res = await getConfigEntry(this.hass!, entry_id);
     this.lcn.host = {
       name: res.config_entry.title,
-      id: res.config_entry.entry_id
+      id: res.config_entry.entry_id,
     };
   }
 }
