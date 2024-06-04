@@ -4,7 +4,6 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@ha/components/ha-fab";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
-import type { HaSelect } from "@ha/components/ha-select";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { mdiPlus } from "@mdi/js";
@@ -35,8 +34,6 @@ export class LCNConfigDashboard extends LitElement {
 
   @property({ attribute: false }) public route!: Route;
 
-  @property({ attribute: false }) public hosts!: LcnHost[];
-
   @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
   @state() private _deviceConfigs: LcnDeviceConfig[] = [];
@@ -49,10 +46,11 @@ export class LCNConfigDashboard extends LitElement {
     this.addEventListener("lcn-config-changed", async () => {
       this._fetchDevices(this.lcn.host);
     });
+    await this._fetchDevices(this.lcn.host);
   }
 
   protected render(): TemplateResult {
-    if (!(this.hass && this.lcn && this.hosts)) {
+    if (!(this.hass && this.lcn)) {
       return html` <hass-loading-screen></hass-loading-screen> `;
     }
     return html`
@@ -68,18 +66,6 @@ export class LCNConfigDashboard extends LitElement {
           <span slot="introduction"> ${this.renderIntro()} </span>
 
           <div id="box">
-            <ha-select
-              id="host-select"
-              .label=${this.lcn.localize("dashboard-devices-hosts")}
-              .value=${this.lcn.host.id}
-              fixedMenuPosition
-              @selected=${this._hostChanged}
-            >
-              ${this.hosts.map(
-                (host) => html` <ha-list-item .value=${host.id}> ${host.name} </ha-list-item> `,
-              )}
-            </ha-select>
-
             <mwc-button id="scan_devices" raised @click=${this._scanDevices}>
               ${this.lcn.localize("dashboard-devices-scan")}
             </mwc-button>
@@ -122,13 +108,6 @@ export class LCNConfigDashboard extends LitElement {
         </ul>
       </details>
     `;
-  }
-
-  private async _hostChanged(ev: CustomEvent) {
-    const target = ev.target as HaSelect;
-    const host: LcnHost = this.hosts.find((el) => el.id === target.value)!;
-    this.lcn.host = host;
-    await this._fetchDevices(this.lcn.host);
   }
 
   private async _fetchDevices(host: LcnHost) {

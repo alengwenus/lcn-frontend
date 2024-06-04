@@ -62,7 +62,7 @@
   "dashboard-devices-title": "LCN Konfiguration",
   "dashboard-devices-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard!",
   "dashboard-devices-introduction-help-1": "Hier kannst du die Module und Gruppen deines LCN Systems konfigurieren.",
-  "dashboard-devices-introduction-help-2": "Um zu beginnen, selektiere deinen Host und starte eine automatische Suche nach LCN Modulen. Die gefundenen Module werden in der Liste angezeigt.",
+  "dashboard-devices-introduction-help-2": "Um zu beginnen, starte eine automatische Suche nach LCN Modulen. Die gefundenen Module werden in der Liste angezeigt.",
   "dashboard-devices-introduction-help-3": "Wird ein Modul nicht automatisch erkannt, kannst du das Modul auch manuell hinzufügen.",
   "dashboard-devices-introduction-help-4": "Klicke auf einen Eintrag in der Liste, um die zugehörigen Entitäten anzuzeigen und zu editieren.",
   "dashboard-devices-introduction-help-5": "Wenn du einen Eintrag löschen möchtest, klicke auf das Mülleimersymbol neben dem Eintrag.",
