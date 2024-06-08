@@ -4,16 +4,10 @@ import type { LCNLogger } from "lcn-logger";
 
 export interface LCN {
   language: string;
-  config_entries: ConfigEntry[];
   localize(string: string, replace?: Record<string, any>): string;
   log: LCNLogger;
-  host: LcnHost;
+  config_entry: ConfigEntry;
   address: LcnAddress;
-}
-
-export interface LcnHost {
-  name: string;
-  id: string;
 }
 
 export type LcnAddress = [number, number, boolean];
@@ -82,37 +76,43 @@ export interface LcnDeviceConfig {
   hardware_type: number;
 }
 
-export const fetchDevices = (hass: HomeAssistant, hostId: string): Promise<LcnDeviceConfig[]> =>
+export const fetchDevices = (
+  hass: HomeAssistant,
+  config_entry: ConfigEntry,
+): Promise<LcnDeviceConfig[]> =>
   hass.callWS({
     type: "lcn/devices",
-    host_id: hostId,
+    entry_id: config_entry.entry_id,
   });
 
 export const fetchEntities = (
   hass: HomeAssistant,
-  hostId: string,
+  config_entry: ConfigEntry,
   address: LcnAddress,
 ): Promise<LcnEntityConfig[]> =>
   hass.callWS({
     type: "lcn/entities",
-    host_id: hostId,
+    entry_id: config_entry.entry_id,
     address: address,
   });
 
-export const scanDevices = (hass: HomeAssistant, hostId: string): Promise<LcnDeviceConfig[]> =>
+export const scanDevices = (
+  hass: HomeAssistant,
+  config_entry: ConfigEntry,
+): Promise<LcnDeviceConfig[]> =>
   hass.callWS({
     type: "lcn/devices/scan",
-    host_id: hostId,
+    entry_id: config_entry.entry_id,
   });
 
 export const addEntity = (
   hass: HomeAssistant,
-  hostId: string,
+  config_entry: ConfigEntry,
   entity: Partial<LcnEntityConfig>,
 ): Promise<boolean> =>
   hass.callWS({
     type: "lcn/entities/add",
-    host_id: hostId,
+    entry_id: config_entry.entry_id,
     address: entity.address,
     name: entity.name,
     domain: entity.domain,
@@ -121,12 +121,12 @@ export const addEntity = (
 
 export const deleteEntity = (
   hass: HomeAssistant,
-  hostId: string,
+  config_entry: ConfigEntry,
   entity: LcnEntityConfig,
 ): Promise<void> =>
   hass.callWS({
     type: "lcn/entities/delete",
-    host_id: hostId,
+    entry_id: config_entry.entry_id,
     address: entity.address,
     domain: entity.domain,
     resource: entity.resource,
@@ -134,22 +134,22 @@ export const deleteEntity = (
 
 export const addDevice = (
   hass: HomeAssistant,
-  hostId: string,
+  config_entry: ConfigEntry,
   device: Partial<LcnDeviceConfig>,
 ): Promise<boolean> =>
   hass.callWS({
     type: "lcn/devices/add",
-    host_id: hostId,
+    entry_id: config_entry.entry_id,
     address: device.address,
   });
 
 export const deleteDevice = (
   hass: HomeAssistant,
-  hostId: string,
+  config_entry: ConfigEntry,
   device: LcnDeviceConfig,
 ): Promise<void> =>
   hass.callWS({
     type: "lcn/devices/delete",
-    host_id: hostId,
+    entry_id: config_entry.entry_id,
     address: device.address,
   });

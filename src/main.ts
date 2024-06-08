@@ -13,7 +13,7 @@ import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
 import { LCNLogger } from "./lcn-logger";
 import { localize } from "./localize/localize";
-import type { LCN, LcnHost, LcnAddress } from "./types/lcn";
+import type { LCN, LcnAddress } from "./types/lcn";
 import { LocationChangedEvent } from "./types/navigation";
 
 @customElement("lcn-frontend")
@@ -68,13 +68,9 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
 
       this.lcn = {
         language: this.hass.language,
-        config_entries: configEntries,
         localize: (string, replace) => localize(this.hass, string, replace),
         log: new LCNLogger(),
-        host: <LcnHost>{
-          name: configEntry.title,
-          id: configEntry.entry_id,
-        },
+        config_entry: configEntry,
         address: <LcnAddress>[0, 0, false],
       };
     });

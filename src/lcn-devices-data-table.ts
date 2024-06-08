@@ -189,7 +189,7 @@ export class LCNDevicesDataTable extends LitElement {
       return;
     }
 
-    await deleteDevice(this.hass, this.lcn.host.id, device_to_delete);
+    await deleteDevice(this.hass, this.lcn.config_entry, device_to_delete);
     this._dispatchConfigurationChangedEvent();
   }
 }

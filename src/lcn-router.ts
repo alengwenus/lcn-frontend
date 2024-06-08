@@ -38,7 +38,7 @@ class LCNRouter extends HassRouterPage {
         },
       },
     },
-    initialLoad: () => this._fetchHost(this._searchParms.get("config_entry")!),
+    initialLoad: () => this._fetchConfigEntry(this._searchParms.get("config_entry")!),
   };
 
   protected updatePageEl(el): void {
@@ -46,16 +46,12 @@ class LCNRouter extends HassRouterPage {
     el.lcn = this.lcn;
     el.route = this.routeTail;
     el.narrow = this.narrow;
-
     logger.debug(`Current Page: ${this._currentPage} Route: ${this.route.path}`);
   }
 
-  private async _fetchHost(entry_id: string) {
+  private async _fetchConfigEntry(entry_id: string) {
     const res = await getConfigEntry(this.hass!, entry_id);
-    this.lcn.host = {
-      name: res.config_entry.title,
-      id: res.config_entry.entry_id,
-    };
+    this.lcn.config_entry = res.config_entry;
   }
 }
 

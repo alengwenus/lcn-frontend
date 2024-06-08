@@ -116,7 +116,7 @@ export class LCNEntitiesDataTable extends LitElement {
 
   private async _onEntityDelete(ev, entity: LcnEntityConfig) {
     ev.stopPropagation();
-    await deleteEntity(this.hass, this.lcn.host.id, entity);
+    await deleteEntity(this.hass, this.lcn.config_entry, entity);
     this.dispatchEvent(
       new CustomEvent("lcn-configuration-changed", {
         bubbles: true,
