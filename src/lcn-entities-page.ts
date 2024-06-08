@@ -19,6 +19,7 @@ import {
   LcnEntityConfig,
   LcnAddress,
 } from "types/lcn";
+import { ConfigEntry } from "@ha/data/config_entries";
 import {
   loadLCNCreateEntityDialog,
   showLCNCreateEntityDialog,
@@ -44,7 +45,7 @@ export class LCNEntitiesPage extends LitElement {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
 
-    await this._fetchEntities(this.lcn.host.id, this.lcn.address);
+    await this._fetchEntities(this.lcn.config_entry, this.lcn.address);
   }
 
   protected render(): TemplateResult {
@@ -67,7 +68,7 @@ export class LCNEntitiesPage extends LitElement {
             header="${this._deviceConfig.address[2]
               ? this.lcn.localize("dashboard-entities-entities-for-group")
               : this.lcn.localize("dashboard-entities-entities-for-module")}:
-              (${this.lcn.host.name}, ${this._deviceConfig.address[0]},
+              (${this.lcn.config_entry.title}, ${this._deviceConfig.address[0]},
               ${this._deviceConfig.address[1]})
               ${this._deviceConfig.name ? " - " + this._deviceConfig.name : ""}
             "
@@ -111,11 +112,11 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   private _configurationChanged() {
-    this._fetchEntities(this.lcn.host.id, this.lcn.address);
+    this._fetchEntities(this.lcn.config_entry, this.lcn.address);
   }
 
-  private async _fetchEntities(host: string, address: LcnAddress) {
-    const deviceConfigs = await fetchDevices(this.hass!, host);
+  private async _fetchEntities(config_entry: ConfigEntry, address: LcnAddress) {
+    const deviceConfigs = await fetchDevices(this.hass!, config_entry);
     const deviceConfig = deviceConfigs.find(
       (el) =>
         el.address[0] === address[0] &&
@@ -125,7 +126,7 @@ export class LCNEntitiesPage extends LitElement {
     if (deviceConfig !== undefined) {
       this._deviceConfig = deviceConfig;
     }
-    this._entityConfigs = await fetchEntities(this.hass!, host, address);
+    this._entityConfigs = await fetchEntities(this.hass!, config_entry, address);
   }
 
   private async _addEntity() {
@@ -133,8 +134,8 @@ export class LCNEntitiesPage extends LitElement {
       lcn: this.lcn,
       device: <LcnDeviceConfig>this._deviceConfig,
       createEntity: async (entityParams) => {
-        if (await addEntity(this.hass, this.lcn.host.id, entityParams)) {
-          await this._fetchEntities(this.lcn.host.id, this.lcn.address);
+        if (await addEntity(this.hass, this.lcn.config_entry, entityParams)) {
+          await this._fetchEntities(this.lcn.config_entry, this.lcn.address);
           return true;
         }
         return false;

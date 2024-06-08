@@ -15,7 +15,8 @@ import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
-import { LCN, fetchDevices, scanDevices, addDevice, LcnHost, LcnDeviceConfig } from "types/lcn";
+import { LCN, fetchDevices, scanDevices, addDevice, LcnDeviceConfig } from "types/lcn";
+import { ConfigEntry } from "@ha/data/config_entries";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -42,11 +43,10 @@ export class LCNConfigDashboard extends LitElement {
     super.firstUpdated(changedProperties);
     loadProgressDialog();
     loadLCNCreateDeviceDialog();
-
     this.addEventListener("lcn-config-changed", async () => {
-      this._fetchDevices(this.lcn.host);
+      this._fetchDevices(this.lcn.config_entry);
     });
-    await this._fetchDevices(this.lcn.host);
+    await this._fetchDevices(this.lcn.config_entry);
   }
 
   protected render(): TemplateResult {
@@ -72,7 +72,8 @@ export class LCNConfigDashboard extends LitElement {
           </div>
 
           <ha-card
-            header="${this.lcn.localize("dashboard-devices-for-host")}: ${this.lcn.host.name}"
+            header="${this.lcn.localize("dashboard-devices-for-host")}: ${this.lcn.config_entry
+              .title}"
           >
             <lcn-devices-data-table
               .hass=${this.hass}
@@ -110,8 +111,8 @@ export class LCNConfigDashboard extends LitElement {
     `;
   }
 
-  private async _fetchDevices(host: LcnHost) {
-    this._deviceConfigs = await fetchDevices(this.hass!, host.id);
+  private async _fetchDevices(config_entry: ConfigEntry) {
+    this._deviceConfigs = await fetchDevices(this.hass!, config_entry);
   }
 
   private async _scanDevices() {
@@ -120,7 +121,7 @@ export class LCNConfigDashboard extends LitElement {
       text: this.lcn.localize("dashboard-dialog-scan-devices-text"),
     });
 
-    this._deviceConfigs = await scanDevices(this.hass!, this.lcn.host.id);
+    this._deviceConfigs = await scanDevices(this.hass!, this.lcn.config_entry);
     await dialog()!.closeDialog();
   }
 
@@ -141,7 +142,7 @@ export class LCNConfigDashboard extends LitElement {
       `,
     });
 
-    if (!(await addDevice(this.hass, this.lcn.host.id, deviceParams))) {
+    if (!(await addDevice(this.hass, this.lcn.config_entry, deviceParams))) {
       dialog()!.closeDialog();
       await showAlertDialog(this, {
         title: this.lcn.localize("dashboard-devices-dialog-add-alert-title"),
@@ -155,7 +156,7 @@ export class LCNConfigDashboard extends LitElement {
       return;
     }
     dialog()!.closeDialog();
-    this._fetchDevices(this.lcn.host);
+    this._fetchDevices(this.lcn.config_entry);
   }
 
   static get styles(): CSSResultGroup[] {
@@ -165,10 +166,6 @@ export class LCNConfigDashboard extends LitElement {
         #box {
           display: flex;
           justify-content: space-between;
-        }
-        #host-select {
-          width: 40%;
-          display: inline-block;
         }
         #scan-devices {
           display: inline-block;
