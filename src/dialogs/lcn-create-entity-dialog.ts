@@ -89,7 +89,6 @@ export class CreateEntityDialog extends LitElement {
             `,
           )}
         </ha-select>
-
         <ha-textfield
           id="name-input"
           label=${this.lcn.localize("entity-id")}
