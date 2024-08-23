@@ -91,9 +91,8 @@ export class CreateEntityDialog extends LitElement {
         </ha-select>
         <ha-textfield
           id="name-input"
-          label=${this.lcn.localize("entity-id")}
+          label=${this.lcn.localize("name")}
           type="string"
-          prefix=${this.domain + "."}
           maxLength="20"
           @input=${this._nameChanged}
         ></ha-textfield>
