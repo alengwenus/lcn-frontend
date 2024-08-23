@@ -40,7 +40,7 @@ export class LCNEntitiesDataTable extends LitElement {
       narrow
         ? {
             name: {
-              title: this.lcn.localize("entity-id"),
+              title: this.lcn.localize("name"),
               sortable: true,
               direction: "asc",
               grows: true,
@@ -63,7 +63,7 @@ export class LCNEntitiesDataTable extends LitElement {
           }
         : {
             name: {
-              title: this.lcn.localize("entity-id"),
+              title: this.lcn.localize("name"),
               sortable: true,
               direction: "asc",
               grows: true,
@@ -109,7 +109,6 @@ export class LCNEntitiesDataTable extends LitElement {
         .dir=${computeRTLDirection(this.hass)}
         auto-height
         clickable
-        .id=${"entity_id"}
       ></ha-data-table>
     `;
   }

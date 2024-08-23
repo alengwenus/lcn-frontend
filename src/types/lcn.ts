@@ -58,14 +58,13 @@ export interface LcnEntityConfig {
   domain: string;
   resource: string;
   domain_data:
-    | BinarySensorConfig[]
-    | ClimateConfig[]
-    | CoverConfig[]
-    | LightConfig[]
-    | SceneConfig[]
-    | SensorConfig[]
-    | SwitchConfig[];
-  entity_id: string;
+    | BinarySensorConfig
+    | ClimateConfig
+    | CoverConfig
+    | LightConfig
+    | SceneConfig
+    | SensorConfig
+    | SwitchConfig;
 }
 
 export interface LcnDeviceConfig {
