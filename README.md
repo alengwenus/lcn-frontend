@@ -1,5 +1,7 @@
 # LCN Frontend
 
+<a href="https://www.buymeacoffee.com/alengwenus" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/white_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+
 This repository contains the frontend files for the Home Assistant LCN configuration panel.
 
 ## Features
