@@ -37,6 +37,9 @@ jobs:
           python -m pip install build twine
           ./script/bootstrap
 
+      - name: Install yarn
+        run: yarn install
+
       - name: Build
         run: yarn build
 
