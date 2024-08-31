@@ -17,13 +17,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: yarn
+
       - name: Install dependencies
         run: script/bootstrap
+
+      - name: Install yarn
+        run: yarn install
 
       - name: Run eslint
         run: yarn run lint:eslint
@@ -51,6 +56,9 @@ jobs:
 
       - name: Install dependencies
         run: script/bootstrap
+
+      - name: Install yarn
+        run: yarn install
 
       - name: Build
         run: yarn build

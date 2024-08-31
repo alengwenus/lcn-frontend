@@ -13,4 +13,3 @@ if [ ! -d "./homeassistant-frontend/src" ]; then
   cd ..
 fi
 
-yarn install
