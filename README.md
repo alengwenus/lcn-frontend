@@ -4,6 +4,8 @@
 
 This repository contains the frontend files for the Home Assistant LCN configuration panel.
 
+A detailed guide can be found in the [documentation](./docs/lcn-frontend.md).
+
 ## Features
 
 - Device Configuration
