@@ -6,6 +6,10 @@ This repository contains the frontend files for the Home Assistant LCN configura
 
 A detailed guide can be found in the [documentation](./docs/lcn-frontend.md).
 
+Feel free to use the [issue tracker](https://github.com/alengwenus/lcn-frontend/issues) to report bugs, give feetback or share ideas for improvements.
+
+If you want to participate in development (great!) head down to the [development](#development) section.
+
 ## Features
 
 - Device Configuration
