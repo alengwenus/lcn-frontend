@@ -74,6 +74,12 @@ $ ln -s <lcn-frontend-dir>/lcn_frontend <hass-dir>/config/deps/lib/python3.xx/si
 
 The `<hass-dir>/config` directory is created when first starting Home Assistant. Usually you have to create the mentioned sub-paths by your own. Use the appropriate Home Assistant's Python version in the path.
 
+Alternatively, if you are working with a venv install:
+
+```shell
+export PYTHONPATH=<lcn-frontend-dir>
+```
+
 ### Starting Home Assistant
 
 Start Home Assistant using:
