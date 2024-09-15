@@ -10,6 +10,10 @@ import {
   DataTableColumnContainer,
   DataTableRowData,
 } from "@ha/components/data-table/ha-data-table";
+import {
+  loadLCNEditEntityDialog,
+  showLCNEditEntityDialog,
+} from "./dialogs/show-dialog-edit-entity";
 
 export type EntityRowData = LcnEntityConfig & {
   delete: LcnEntityConfig;
@@ -30,6 +34,7 @@ export class LCNEntitiesDataTable extends LitElement {
   private _entities = memoizeOne((entities: LcnEntityConfig[]) => {
     const entityRowData: EntityRowData[] = entities.map((entity) => ({
       ...entity,
+      edit: entity,
       delete: entity,
     }));
     return entityRowData;
@@ -99,18 +104,38 @@ export class LCNEntitiesDataTable extends LitElement {
           },
   );
 
+  protected async firstUpdated(changedProperties) {
+    super.firstUpdated(changedProperties);
+    loadLCNEditEntityDialog();
+  }
+
   protected render() {
     return html`
       <ha-data-table
         .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._entities(this.entities) as DataTableRowData[]}
+        .id=${"edit"}
         .noDataText=${this.lcn.localize("dashboard-entities-table-no-data")}
         .dir=${computeRTLDirection(this.hass)}
         auto-height
         clickable
+        @row-click=${this._editEntity}
       ></ha-data-table>
     `;
+  }
+
+  private async _editEntity(ev: CustomEvent) {
+    console.log(ev.detail);
+    const entity: LcnEntityConfig = ev.detail.id;
+    showLCNEditEntityDialog(this, {
+      lcn: this.lcn,
+      device: <LcnDeviceConfig>this.device,
+      entity: <LcnEntityConfig>entity,
+      editEntity: async (entityParams) => {
+        console.log(entityParams);
+      }
+    })
   }
 
   private async _onEntityDelete(ev, entity: LcnEntityConfig) {

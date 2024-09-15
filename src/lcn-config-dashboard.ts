@@ -69,7 +69,6 @@ export class LCNConfigDashboard extends LitElement {
               ${this.lcn.localize("dashboard-devices-scan")}
             </mwc-button>
           </div>
-
           <ha-card
             header="${this.lcn.localize("dashboard-devices-for-host")}: ${this.lcn.config_entry
               .title}"

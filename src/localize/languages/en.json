@@ -12,6 +12,7 @@
   "resource": "Resource",
   "create": "Create",
   "dismiss": "Dismiss",
+  "update": "Update",
 
   "domain": "Domain",
   "binary-sensor": "Binary sensor",
@@ -115,6 +116,7 @@
   "dashboard-entities-table-no-data": "No entities configured.",
 
   "dashboard-entities-dialog-create-title": "Create entity",
+  "dashboard-entities-dialog-edit-title": "Edit entity",
 
   "dashboard-entities-dialog-unit-of-measurement": "Unit of measurement",
 
