@@ -50,7 +50,10 @@ export interface SensorConfig {
 
 export interface SwitchConfig {
   output: string;
+  lock_time?: number;
+  time_unit?: string;
 }
+
 
 export interface LcnEntityConfig {
   address: LcnAddress;
