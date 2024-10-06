@@ -11,18 +11,10 @@ import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import type { HaRadio } from "@ha/components/ha-radio";
-import type { HaTextField } from "@ha/components/ha-textfield";
 
 interface ConfigItem {
   name: string;
   value: string;
-}
-
-interface ConfigItemTimeUnit {
-  name: string;
-  value: string;
-  min: number;
-  max: number;
 }
 
 interface ConfigItemCollection {
@@ -42,10 +34,6 @@ export class LCNConfigSwitchElement extends LitElement {
   @state() private _portType!: ConfigItemCollection;
 
   @state() private _port!: ConfigItem;
-
-  @state() private _lockTime!: number;
-
-  @state() private _timeUnit!: ConfigItemTimeUnit;
 
   @query("#port-select") private _portSelect;
 
@@ -72,7 +60,6 @@ export class LCNConfigSwitchElement extends LitElement {
       { name: relay + " 8", value: "RELAY8" },
     ];
   }
-
 
   private get _regulators(): ConfigItem[] {
     const regulator: string = this.lcn.localize("regulator");
@@ -126,21 +113,10 @@ export class LCNConfigSwitchElement extends LitElement {
     ];
   }
 
-  private get _timeUnits(): ConfigItemTimeUnit[] {
-    return [
-      { name: this.lcn.localize("unit-seconds"), value: "seconds", min: 0, max: 60 },
-      { name: this.lcn.localize("unit-minutes"), value: "minutes", min: 0, max: 90 },
-      { name: this.lcn.localize("unit-hours"), value: "hours", min: 0, max: 50 },
-      { name: this.lcn.localize("unit-days"), value: "days", min: 0, max: 45 },
-    ]
-  }
-
   public connectedCallback(): void {
     super.connectedCallback();
     this._portType = this._portTypes[0];
     this._port = this._portType.value[0];
-    this._timeUnit = this._timeUnits[0];
-    this._lockTime = 0;
   }
 
   protected render() {
@@ -198,44 +174,7 @@ export class LCNConfigSwitchElement extends LitElement {
           (port) => html` <ha-list-item .value=${port.value}> ${port.name} </ha-list-item> `,
         )}
       </ha-select>
-
-      ${this.renderKeyLockFeatures()}
     `;
-  }
-
-  private renderKeyLockFeatures() {
-    if (this._portType.id != "key-locks") return nothing;
-    if (this._port.value.charAt(0) != "A") return nothing;
-
-    return html`
-      <div class="lock-time">
-        <ha-textfield
-          id="time"
-          .label="Time"
-          type="number"
-          .value=${this._lockTime}
-          min=${this._timeUnit.min}
-          max=${this._timeUnit.max}
-          autoValidate
-          @input=${this._lockTimeChanged}
-        ></ha-textfield>
-
-        <ha-select
-          id="time-unit"
-          .label="Time unit"
-          .value=${this._timeUnit.value}
-          fixedMenuPosition
-          @selected=${this._timeUnitChanged}
-          @closed=${stopPropagation}
-        >
-            ${this._timeUnits.map(
-              (unit) => html`
-                <ha-list-item .value=${unit.value}> ${unit.name} </ha-list-item>
-              `
-            )}
-        </ha-select>
-      </div>
-    `
   }
 
   private _portTypeChanged(ev: ValueChangedEvent<string>): void {
@@ -252,41 +191,6 @@ export class LCNConfigSwitchElement extends LitElement {
 
     this._port = this._portType.value.find((portType) => portType.value === target.value)!;
     this.domainData.output = this._port.value;
-
-    if (
-      (this._portType.id != "key-locks") ||
-      (this._port.value.charAt(0) != "A") ||
-      (this._lockTime == 0)) {
-        this.domainData.lock_time = undefined;
-        this.domainData.time_unit = undefined;
-    };
-  }
-
-  private _lockTimeChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaTextField;
-    this._lockTime = +target.value;
-
-    if (this._lockTime == 0) {
-      this.domainData.lock_time = undefined;
-      this.domainData.time_unit = undefined;
-    } else {
-      this.domainData.lock_time = this._lockTime;
-      this.domainData.time_unit = this._timeUnit.value;
-    }
-  }
-
-  private _timeUnitChanged(ev: ValueChangedEvent<ConfigItemTimeUnit>): void {
-    const target = ev.target as HaSelect;
-
-    this._timeUnit = this._timeUnits.find((unit) => unit.value === target.value)!;
-
-    if (this._lockTime == 0) {
-      this.domainData.lock_time = undefined;
-      this.domainData.time_unit = undefined;
-    } else {
-      this.domainData.lock_time = this._lockTime;
-      this.domainData.time_unit = this._timeUnit.value;
-    }
   }
 
   static get styles(): CSSResultGroup[] {
@@ -301,8 +205,7 @@ export class LCNConfigSwitchElement extends LitElement {
           grid-template-columns: 1fr 1fr;
           column-gap: 4px;
         }
-        ha-select,
-        ha-textfield {
+        ha-select {
           display: block;
           margin-bottom: 8px;
         }
