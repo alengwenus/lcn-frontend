@@ -53,12 +53,11 @@ export class LCNDevicesDataTable extends LitElement {
               title: this.lcn.localize("name"),
               sortable: true,
               direction: "asc",
-              grows: true,
             },
             delete: {
               title: "",
               sortable: false,
-              width: "80px",
+              minWidth: "80px",
               template: (device: LcnDeviceConfig) => {
                 const handler = (ev) => this._onDeviceDelete(ev, device);
                 return html`
@@ -76,31 +75,27 @@ export class LCNDevicesDataTable extends LitElement {
               title: this.lcn.localize("name"),
               sortable: true,
               direction: "asc",
-              grows: true,
-              width: "40%",
+              minWidth: "40%",
             },
             segment_id: {
               title: this.lcn.localize("segment"),
               sortable: true,
-              grows: false,
-              width: "15%",
+              minWidth: "15%",
             },
             address_id: {
               title: this.lcn.localize("id"),
               sortable: true,
-              grows: false,
-              width: "15%",
+              minWidth: "15%",
             },
             type: {
               title: this.lcn.localize("type"),
               sortable: true,
-              grows: false,
-              width: "15%",
+              minWidth: "15%",
             },
             delete: {
               title: "",
               sortable: false,
-              width: "80px",
+              minWidth: "80px",
               template: (device: LcnDeviceConfig) => {
                 const handler = (ev) => this._onDeviceDelete(ev, device);
                 return html`

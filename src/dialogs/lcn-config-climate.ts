@@ -23,7 +23,7 @@ export class LCNConfigClimateElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property({ type: Number }) public softwareSerial: number = -1;
+  @property({ attribute: false, type: Number }) public softwareSerial: number = -1;
 
   @property({ attribute: false }) public domainData: ClimateConfig = {
     source: "VAR1",
