@@ -1,4 +1,3 @@
-import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";

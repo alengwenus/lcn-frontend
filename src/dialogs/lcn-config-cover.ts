@@ -1,7 +1,6 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import { css, html, LitElement, CSSResult, nothing } from "lit";

@@ -1,6 +1,5 @@
 import { haStyle } from "@ha/resources/styles";
 import "@material/mwc-button";
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@ha/components/ha-fab";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";

@@ -43,12 +43,11 @@ export class LCNEntitiesDataTable extends LitElement {
               title: this.lcn.localize("name"),
               sortable: true,
               direction: "asc",
-              grows: true,
             },
             delete: {
               title: "",
               sortable: false,
-              width: "80px",
+              minWidth: "80px",
               template: (entity: LcnEntityConfig) => {
                 const handler = (ev) => this._onEntityDelete(ev, entity);
                 return html`
@@ -66,25 +65,22 @@ export class LCNEntitiesDataTable extends LitElement {
               title: this.lcn.localize("name"),
               sortable: true,
               direction: "asc",
-              grows: true,
-              width: "35%",
+              minWidth: "35%",
             },
             domain: {
               title: this.lcn.localize("domain"),
               sortable: true,
-              grows: false,
-              width: "25%",
+              minWidth: "25%",
             },
             resource: {
               title: this.lcn.localize("resource"),
               sortable: true,
-              grows: false,
-              width: "25%",
+              minWidth: "25%",
             },
             delete: {
               title: "",
               sortable: false,
-              width: "80px",
+              minWidth: "80px",
               template: (entity: LcnEntityConfig) => {
                 const handler = (ev) => this._onEntityDelete(ev, entity);
                 return html`
