@@ -93,7 +93,6 @@ export class CreateEntityDialog extends LitElement {
           id="name-input"
           label=${this.lcn.localize("name")}
           type="string"
-          maxLength="20"
           @input=${this._nameChanged}
         ></ha-textfield>
 
