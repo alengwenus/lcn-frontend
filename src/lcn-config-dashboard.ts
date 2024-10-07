@@ -14,9 +14,9 @@ import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
-import { fileDownload } from "@ha/util/file_download";
-import { LCN, fetchDevices, scanDevices, addDevice, LcnDeviceConfig, LcnEntityConfig, fetchEntities, LcnConfig } from "types/lcn";
+import { LCN, fetchDevices, scanDevices, addDevice, LcnDeviceConfig } from "types/lcn";
 import { ConfigEntry } from "@ha/data/config_entries";
+import { exportConfig, importConfig } from "helpers/config-exchange";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -65,15 +65,18 @@ export class LCNConfigDashboard extends LitElement {
           <span slot="introduction"> ${this.renderIntro()} </span>
 
           <div id="box">
-            <mwc-button id="scan_devices" raised @click=${this._scanDevices}>
+            <mwc-button id="scan-devices" raised @click=${this._scanDevices}>
               ${this.lcn.localize("dashboard-devices-scan")}
             </mwc-button>
-            <mwc-button id="export_config" raised @click=${this._importConfig}>
-              Import config
-            </mwc-button>
-            <mwc-button id="export_config" raised @click=${this._exportConfig}>
-              Export config
-            </mwc-button>
+            <div id="config-exchange">
+              <mwc-button id="import-config" raised @click=${this._importConfig}>
+                Import config
+              </mwc-button>
+              </br>
+              <mwc-button id="export-config" raised @click=${this._exportConfig}>
+                Export config
+              </mwc-button>
+            </div>
           </div>
 
           <ha-card
@@ -130,24 +133,6 @@ export class LCNConfigDashboard extends LitElement {
     await dialog()!.closeDialog();
   }
 
-  private async _exportConfig() {
-    this.lcn.log.debug("Exporting config");
-    const config: LcnConfig = {devices: [], entities: []};
-    config.devices = await fetchDevices(this.hass!, this.lcn.config_entry)
-    for await (const device of config.devices) {
-      const device_entities: LcnEntityConfig[] = await fetchEntities(this.hass!, this.lcn.config_entry, device.address)
-      config.entities.push(...device_entities);
-    }
-    const jsonData = JSON.stringify(config, null, 2);
-    const blob = new Blob([jsonData], { type: "application/json" })
-    const url = window.URL.createObjectURL(blob);
-    fileDownload(url, "lcn_config.json");
-  }
-
-  private async _importConfig() {
-    this.lcn.log.debug("Importing config");
-  }
-
   private _addDevice() {
     showLCNCreateDeviceDialog(this, {
       lcn: this.lcn,
@@ -182,6 +167,20 @@ export class LCNConfigDashboard extends LitElement {
     this._fetchDevices(this.lcn.config_entry);
   }
 
+  private async _importConfig() {
+    await importConfig(this.hass, this.lcn);
+    this.dispatchEvent(
+      new CustomEvent("lcn-config-changed", {
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  private async _exportConfig() {
+    exportConfig(this.hass, this.lcn);
+  }
+
   static get styles(): CSSResultGroup[] {
     return [
       haStyle,
@@ -192,10 +191,14 @@ export class LCNConfigDashboard extends LitElement {
         }
         #scan-devices {
           display: inline-block;
-          margin-top: 20px;
+          margin-top: 0px;
           justify-content: center;
         }
-        summary:hover {
+        #export-config {
+          position: relative;
+          margin-top: 10px;
+        }
+        summary: hover {
           text-decoration: underline;
         }
       `,
