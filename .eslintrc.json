@@ -52,7 +52,7 @@
     "no-continue": "off",
     "no-param-reassign": "off",
     "no-multi-assign": "off",
-    "no-console": "error",
+    "no-console": "warn",
     "radix": "off",
     "no-alert": "off",
     "no-nested-ternary": "off",

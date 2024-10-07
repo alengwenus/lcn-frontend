@@ -14,7 +14,8 @@ import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
-import { LCN, fetchDevices, scanDevices, addDevice, LcnDeviceConfig } from "types/lcn";
+import { fileDownload } from "@ha/util/file_download";
+import { LCN, fetchDevices, scanDevices, addDevice, LcnDeviceConfig, LcnEntityConfig, fetchEntities, LcnConfig } from "types/lcn";
 import { ConfigEntry } from "@ha/data/config_entries";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
@@ -66,6 +67,12 @@ export class LCNConfigDashboard extends LitElement {
           <div id="box">
             <mwc-button id="scan_devices" raised @click=${this._scanDevices}>
               ${this.lcn.localize("dashboard-devices-scan")}
+            </mwc-button>
+            <mwc-button id="export_config" raised @click=${this._importConfig}>
+              Import config
+            </mwc-button>
+            <mwc-button id="export_config" raised @click=${this._exportConfig}>
+              Export config
             </mwc-button>
           </div>
 
@@ -121,6 +128,24 @@ export class LCNConfigDashboard extends LitElement {
 
     this._deviceConfigs = await scanDevices(this.hass!, this.lcn.config_entry);
     await dialog()!.closeDialog();
+  }
+
+  private async _exportConfig() {
+    this.lcn.log.debug("Exporting config");
+    const config: LcnConfig = {devices: [], entities: []};
+    config.devices = await fetchDevices(this.hass!, this.lcn.config_entry)
+    for await (const device of config.devices) {
+      const device_entities: LcnEntityConfig[] = await fetchEntities(this.hass!, this.lcn.config_entry, device.address)
+      config.entities.push(...device_entities);
+    }
+    const jsonData = JSON.stringify(config, null, 2);
+    const blob = new Blob([jsonData], { type: "application/json" })
+    const url = window.URL.createObjectURL(blob);
+    fileDownload(url, "lcn_config.json");
+  }
+
+  private async _importConfig() {
+    this.lcn.log.debug("Importing config");
   }
 
   private _addDevice() {
