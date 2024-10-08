@@ -1,21 +1,32 @@
 import { haStyle } from "@ha/resources/styles";
 import "@material/mwc-button";
+import "@ha/components/ha-clickable-list-item";
 import "@ha/components/ha-fab";
+import "@ha/components/ha-button-menu";
+import "@ha/components/ha-icon-button";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
+import "@ha/components/ha-md-button-menu";
+import "@ha/layouts/hass-tabs-subpage-data-table";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import { mdiPlus } from "@mdi/js";
+import { mdiPlus, mdiDelete, mdiConsoleNetworkOutline } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
-import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
+import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/layouts/hass-tabs-subpage";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
-import { LCN, fetchDevices, scanDevices, addDevice, LcnDeviceConfig } from "types/lcn";
+import memoizeOne from "memoize-one";
+import { LCN, fetchDevices, scanDevices, deleteDevice, addDevice, LcnDeviceConfig, LcnAddress } from "types/lcn";
 import { ConfigEntry } from "@ha/data/config_entries";
+import type {
+  DataTableColumnContainer,
+  DataTableRowData
+} from "@ha/components/data-table/ha-data-table";
+import { navigate } from "@ha/common/navigate";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -23,6 +34,14 @@ import {
 } from "./dialogs/show-dialog-create-device";
 import { loadProgressDialog, showProgressDialog } from "./dialogs/show-dialog-progress";
 import "./lcn-devices-data-table";
+
+export type DeviceRowData = LcnDeviceConfig & {
+  segment_id: number;
+  address_id: number;
+  type: string;
+  delete: LcnDeviceConfig;
+};
+
 
 @customElement("lcn-config-dashboard")
 export class LCNConfigDashboard extends LitElement {
@@ -36,7 +55,83 @@ export class LCNConfigDashboard extends LitElement {
 
   @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
-  @state() private _deviceConfigs: LcnDeviceConfig[] = [];
+  @state() private deviceConfigs: LcnDeviceConfig[] = [];
+
+  private _devices = memoizeOne((devices: LcnDeviceConfig[]) => {
+    const deviceRowData: DeviceRowData[] = devices.map((device) => ({
+      ...device,
+      segment_id: device.address[0],
+      address_id: device.address[1],
+      type: device.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
+      delete: device,
+    }));
+    return deviceRowData;
+  });
+
+  private _columns = memoizeOne(
+    (narrow: boolean): DataTableColumnContainer =>
+      narrow
+        ? {
+            name: {
+              title: this.lcn.localize("name"),
+              sortable: true,
+              direction: "asc",
+            },
+            delete: {
+              title: "",
+              sortable: false,
+              minWidth: "80px",
+              template: (device: LcnDeviceConfig) => {
+                const handler = (ev) => this._onDeviceDelete(ev, device);
+                return html`
+                  <ha-icon-button
+                    .label=${this.lcn.localize("dashboard-devices-table-delete")}
+                    .path=${mdiDelete}
+                    @click=${handler}
+                  ></ha-icon-button>
+                `;
+              },
+            },
+          }
+        : {
+            name: {
+              title: this.lcn.localize("name"),
+              sortable: true,
+              direction: "asc",
+              minWidth: "40%",
+            },
+            segment_id: {
+              title: this.lcn.localize("segment"),
+              sortable: true,
+              minWidth: "15%",
+            },
+            address_id: {
+              title: this.lcn.localize("id"),
+              sortable: true,
+              minWidth: "15%",
+            },
+            type: {
+              title: this.lcn.localize("type"),
+              sortable: true,
+              minWidth: "15%",
+            },
+            delete: {
+              title: "",
+              sortable: false,
+              minWidth: "80px",
+              template: (device: LcnDeviceConfig) => {
+                const handler = (ev) => this._onDeviceDelete(ev, device);
+                return html`
+                  <ha-icon-button
+                    .label=${this.lcn.localize("dashboard-devices-table-delete")}
+                    .path=${mdiDelete}
+                    @click=${handler}
+                  ></ha-icon-button>
+                `;
+              },
+            },
+          },
+  );
 
   protected async firstUpdated(changedProperties: PropertyValues): Promise<void> {
     super.firstUpdated(changedProperties);
@@ -53,34 +148,20 @@ export class LCNConfigDashboard extends LitElement {
       return html` <hass-loading-screen></hass-loading-screen> `;
     }
     return html`
-      <hass-tabs-subpage
+      <hass-tabs-subpage-data-table
         .hass=${this.hass}
         .narrow=${this.narrow}
+        back-path="/config/integrations/integration/lcn"
         .route=${this.route}
         .tabs=${this.tabs}
+        .columns=${this._columns(this.narrow)}
+        .data=${this._devices(this.deviceConfigs) as DataTableRowData[]}
+        .id=${"address"}
+        clickable
+        @row-click=${this._rowClicked}
+        selectable
       >
-        <span slot="header"> ${this.lcn.localize("dashboard-devices-title")} </span>
-        <ha-config-section .narrow=${this.narrow}>
-          <span slot="introduction"> ${this.renderIntro()} </span>
 
-          <div id="box">
-            <mwc-button id="scan_devices" raised @click=${this._scanDevices}>
-              ${this.lcn.localize("dashboard-devices-scan")}
-            </mwc-button>
-          </div>
-
-          <ha-card
-            header="${this.lcn.localize("dashboard-devices-for-host")}: ${this.lcn.config_entry
-              .title}"
-          >
-            <lcn-devices-data-table
-              .hass=${this.hass}
-              .lcn=${this.lcn}
-              .devices=${this._deviceConfigs}
-              .narrow=${this.narrow}
-            ></lcn-devices-data-table>
-          </ha-card>
-        </ha-config-section>
         <ha-fab
           slot="fab"
           @click=${this._addDevice}
@@ -89,28 +170,26 @@ export class LCNConfigDashboard extends LitElement {
         >
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
-      </hass-tabs-subpage>
+      </hass-tabs-subpage-data-table>
     `;
   }
 
-  private renderIntro(): TemplateResult {
-    return html`
-      <h2>${this.lcn.localize("dashboard-devices-introduction")}</h2>
-      ${this.lcn.localize("dashboard-devices-introduction-help-1")} <br />
-      <details>
-        <summary>${this.lcn.localize("more-help")}</summary>
-        <ul>
-          <li>${this.lcn.localize("dashboard-devices-introduction-help-2")}</li>
-          <li>${this.lcn.localize("dashboard-devices-introduction-help-3")}</li>
-          <li>${this.lcn.localize("dashboard-devices-introduction-help-4")}</li>
-          <li>${this.lcn.localize("dashboard-devices-introduction-help-5")}</li>
-        </ul>
-      </details>
-    `;
+  private _dispatchConfigurationChangedEvent() {
+    this.dispatchEvent(
+      new CustomEvent("lcn-config-changed", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private _rowClicked(ev: CustomEvent) {
+    this.lcn.address = ev.detail.id;
+    navigate("/lcn/entities");
   }
 
   private async _fetchDevices(config_entry: ConfigEntry) {
-    this._deviceConfigs = await fetchDevices(this.hass!, config_entry);
+    this.deviceConfigs = await fetchDevices(this.hass!, config_entry);
   }
 
   private async _scanDevices() {
@@ -119,7 +198,7 @@ export class LCNConfigDashboard extends LitElement {
       text: this.lcn.localize("dashboard-dialog-scan-devices-text"),
     });
 
-    this._deviceConfigs = await scanDevices(this.hass!, this.lcn.config_entry);
+    this.deviceConfigs = await scanDevices(this.hass!, this.lcn.config_entry);
     await dialog()!.closeDialog();
   }
 
@@ -155,6 +234,45 @@ export class LCNConfigDashboard extends LitElement {
     }
     dialog()!.closeDialog();
     this._fetchDevices(this.lcn.config_entry);
+  }
+
+  private _onDeviceDelete(ev, device: LcnDeviceConfig) {
+    ev.stopPropagation();
+    this._deleteDevice(device.address);
+  }
+
+  private async _deleteDevice(address: LcnAddress) {
+    const device_to_delete = this.deviceConfigs.find(
+      (device) =>
+        device.address[0] === address[0] &&
+        device.address[1] === address[1] &&
+        device.address[2] === address[2],
+    )!;
+
+    if (
+      !(await showConfirmationDialog(this, {
+        title: `
+          ${
+            device_to_delete.address[2]
+              ? this.lcn.localize("dashboard-devices-dialog-delete-group-title")
+              : this.lcn.localize("dashboard-devices-dialog-delete-module-title")
+          }`,
+        text: html`${this.lcn.localize("dashboard-devices-dialog-delete-text")}
+          ${device_to_delete.name ? `'${device_to_delete.name}'` : ""}
+          (${device_to_delete.address[2]
+            ? this.lcn.localize("group")
+            : this.lcn.localize("module")}:
+          ${this.lcn.localize("segment")} ${device_to_delete.address[0]}, ${this.lcn.localize("id")}
+          ${device_to_delete.address[1]})
+          <br />
+          ${this.lcn.localize("dashboard-devices-dialog-delete-warning")}`,
+      }))
+    ) {
+      return;
+    }
+
+    await deleteDevice(this.hass, this.lcn.config_entry, device_to_delete);
+    this._dispatchConfigurationChangedEvent();
   }
 
   static get styles(): CSSResultGroup[] {

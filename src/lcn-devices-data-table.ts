@@ -127,6 +127,7 @@ export class LCNDevicesDataTable extends LitElement {
         auto-height
         clickable
         @row-click=${this._rowClicked}
+        selectable
       ></ha-data-table>
     `;
   }
