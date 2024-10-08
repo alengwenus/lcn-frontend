@@ -8,9 +8,10 @@ import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import "@ha/components/ha-md-button-menu";
 import "@ha/layouts/hass-tabs-subpage-data-table";
+import { storage } from "@ha/common/decorators/storage";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import { mdiPlus, mdiDelete, mdiConsoleNetworkOutline } from "@mdi/js";
+import { mdiPlus, mdiDelete } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/layouts/hass-tabs-subpage";
@@ -24,7 +25,9 @@ import { LCN, fetchDevices, scanDevices, deleteDevice, addDevice, LcnDeviceConfi
 import { ConfigEntry } from "@ha/data/config_entries";
 import type {
   DataTableColumnContainer,
-  DataTableRowData
+  DataTableRowData,
+  SortingChangedEvent,
+  RowClickedEvent
 } from "@ha/components/data-table/ha-data-table";
 import { navigate } from "@ha/common/navigate";
 import { ProgressDialog } from "./dialogs/progress-dialog";
@@ -57,6 +60,36 @@ export class LCNConfigDashboard extends LitElement {
 
   @state() private deviceConfigs: LcnDeviceConfig[] = [];
 
+  @storage({
+    storage: "sessionStorage",
+    key: "lcn-devices-table-search",
+    state: false,
+    subscribe: false,
+  })
+  private _filter: string = "";
+
+  @storage({
+    storage: "sessionStorage",
+    key: "lcn-devices-table-sort",
+    state: false,
+    subscribe: false,
+  })
+  private _activeSorting?: SortingChangedEvent;
+
+  @storage({
+    key: "lcn-devices-table-column-order",
+    state: false,
+    subscribe: false,
+  })
+  private _activeColumnOrder?: string[];
+
+  @storage({
+    key: "lcn-devices-table-hidden-columns",
+    state: false,
+    subscribe: false,
+  })
+  private _activeHiddenColumns?: string[];
+
   private _devices = memoizeOne((devices: LcnDeviceConfig[]) => {
     const deviceRowData: DeviceRowData[] = devices.map((device) => ({
       ...device,
@@ -74,7 +107,8 @@ export class LCNConfigDashboard extends LitElement {
         ? {
             name: {
               title: this.lcn.localize("name"),
-              sortable: true,
+            sortable: true,
+              filterable: true,
               direction: "asc",
             },
             delete: {
@@ -97,26 +131,30 @@ export class LCNConfigDashboard extends LitElement {
             name: {
               title: this.lcn.localize("name"),
               sortable: true,
+              filterable: true,
               direction: "asc",
               minWidth: "40%",
             },
             segment_id: {
               title: this.lcn.localize("segment"),
               sortable: true,
+              filterable: true,
               minWidth: "15%",
             },
             address_id: {
               title: this.lcn.localize("id"),
               sortable: true,
+              filterable: true,
               minWidth: "15%",
             },
             type: {
               title: this.lcn.localize("type"),
               sortable: true,
+              filterable: true,
               minWidth: "15%",
             },
             delete: {
-              title: "",
+              title: this.lcn.localize("delete"),
               sortable: false,
               minWidth: "80px",
               template: (device: LcnDeviceConfig) => {
@@ -156,17 +194,25 @@ export class LCNConfigDashboard extends LitElement {
         .tabs=${this.tabs}
         .columns=${this._columns(this.narrow)}
         .data=${this._devices(this.deviceConfigs) as DataTableRowData[]}
+        .initialSorting=${this._activeSorting}
+        .columnOrder=${this._activeColumnOrder}
+        .hiddenColumns=${this._activeHiddenColumns}
+        @columns-changed=${this._handleColumnsChanged}
+        @sorting-changed=${this._handleSortingChanged}
+        .filter=${this._filter}
+        @search-changed=${this._handleSearchChange}
+        @row-click=${this._rowClicked}
         .id=${"address"}
         clickable
-        @row-click=${this._rowClicked}
+        hasfab
         selectable
       >
 
         <ha-fab
           slot="fab"
-          @click=${this._addDevice}
           .label=${this.lcn.localize("dashboard-devices-add")}
           extended
+          @click=${this._addDevice}
         >
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
@@ -273,6 +319,19 @@ export class LCNConfigDashboard extends LitElement {
 
     await deleteDevice(this.hass, this.lcn.config_entry, device_to_delete);
     this._dispatchConfigurationChangedEvent();
+  }
+
+  private _handleSortingChanged(ev: CustomEvent) {
+    this._activeSorting = ev.detail;
+  }
+
+  private _handleSearchChange(ev: CustomEvent) {
+    this._filter = ev.detail.value;
+  }
+
+  private _handleColumnsChanged(ev: CustomEvent) {
+    this._activeColumnOrder = ev.detail.columnOrder;
+    this._activeHiddenColumns = ev.detail.hiddenColumns;
   }
 
   static get styles(): CSSResultGroup[] {

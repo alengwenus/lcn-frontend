@@ -12,6 +12,7 @@
   "resource": "Ressource",
   "create": "Erstellen",
   "dismiss": "Abbrechen",
+  "delete": "Entfernen",
 
   "domain": "Domäne",
   "binary-sensor": "Binärsensor",
