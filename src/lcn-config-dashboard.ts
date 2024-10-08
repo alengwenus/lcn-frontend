@@ -11,7 +11,7 @@ import "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import { mdiPlus, mdiDelete } from "@mdi/js";
+import { mdiPlus, mdiDelete, mdiDotsVertical, mdiMenuDown } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/layouts/hass-tabs-subpage";
@@ -27,7 +27,6 @@ import type {
   DataTableColumnContainer,
   DataTableRowData,
   SortingChangedEvent,
-  RowClickedEvent
 } from "@ha/components/data-table/ha-data-table";
 import { navigate } from "@ha/common/navigate";
 import { ProgressDialog } from "./dialogs/progress-dialog";
@@ -59,6 +58,8 @@ export class LCNConfigDashboard extends LitElement {
   @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
   @state() private deviceConfigs: LcnDeviceConfig[] = [];
+
+  @state() private _selected: string[] = [];
 
   @storage({
     storage: "sessionStorage",
@@ -194,19 +195,39 @@ export class LCNConfigDashboard extends LitElement {
         .tabs=${this.tabs}
         .columns=${this._columns(this.narrow)}
         .data=${this._devices(this.deviceConfigs) as DataTableRowData[]}
+        selectable
+        .selected=${this._selected.length}
         .initialSorting=${this._activeSorting}
         .columnOrder=${this._activeColumnOrder}
         .hiddenColumns=${this._activeHiddenColumns}
         @columns-changed=${this._handleColumnsChanged}
         @sorting-changed=${this._handleSortingChanged}
-        .filter=${this._filter}
         @search-changed=${this._handleSearchChange}
+        @selection-changed=${this._handleSelectionChanged}
+        .filter=${this._filter}
         @row-click=${this._rowClicked}
         .id=${"address"}
         clickable
         hasfab
-        selectable
       >
+
+        <ha-md-button-menu has-overflow slot="selection-bar">
+          ${html`
+            <ha-icon-button
+              .path=${mdiDotsVertical}
+              .label="more"
+              slot="trigger"
+            ></ha-icon-button>
+          `}
+
+          <ha-md-menu-item>
+            <ha-svg-icon slot="start" .path=${mdiDelete}></ha-svg-icon>
+            <div slot="headline">
+              Remove devices
+            </div>
+          </ha-md-menu-item>
+
+        </ha-md-button-menu>
 
         <ha-fab
           slot="fab"
@@ -332,6 +353,10 @@ export class LCNConfigDashboard extends LitElement {
   private _handleColumnsChanged(ev: CustomEvent) {
     this._activeColumnOrder = ev.detail.columnOrder;
     this._activeHiddenColumns = ev.detail.hiddenColumns;
+  }
+
+  private _handleSelectionChanged(ev: CustomEvent) {
+    this._selected = ev.detail.value;
   }
 
   static get styles(): CSSResultGroup[] {
