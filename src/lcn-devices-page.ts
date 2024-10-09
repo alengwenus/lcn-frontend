@@ -3,6 +3,7 @@ import "@material/mwc-button";
 import "@ha/components/ha-clickable-list-item";
 import "@ha/components/ha-fab";
 import "@ha/components/ha-button-menu";
+import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
@@ -37,8 +38,6 @@ import {
   showLCNCreateDeviceDialog,
 } from "./dialogs/show-dialog-create-device";
 import { loadProgressDialog, showProgressDialog } from "./dialogs/show-dialog-progress";
-import "./lcn-devices-data-table";
-import "@ha/panels/config/integrations/ha-integration-overflow-menu";
 
 interface DeviceRowData extends LcnDeviceConfig {
   segment_id: number;
@@ -189,28 +188,16 @@ export class LCNConfigDashboard extends LitElement {
         .hasfab
         class=${this.narrow ? "narrow" : ""}
       >
-        <ha-integration-overflow-menu
-          .hass=${this.hass}
-          slot="toolbar-icon"
-        ></ha-integration-overflow-menu>
-
-        <ha-md-button-menu has-overflow slot="selection-bar">
-          ${html`
-            <ha-icon-button
-              .path=${mdiDotsVertical}
-              .label="more"
-              slot="trigger"
-            ></ha-icon-button>
-          `}
-
-          <ha-md-menu-item>
-            <ha-svg-icon slot="start" .path=${mdiDelete}></ha-svg-icon>
-            <div slot="headline">
-              Remove devices
-            </div>
-          </ha-md-menu-item>
-
-        </ha-md-button-menu>
+        <ha-button-menu activatable slot="toolbar-icon">
+          <ha-icon-button
+            .path=${mdiDotsVertical}
+            .label="Actions"
+            slot="trigger"
+          ></ha-icon-button>
+          <ha-clickable-list-item @click=${this._scanDevices}>
+            ${this.lcn.localize("dashboard-devices-scan")}
+          </ha-clickable-list-item>
+        </ha-button-menu>
 
         <ha-fab
           slot="fab"
