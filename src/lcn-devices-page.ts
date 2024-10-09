@@ -9,9 +9,10 @@ import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import "@ha/components/ha-md-button-menu";
 import "@ha/layouts/hass-tabs-subpage-data-table";
+import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
-import { customElement, property, state } from "lit/decorators";
+import { customElement, property, state, query } from "lit/decorators";
 import { mdiPlus, mdiDelete, mdiDotsVertical } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
@@ -24,7 +25,6 @@ import "@ha/components/ha-svg-icon";
 import memoizeOne from "memoize-one";
 import { LCN, fetchDevices, scanDevices, deleteDevice, addDevice, LcnDeviceConfig, LcnAddress } from "types/lcn";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
-import { ConfigEntry } from "@ha/data/config_entries";
 import type {
   DataTableColumnContainer,
   SelectionChangedEvent,
@@ -43,7 +43,6 @@ interface DeviceRowData extends LcnDeviceConfig {
   segment_id: number;
   address_id: number;
   type: string;
-  delete: LcnDeviceConfig;
 };
 
 
@@ -93,6 +92,9 @@ export class LCNConfigDashboard extends LitElement {
   })
   private _activeHiddenColumns?: string[];
 
+  @query("hass-tabs-subpage-data-table", true)
+  private _dataTable!: HaTabsSubpageDataTable;
+
   private _devices = memoizeOne((devices: LcnDeviceConfig[]) => {
     const deviceRowData: DeviceRowData[] = devices.map((device) => ({
       ...device,
@@ -100,7 +102,6 @@ export class LCNConfigDashboard extends LitElement {
       segment_id: device.address[0],
       address_id: device.address[1],
       type: device.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
-      delete: device,
     }));
     return deviceRowData;
   });
@@ -130,22 +131,6 @@ export class LCNConfigDashboard extends LitElement {
         sortable: true,
         filterable: true,
       },
-      delete: {
-        title: this.lcn.localize("delete"),
-        sortable: false,
-        showNarrow: true,
-        minWidth: "80px",
-        template: (device: LcnDeviceConfig) => {
-          const handler = (ev) => this._onDeviceDelete(ev, device);
-          return html`
-            <ha-icon-button
-              .label=${this.lcn.localize("dashboard-devices-table-delete")}
-              .path=${mdiDelete}
-              @click=${handler}
-            ></ha-icon-button>
-          `;
-        },
-      },
     })
   );
 
@@ -153,10 +138,7 @@ export class LCNConfigDashboard extends LitElement {
     super.firstUpdated(changedProperties);
     loadProgressDialog();
     loadLCNCreateDeviceDialog();
-    this.addEventListener("lcn-config-changed", async () => {
-      this._fetchDevices(this.lcn.config_entry);
-    });
-    await this._fetchDevices(this.lcn.config_entry);
+    this.deviceConfigs = await fetchDevices(this.hass!, this.lcn.config_entry);
   }
 
   protected render(): TemplateResult {
@@ -199,6 +181,30 @@ export class LCNConfigDashboard extends LitElement {
           </ha-clickable-list-item>
         </ha-button-menu>
 
+        <div class="header-btns" slot="selection-bar">
+          ${!this.narrow
+            ? html`
+                <mwc-button @click=${this._deleteSelected} class="warning">
+                  ${this.lcn.localize("delete-selected")}
+                </mwc-button>
+              `
+            : html`
+                <ha-icon-button
+                  class="warning"
+                  id="remove-btn"
+                  @click=${this._deleteSelected}
+                  .path=${mdiDelete}
+                  .label=${this.lcn.localize("delete-selected")}
+                ></ha-icon-button>
+                <ha-help-tooltip
+                  .label=${this.lcn.localize("delete-selected")}
+                  )}
+                >
+                </ha-help-tooltip>
+            `
+          }
+        </div>
+
         <ha-fab
           slot="fab"
           .label=${this.lcn.localize("dashboard-devices-add")}
@@ -211,22 +217,20 @@ export class LCNConfigDashboard extends LitElement {
     `;
   }
 
-  private _dispatchConfigurationChangedEvent() {
-    this.dispatchEvent(
-      new CustomEvent("lcn-config-changed", {
-        bubbles: true,
-        composed: true,
-      }),
+  private getDeviceConfigByUniqueId(unique_id: string): LcnDeviceConfig {
+    const address = stringToAddress(unique_id);
+    const deviceConfig = this.deviceConfigs.find(
+      (el) =>
+        el.address[0] === address[0] &&
+        el.address[1] === address[1] &&
+        el.address[2] === address[2],
     );
+    return deviceConfig!;
   }
 
   private _rowClicked(ev: CustomEvent) {
     this.lcn.address = stringToAddress(ev.detail.id);
     navigate("/lcn/entities");
-  }
-
-  private async _fetchDevices(config_entry: ConfigEntry) {
-    this.deviceConfigs = await fetchDevices(this.hass!, config_entry);
   }
 
   private async _scanDevices() {
@@ -270,46 +274,37 @@ export class LCNConfigDashboard extends LitElement {
       return;
     }
     dialog()!.closeDialog();
-    this._fetchDevices(this.lcn.config_entry);
+    this.deviceConfigs = await fetchDevices(this.hass!, this.lcn.config_entry);
   }
 
-  private _onDeviceDelete(ev, device: LcnDeviceConfig) {
-    ev.stopPropagation();
-    this._deleteDevice(device.address);
-  }
-
-  private async _deleteDevice(address: LcnAddress) {
-    const device_to_delete = this.deviceConfigs.find(
-      (device) =>
-        device.address[0] === address[0] &&
-        device.address[1] === address[1] &&
-        device.address[2] === address[2],
-    )!;
+  private async _deleteSelected() {
+    const devices = this._selected.map((unique_id) =>
+      this.getDeviceConfigByUniqueId(unique_id)
+    );
 
     if (
+      this._selected.length &&
       !(await showConfirmationDialog(this, {
-        title: `
-          ${
-            device_to_delete.address[2]
-              ? this.lcn.localize("dashboard-devices-dialog-delete-group-title")
-              : this.lcn.localize("dashboard-devices-dialog-delete-module-title")
-          }`,
-        text: html`${this.lcn.localize("dashboard-devices-dialog-delete-text")}
-          ${device_to_delete.name ? `'${device_to_delete.name}'` : ""}
-          (${device_to_delete.address[2]
-            ? this.lcn.localize("group")
-            : this.lcn.localize("module")}:
-          ${this.lcn.localize("segment")} ${device_to_delete.address[0]}, ${this.lcn.localize("id")}
-          ${device_to_delete.address[1]})
+        title: this.lcn.localize("dashboard-devices-dialog-delete-devices-title"),
+        text: html`
+          ${this.lcn.localize("dashboard-devices-dialog-delete-text", { count: this._selected.length })}
           <br />
-          ${this.lcn.localize("dashboard-devices-dialog-delete-warning")}`,
+          ${this.lcn.localize("dashboard-devices-dialog-delete-warning")}
+          `
       }))
     ) {
       return;
     }
 
-    await deleteDevice(this.hass, this.lcn.config_entry, device_to_delete);
-    this._dispatchConfigurationChangedEvent();
+    for await (const device of devices) {
+      await deleteDevice(this.hass, this.lcn.config_entry, device);
+    };
+    this._clearSelection();
+    this.deviceConfigs = await fetchDevices(this.hass!, this.lcn.config_entry);
+  }
+
+  private _clearSelection() {
+    this._dataTable.clearSelection();
   }
 
   private _handleSortingChanged(ev: CustomEvent) {
@@ -338,19 +333,6 @@ export class LCNConfigDashboard extends LitElement {
         }
         hass-tabs-subpage-data-table.narrow {
           --data-table-row-height: 72px;
-        }
-
-        #box {
-          display: flex;
-          justify-content: space-between;
-        }
-        #scan-devices {
-          display: inline-block;
-          margin-top: 20px;
-          justify-content: center;
-        }
-        summary:hover {
-          text-decoration: underline;
         }
       `,
     ];

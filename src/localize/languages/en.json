@@ -68,6 +68,7 @@
   "key-locks": "Lock state keys",
 
   "more-help": "more help...",
+  "delete-selected": "Delete selected",
 
   "dashboard-devices-title": "LCN Configuration Dashboard",
   "dashboard-devices-introduction": "Welcome to the LCN configuration dashboard!",
@@ -95,9 +96,8 @@
   "dashboard-devices-table-delete": "Delete entry",
   "dashboard-devices-table-no-data": "No devices configured.",
 
-  "dashboard-devices-dialog-delete-module-title": "Delete module",
-  "dashboard-devices-dialog-delete-group-title": "Delete group",
-  "dashboard-devices-dialog-delete-text": "You are about to delete:",
+  "dashboard-devices-dialog-delete-devices-title": "Delete devices",
+  "dashboard-devices-dialog-delete-text": "You are about to delete {count} devices.",
   "dashboard-devices-dialog-delete-warning": "Removing a device will also delete all associated entities!",
 
   "dashboard-devices-dialog-create-title": "Create module / group",

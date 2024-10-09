@@ -1,11 +1,13 @@
 import { haStyle } from "@ha/resources/styles";
 import { css, html, LitElement, TemplateResult, CSSResultGroup } from "lit";
-import { customElement, property, state } from "lit/decorators";
+import { customElement, property, state, query } from "lit/decorators";
 import { mdiPlus, mdiDelete } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
+import "@ha/layouts/hass-tabs-subpage-data-table";
+import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
+import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import "@ha/layouts/hass-tabs-subpage";
 import memoizeOne from "memoize-one";
-import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import { storage } from "@ha/common/decorators/storage";
 import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
@@ -37,7 +39,6 @@ import {
 
 interface EntityRowData extends LcnEntityConfig {
   unique_id: string;
-  delete: LcnEntityConfig;
 };
 
 
@@ -105,11 +106,13 @@ export class LCNEntitiesPage extends LitElement {
   })
   private _activeHiddenColumns?: string[];
 
+  @query("hass-tabs-subpage-data-table", true)
+  private _dataTable!: HaTabsSubpageDataTable;
+
   private _entities = memoizeOne((entities: LcnEntityConfig[]) => {
     const entityRowData: EntityRowData[] = entities.map((entity) => ({
       ...entity,
       unique_id: createUniqueEntityId(entity),
-      delete: entity,
     }));
     return entityRowData;
   });
@@ -133,22 +136,6 @@ export class LCNEntitiesPage extends LitElement {
         title: this.lcn.localize("resource"),
         sortable: true,
         filterable: true,
-      },
-      delete: {
-        title: this.lcn.localize("delete"),
-        sortable: false,
-        showNarrow: true,
-        minWidth: "80px",
-        template: (entity: LcnEntityConfig) => {
-          const handler = (ev) => this._onEntityDelete(ev, entity);
-          return html`
-            <ha-icon-button
-              title=${this.lcn.localize("dashboard-entities-table-delete")}
-              .path=${mdiDelete}
-              @click=${handler}
-            ></ha-icon-button>
-          `;
-        },
       },
     })
   );
@@ -190,6 +177,30 @@ export class LCNEntitiesPage extends LitElement {
         class=${this.narrow ? "narrow" : ""}
       >
 
+        <div class="header-btns" slot="selection-bar">
+          ${!this.narrow
+            ? html`
+                <mwc-button @click=${this._deleteSelected} class="warning">
+                  ${this.lcn.localize("delete-selected")}
+                </mwc-button>
+              `
+            : html`
+                <ha-icon-button
+                  class="warning"
+                  id="remove-btn"
+                  @click=${this._deleteSelected}
+                  .path=${mdiDelete}
+                  .label=${this.lcn.localize("delete-selected")}
+                ></ha-icon-button>
+                <ha-help-tooltip
+                  .label=${this.lcn.localize("delete-selected")}
+                  )}
+                >
+                </ha-help-tooltip>
+            `
+          }
+        </div>
+
         <ha-fab
           slot="fab"
           @click=${this._addEntity}
@@ -202,7 +213,7 @@ export class LCNEntitiesPage extends LitElement {
     `;
   }
 
-  private getEntityConfigByUniqueId(unique_id: string): LcnEntityConfig | undefined {
+  private getEntityConfigByUniqueId(unique_id: string): LcnEntityConfig {
     const { address, domain, resource } = parseUniqueEntityId(unique_id);
     const entityConfig = this.entityConfigs.find(
       (el) =>
@@ -212,15 +223,11 @@ export class LCNEntitiesPage extends LitElement {
         el.domain === domain &&
         el.resource === resource,
     );
-    return entityConfig;
+    return entityConfig!;
   }
 
   private _rowClicked(ev: CustomEvent) {
     this.lcn.log.debug(this.getEntityConfigByUniqueId(ev.detail.id));
-  }
-
-  private _configurationChanged() {
-    this._fetchEntities(this.lcn.config_entry, this.lcn.address);
   }
 
   private async _fetchEntities(config_entry: ConfigEntry, address: LcnAddress) {
@@ -254,7 +261,23 @@ export class LCNEntitiesPage extends LitElement {
   private async _onEntityDelete(ev, entity: LcnEntityConfig) {
     ev.stopPropagation();
     await deleteEntity(this.hass, this.lcn.config_entry, entity);
-    this._configurationChanged();
+    this._fetchEntities(this.lcn.config_entry, this.lcn.address);
+  }
+
+  private async _deleteSelected() {
+    const entities = this._selected.map((unique_id) =>
+      this.getEntityConfigByUniqueId(unique_id)
+    );
+
+    for await (const entity of entities) {
+      await deleteEntity(this.hass, this.lcn.config_entry, entity);
+    };
+    this._clearSelection();
+    this._fetchEntities(this.lcn.config_entry, this.lcn.address);
+  }
+
+  private _clearSelection() {
+    this._dataTable.clearSelection();
   }
 
   private _handleSortingChanged(ev: CustomEvent) {

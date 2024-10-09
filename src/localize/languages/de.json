@@ -67,6 +67,7 @@
   "key-locks": "Sperrung Tasten",
 
   "more-help": "mehr Hilfe...",
+  "delete-selected": "Ausgewählte entfernen",
 
   "dashboard-devices-title": "LCN Konfiguration",
   "dashboard-devices-introduction": "Willkommen auf dem LCN Konfigurations-Dashboard!",
@@ -94,9 +95,8 @@
   "dashboard-devices-table-delete": "Lösche Eintrag",
   "dashboard-devices-table-no-data": "Keine Geräte konfiguriert.",
 
-  "dashboard-devices-dialog-delete-module-title": "Modul löschen",
-  "dashboard-devices-dialog-delete-group-title": "Gruppe löschen",
-  "dashboard-devices-dialog-delete-text": "Du möchtest folgendes Gerät löschen:",
+  "dashboard-devices-dialog-delete-devices-title": "Gerät löschen",
+  "dashboard-devices-dialog-delete-text": "Du möchtest {count} Geräte löschen.",
   "dashboard-devices-dialog-delete-warning": "Mit dem Löschen des Gerätes werden alle zugehörigen Entitäten gelöscht!",
 
   "dashboard-devices-dialog-create-title": "Modul / Gruppe erstellen",
