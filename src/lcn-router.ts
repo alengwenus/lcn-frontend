@@ -23,8 +23,8 @@ class LCNRouter extends HassRouterPage {
       devices: {
         tag: "lcn-config-dashboard",
         load: () => {
-          logger.debug("Importing lcn-config-dashboard");
-          return import("./lcn-config-dashboard");
+          logger.debug("Importing lcn-devices-page");
+          return import("./lcn-devices-page");
         },
       },
       entities: {
