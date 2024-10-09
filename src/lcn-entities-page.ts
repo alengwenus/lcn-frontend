@@ -1,29 +1,61 @@
-import { html, LitElement, TemplateResult } from "lit";
+import { haStyle } from "@ha/resources/styles";
+import { css, html, LitElement, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import { mdiPlus } from "@mdi/js";
+import { mdiPlus, mdiDelete } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import "@ha/layouts/hass-tabs-subpage";
+import memoizeOne from "memoize-one";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
+import { storage } from "@ha/common/decorators/storage";
 import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
 import "@ha/components/ha-fab";
-import "./lcn-entities-data-table";
 import {
   LCN,
   fetchEntities,
   fetchDevices,
   addEntity,
+  deleteEntity,
   LcnDeviceConfig,
   LcnEntityConfig,
   LcnAddress,
 } from "types/lcn";
 import { ConfigEntry } from "@ha/data/config_entries";
+import type { HASSDomEvent } from "@ha/common/dom/fire_event";
+import type {
+  DataTableColumnContainer,
+  SelectionChangedEvent,
+  SortingChangedEvent,
+} from "@ha/components/data-table/ha-data-table";
+import { addressToString, stringToAddress } from "helpers/address_conversion";
 import {
   loadLCNCreateEntityDialog,
   showLCNCreateEntityDialog,
 } from "./dialogs/show-dialog-create-entity";
+
+interface EntityRowData extends LcnEntityConfig {
+  unique_id: string;
+  delete: LcnEntityConfig;
+};
+
+
+function createUniqueEntityId(entity: LcnEntityConfig): string {
+  return `${addressToString(entity.address)}/${entity.domain}/${entity.resource}`
+}
+
+function parseUniqueEntityId(unique_id: string):
+    { address: LcnAddress; domain: string; resource: string } {
+  const splitted = unique_id.split("/");
+  const resource = splitted.pop()!;
+  const domain = splitted.pop()!;
+  const address_str = splitted.pop();
+  const address = stringToAddress(address_str!);
+  const result = { address: address, domain: domain, resource: resource };
+  return result
+}
+
 
 @customElement("lcn-entities-page")
 export class LCNEntitiesPage extends LitElement {
@@ -39,7 +71,87 @@ export class LCNEntitiesPage extends LitElement {
 
   @state() private _deviceConfig!: LcnDeviceConfig;
 
-  @state() private _entityConfigs: LcnEntityConfig[] = [];
+  @state() private entityConfigs: LcnEntityConfig[] = [];
+
+  @state() private _selected: string[] = [];
+
+  @storage({
+    storage: "sessionStorage",
+    key: "lcn-devices-table-search",
+    state: true,
+    subscribe: false,
+  })
+  private _filter: string = "";
+
+  @storage({
+    storage: "sessionStorage",
+    key: "lcn-devices-table-sort",
+    state: false,
+    subscribe: false,
+  })
+  private _activeSorting?: SortingChangedEvent;
+
+  @storage({
+    key: "lcn-devices-table-column-order",
+    state: false,
+    subscribe: false,
+  })
+  private _activeColumnOrder?: string[];
+
+  @storage({
+    key: "lcn-devices-table-hidden-columns",
+    state: false,
+    subscribe: false,
+  })
+  private _activeHiddenColumns?: string[];
+
+  private _entities = memoizeOne((entities: LcnEntityConfig[]) => {
+    const entityRowData: EntityRowData[] = entities.map((entity) => ({
+      ...entity,
+      unique_id: createUniqueEntityId(entity),
+      delete: entity,
+    }));
+    return entityRowData;
+  });
+
+  private _columns = memoizeOne(
+    (): DataTableColumnContainer => ({
+      name: {
+        main: true,
+        title: this.lcn.localize("name"),
+        sortable: true,
+        filterable: true,
+        direction: "asc",
+        flex: 2,
+      },
+      domain: {
+        title: this.lcn.localize("domain"),
+        sortable: true,
+        filterable: true,
+      },
+      resource: {
+        title: this.lcn.localize("resource"),
+        sortable: true,
+        filterable: true,
+      },
+      delete: {
+        title: this.lcn.localize("delete"),
+        sortable: false,
+        showNarrow: true,
+        minWidth: "80px",
+        template: (entity: LcnEntityConfig) => {
+          const handler = (ev) => this._onEntityDelete(ev, entity);
+          return html`
+            <ha-icon-button
+              title=${this.lcn.localize("dashboard-entities-table-delete")}
+              .path=${mdiDelete}
+              @click=${handler}
+            ></ha-icon-button>
+          `;
+        },
+      },
+    })
+  );
 
   protected async firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);
@@ -49,39 +161,35 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   protected render(): TemplateResult {
-    if (!this._deviceConfig && this._entityConfigs.length === 0) {
+    if (!this._deviceConfig && this.entityConfigs.length === 0) {
       return html` <hass-loading-screen></hass-loading-screen> `;
     }
     return html`
-      <hass-tabs-subpage
+      <hass-tabs-subpage-data-table
         .hass=${this.hass}
         .narrow=${this.narrow}
+        .back-path="/config/integrations/integration/lcn"
         .route=${this.route}
         .tabs=${this.tabs}
+        .columns=${this._columns()}
+        .data=${this._entities(this.entityConfigs)}
+        selectable
+        .selected=${this._selected.length}
+        .initialSorting=${this._activeSorting}
+        .columnOrder=${this._activeColumnOrder}
+        .hiddenColumns=${this._activeHiddenColumns}
+        @columns-changed=${this._handleColumnsChanged}
+        @sorting-changed=${this._handleSortingChanged}
+        @selection-changed=${this._handleSelectionChanged}
+        clickable
+        .filter=${this._filter}
+        @search-changed=${this._handleSearchChange}
+        @row-click=${this._rowClicked}
+        id="unique_id"
+        .hasfab
+        class=${this.narrow ? "narrow" : ""}
       >
-        <span slot="header"> ${this.lcn.localize("dashboard-entities-title")} </span>
-        <ha-config-section .narrow=${this.narrow}>
-          <span slot="introduction"> ${this.renderIntro()} </span>
 
-          <ha-card
-            header="${this._deviceConfig.address[2]
-              ? this.lcn.localize("dashboard-entities-entities-for-group")
-              : this.lcn.localize("dashboard-entities-entities-for-module")}:
-              (${this.lcn.config_entry.title}, ${this._deviceConfig.address[0]},
-              ${this._deviceConfig.address[1]})
-              ${this._deviceConfig.name ? " - " + this._deviceConfig.name : ""}
-            "
-          >
-            <lcn-entities-data-table
-              .hass=${this.hass}
-              .lcn=${this.lcn}
-              .entities=${this._entityConfigs}
-              .device=${this._deviceConfig}
-              .narrow=${this.narrow}
-              @lcn-configuration-changed=${this._configurationChanged}
-            ></lcn-entities-data-table>
-          </ha-card>
-        </ha-config-section>
         <ha-fab
           slot="fab"
           @click=${this._addEntity}
@@ -90,24 +198,25 @@ export class LCNEntitiesPage extends LitElement {
         >
           <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
-      </hass-tabs-subpage>
+    </hass-tabs-subpage-data-table>
     `;
   }
 
-  private renderIntro(): TemplateResult {
-    return html`
-      <h3>${this.lcn.localize("dashboard-entities-introduction")}</h3>
-      <details>
-        <summary>${this.lcn.localize("more-help")}</summary>
-        <ul>
-          <li>${this.lcn.localize("dashboard-entities-introduction-help-1")}</li>
-          <li>${this.lcn.localize("dashboard-entities-introduction-help-2")}</li>
-          <li>${this.lcn.localize("dashboard-entities-introduction-help-3")}</li>
-          <li>${this.lcn.localize("dashboard-entities-introduction-help-4")}</li>
-          <li>${this.lcn.localize("dashboard-entities-introduction-help-5")}</li>
-        </ul>
-      </details>
-    `;
+  private getEntityConfigByUniqueId(unique_id: string): LcnEntityConfig | undefined {
+    const { address, domain, resource } = parseUniqueEntityId(unique_id);
+    const entityConfig = this.entityConfigs.find(
+      (el) =>
+        el.address[0] === address[0] &&
+        el.address[1] === address[1] &&
+        el.address[2] === address[2] &&
+        el.domain === domain &&
+        el.resource === resource,
+    );
+    return entityConfig;
+  }
+
+  private _rowClicked(ev: CustomEvent) {
+    this.lcn.log.debug(this.getEntityConfigByUniqueId(ev.detail.id));
   }
 
   private _configurationChanged() {
@@ -125,7 +234,7 @@ export class LCNEntitiesPage extends LitElement {
     if (deviceConfig !== undefined) {
       this._deviceConfig = deviceConfig;
     }
-    this._entityConfigs = await fetchEntities(this.hass!, config_entry, address);
+    this.entityConfigs = await fetchEntities(this.hass!, config_entry, address);
   }
 
   private async _addEntity() {
@@ -141,6 +250,44 @@ export class LCNEntitiesPage extends LitElement {
       },
     });
   }
+
+  private async _onEntityDelete(ev, entity: LcnEntityConfig) {
+    ev.stopPropagation();
+    await deleteEntity(this.hass, this.lcn.config_entry, entity);
+    this._configurationChanged();
+  }
+
+  private _handleSortingChanged(ev: CustomEvent) {
+    this._activeSorting = ev.detail;
+  }
+
+  private _handleSearchChange(ev: CustomEvent) {
+    this._filter = ev.detail.value;
+  }
+
+  private _handleColumnsChanged(ev: CustomEvent) {
+    this._activeColumnOrder = ev.detail.columnOrder;
+    this._activeHiddenColumns = ev.detail.hiddenColumns;
+  }
+
+  private _handleSelectionChanged(ev: HASSDomEvent<SelectionChangedEvent>): void {
+    this._selected = ev.detail.value;
+  }
+
+  static get styles(): CSSResultGroup[] {
+    return [
+      haStyle,
+      css`
+        hass-tabs-subpage-data-table {
+          --data-table-row-height: 60px;
+        }
+        hass-tabs-subpage-data-table.narrow {
+          --data-table-row-height: 72px;
+        }
+      `,
+    ];
+  }
+
 }
 
 declare global {

@@ -12,7 +12,7 @@ import "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
 import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import { mdiPlus, mdiDelete, mdiDotsVertical, mdiMenuDown } from "@mdi/js";
+import { mdiPlus, mdiDelete, mdiDotsVertical } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/layouts/hass-tabs-subpage";
@@ -23,7 +23,7 @@ import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
 import memoizeOne from "memoize-one";
 import { LCN, fetchDevices, scanDevices, deleteDevice, addDevice, LcnDeviceConfig, LcnAddress } from "types/lcn";
-import { address_to_string, string_to_address } from "helpers/address_conversion";
+import { addressToString, stringToAddress } from "helpers/address_conversion";
 import { ConfigEntry } from "@ha/data/config_entries";
 import type {
   DataTableColumnContainer,
@@ -96,7 +96,7 @@ export class LCNConfigDashboard extends LitElement {
   private _devices = memoizeOne((devices: LcnDeviceConfig[]) => {
     const deviceRowData: DeviceRowData[] = devices.map((device) => ({
       ...device,
-      unique_id: address_to_string(device.address),
+      unique_id: addressToString(device.address),
       segment_id: device.address[0],
       address_id: device.address[1],
       type: device.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
@@ -221,7 +221,7 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   private _rowClicked(ev: CustomEvent) {
-    this.lcn.address = string_to_address(ev.detail.id);
+    this.lcn.address = stringToAddress(ev.detail.id);
     navigate("/lcn/entities");
   }
 
