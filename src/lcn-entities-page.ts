@@ -5,7 +5,6 @@ import { mdiPlus, mdiDelete } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
-import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import "@ha/layouts/hass-tabs-subpage";
 import memoizeOne from "memoize-one";
 import { storage } from "@ha/common/decorators/storage";
@@ -32,6 +31,7 @@ import type {
   SortingChangedEvent,
 } from "@ha/components/data-table/ha-data-table";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
+import { lcnMainTabs } from "lcn-router";
 import {
   loadLCNCreateEntityDialog,
   showLCNCreateEntityDialog,
@@ -67,8 +67,6 @@ export class LCNEntitiesPage extends LitElement {
   @property({ attribute: false }) public narrow!: boolean;
 
   @property({ attribute: false }) public route!: Route;
-
-  @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
   @state() private _deviceConfig!: LcnDeviceConfig;
 
@@ -157,7 +155,8 @@ export class LCNEntitiesPage extends LitElement {
         .narrow=${this.narrow}
         .back-path="/config/integrations/integration/lcn"
         .route=${this.route}
-        .tabs=${this.tabs}
+        .tabs=${lcnMainTabs}
+        .localizeFunc=${this.lcn.localize}
         .columns=${this._columns()}
         .data=${this._entities(this.entityConfigs)}
         selectable

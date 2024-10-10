@@ -13,6 +13,8 @@
   "create": "Erstellen",
   "dismiss": "Abbrechen",
   "delete": "Entfernen",
+  "devices": "Geräte",
+  "entities": "Entitäten",
 
   "domain": "Domäne",
   "binary-sensor": "Binärsensor",
