@@ -87,7 +87,7 @@ export const fetchDevices = (
 export const fetchEntities = (
   hass: HomeAssistant,
   config_entry: ConfigEntry,
-  address: LcnAddress,
+  address: LcnAddress | undefined = undefined,
 ): Promise<LcnEntityConfig[]> =>
   hass.callWS({
     type: "lcn/entities",

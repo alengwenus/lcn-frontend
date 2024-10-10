@@ -13,6 +13,10 @@
   "create": "Create",
   "dismiss": "Dismiss",
   "delete": "Delete",
+  "devices": "Devices",
+  "entities": "Entities",
+  "address": "Address",
+  "addresses": "Addresses",
 
   "domain": "Domain",
   "binary-sensor": "Binary sensor",

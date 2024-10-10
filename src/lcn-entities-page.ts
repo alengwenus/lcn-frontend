@@ -1,19 +1,19 @@
 import { haStyle } from "@ha/resources/styles";
-import { css, html, LitElement, TemplateResult, CSSResultGroup } from "lit";
+import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators";
 import { mdiPlus, mdiDelete } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
-import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import "@ha/layouts/hass-tabs-subpage";
-import memoizeOne from "memoize-one";
+import memoize from "memoize-one";
 import { storage } from "@ha/common/decorators/storage";
 import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
 import "@ha/components/ha-fab";
+import { mainWindow } from "@ha/common/dom/get_main_window";
 import {
   LCN,
   fetchEntities,
@@ -32,26 +32,37 @@ import type {
   SortingChangedEvent,
 } from "@ha/components/data-table/ha-data-table";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
+import { lcnMainTabs } from "lcn-router";
+import {
+  DataTableFiltersItems,
+  DataTableFiltersValues,
+} from "@ha/data/data_table_filters";
 import {
   loadLCNCreateEntityDialog,
   showLCNCreateEntityDialog,
 } from "./dialogs/show-dialog-create-entity";
+import "components/lcn-filter-address";
 
-interface EntityRowData extends LcnEntityConfig {
+
+export interface EntityRowData extends LcnEntityConfig {
   unique_id: string;
+  address_str: string;
 };
 
-
-function createUniqueEntityId(entity: LcnEntityConfig): string {
-  return `${addressToString(entity.address)}/${entity.domain}/${entity.resource}`
+function createUniqueEntityId(entity: LcnEntityConfig, includeDomain: boolean = true): string {
+  let unique_id = `${addressToString(entity.address)}-${entity.resource}`
+  if (includeDomain) {
+    unique_id = `${entity.domain}-` + unique_id
+  }
+  return unique_id
 }
 
 function parseUniqueEntityId(unique_id: string):
     { address: LcnAddress; domain: string; resource: string } {
-  const splitted = unique_id.split("/");
+  const splitted = unique_id.split("-");
   const resource = splitted.pop()!;
-  const domain = splitted.pop()!;
   const address_str = splitted.pop();
+  const domain = splitted.pop()!;
   const address = stringToAddress(address_str!);
   const result = { address: address, domain: domain, resource: resource };
   return result
@@ -68,39 +79,51 @@ export class LCNEntitiesPage extends LitElement {
 
   @property({ attribute: false }) public route!: Route;
 
-  @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
-
   @state() private _deviceConfig!: LcnDeviceConfig;
 
   @state() private entityConfigs: LcnEntityConfig[] = [];
 
-  @state() private _selected: string[] = [];
-
   @storage({
     storage: "sessionStorage",
-    key: "lcn-devices-table-search",
+    key: "entities-table-filters",
     state: true,
     subscribe: false,
   })
-  private _filter: string = "";
+  private _filters: DataTableFiltersValues = {};
+
+  @state() private _filteredItems: DataTableFiltersItems = {};
+
+  @state() private _selected: string[] = [];
+
+  @state() private _expandedFilter?: string;
 
   @storage({
     storage: "sessionStorage",
-    key: "lcn-devices-table-sort",
+    key: "lcn-entities-table-search",
+    state: true,
+    subscribe: false,
+  })
+  private _filter: string = history.state?.filter || "";;
+
+  @state() private _searchParms = new URLSearchParams(mainWindow.location.search);
+
+  @storage({
+    storage: "sessionStorage",
+    key: "lcn-entities-table-sort",
     state: false,
     subscribe: false,
   })
   private _activeSorting?: SortingChangedEvent;
 
   @storage({
-    key: "lcn-devices-table-column-order",
+    key: "lcn-entities-table-column-order",
     state: false,
     subscribe: false,
   })
   private _activeColumnOrder?: string[];
 
   @storage({
-    key: "lcn-devices-table-hidden-columns",
+    key: "lcn-entities-table-hidden-columns",
     state: false,
     subscribe: false,
   })
@@ -109,15 +132,16 @@ export class LCNEntitiesPage extends LitElement {
   @query("hass-tabs-subpage-data-table", true)
   private _dataTable!: HaTabsSubpageDataTable;
 
-  private _entities = memoizeOne((entities: LcnEntityConfig[]) => {
+  private _entities = (entities: LcnEntityConfig[]) => {
     const entityRowData: EntityRowData[] = entities.map((entity) => ({
       ...entity,
       unique_id: createUniqueEntityId(entity),
+      address_str: addressToString(entity.address),
     }));
     return entityRowData;
-  });
+  };
 
-  private _columns = memoizeOne(
+  private _columns = memoize(
     (): DataTableColumnContainer => ({
       name: {
         main: true,
@@ -126,6 +150,12 @@ export class LCNEntitiesPage extends LitElement {
         filterable: true,
         direction: "asc",
         flex: 2,
+      },
+      address_str: {
+        title: this.lcn.localize("address"),
+        sortable: true,
+        filterable: true,
+        direction: "asc",
       },
       domain: {
         title: this.lcn.localize("domain"),
@@ -140,26 +170,98 @@ export class LCNEntitiesPage extends LitElement {
     })
   );
 
+  private _filteredEntities = memoize(
+    (
+      filters: DataTableFiltersValues,
+      filteredItems: DataTableFiltersItems
+    ) => {
+      let filteredEntityConfigs = this._entities(this.entityConfigs);
+
+      Object.entries(filters).forEach(([key, filter]) => {
+        if (key === "lcn-filter-address" && Array.isArray(filter) && filter.length) {
+          filteredEntityConfigs = filteredEntityConfigs.filter((entityConfig) =>
+            filter.includes(entityConfig.address_str)
+          )
+        }
+      });
+
+      Object.values(filteredItems).forEach((items) => {
+        if (items) {
+          filteredEntityConfigs = filteredEntityConfigs.filter((entityConfig) =>
+            items.has(entityConfig.unique_id)
+          );
+        }
+      });
+
+      return filteredEntityConfigs;
+      }
+  )
+
+  private _filterExpanded(ev) {
+    if (ev.detail.expanded) {
+      this._expandedFilter = ev.target.localName;
+    } else if (this._expandedFilter === ev.target.localName) {
+      this._expandedFilter = undefined;
+    }
+  }
+
+  private _filterChanged(ev) {
+    const type = ev.target.localName;
+
+    this._filters = { ...this._filters, [type]: ev.detail.value };
+    this._filteredItems = { ...this._filteredItems, [type]: ev.detail.items };
+  }
+
   protected async firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
-
-    await this._fetchEntities(this.lcn.config_entry, this.lcn.address);
+    await this._fetchEntities(this.lcn.config_entry);
+    this._setFiltersFromUrl();
   }
 
-  protected render(): TemplateResult {
-    if (!this._deviceConfig && this.entityConfigs.length === 0) {
-      return html` <hass-loading-screen></hass-loading-screen> `;
+  private _setFiltersFromUrl() {
+    const address_str = this._searchParms.get("address");
+
+    if (!address_str) {
+      this._filters = {}
+      return
     }
+
+    this._filter = history.state?.filter || "";
+
+    this._filters = {
+      "lcn-filter-address": address_str ? [address_str] : [],
+    }
+  }
+
+  protected render() {
+    if (!this._deviceConfig && this.entityConfigs.length === 0) {
+      return nothing
+    }
+
+    const filteredEntities = this._filteredEntities(this._filters, this._filteredItems)
+
     return html`
       <hass-tabs-subpage-data-table
         .hass=${this.hass}
         .narrow=${this.narrow}
         .back-path="/config/integrations/integration/lcn"
         .route=${this.route}
-        .tabs=${this.tabs}
+        .tabs=${lcnMainTabs}
+        .localizeFunc=${this.lcn.localize}
         .columns=${this._columns()}
-        .data=${this._entities(this.entityConfigs)}
+        .data=${filteredEntities}
+        hasFilters
+        .filters=${
+          Object.values(this._filters).filter((filter) =>
+            Array.isArray(filter)
+              ? filter.length
+              : filter &&
+                Object.values(filter).some((val) =>
+                  Array.isArray(val) ? val.length : val
+                )
+          ).length
+        }
         selectable
         .selected=${this._selected.length}
         .initialSorting=${this._activeSorting}
@@ -169,6 +271,7 @@ export class LCNEntitiesPage extends LitElement {
         @sorting-changed=${this._handleSortingChanged}
         @selection-changed=${this._handleSelectionChanged}
         clickable
+        @clear-filter=${this._clearFilter}
         .filter=${this._filter}
         @search-changed=${this._handleSearchChange}
         @row-click=${this._rowClicked}
@@ -201,6 +304,18 @@ export class LCNEntitiesPage extends LitElement {
           }
         </div>
 
+        <lcn-filter-address
+          .hass=${this.hass}
+          .lcn=${this.lcn}
+          .value=${this._filters["lcn-filter-address"]}
+          .entityConfigs=${this._entities(this.entityConfigs)}
+          @data-table-filter-changed=${this._filterChanged}
+          slot="filter-pane"
+          .expanded=${this._expandedFilter === "lcn-filter-address"}
+          .narrow=${this.narrow}
+          @expanded-changed=${this._filterExpanded}
+        ></lcn-filter-address>
+
         <ha-fab
           slot="fab"
           @click=${this._addEntity}
@@ -230,17 +345,20 @@ export class LCNEntitiesPage extends LitElement {
     this.lcn.log.debug(this.getEntityConfigByUniqueId(ev.detail.id));
   }
 
-  private async _fetchEntities(config_entry: ConfigEntry, address: LcnAddress) {
-    const deviceConfigs = await fetchDevices(this.hass!, config_entry);
-    const deviceConfig = deviceConfigs.find(
-      (el) =>
-        el.address[0] === address[0] &&
-        el.address[1] === address[1] &&
-        el.address[2] === address[2],
-    );
-    if (deviceConfig !== undefined) {
-      this._deviceConfig = deviceConfig;
+  private async _fetchEntities(config_entry: ConfigEntry, address: LcnAddress | undefined = undefined) {
+    if (address !== undefined) {
+      const deviceConfigs = await fetchDevices(this.hass!, config_entry);
+      const deviceConfig = deviceConfigs.find(
+        (el) =>
+          el.address[0] === address![0] &&
+          el.address[1] === address![1] &&
+          el.address[2] === address![2],
+      );
+      if (deviceConfig !== undefined) {
+        this._deviceConfig = deviceConfig;
+      }
     }
+
     this.entityConfigs = await fetchEntities(this.hass!, config_entry, address);
   }
 
@@ -256,12 +374,6 @@ export class LCNEntitiesPage extends LitElement {
         return false;
       },
     });
-  }
-
-  private async _onEntityDelete(ev, entity: LcnEntityConfig) {
-    ev.stopPropagation();
-    await deleteEntity(this.hass, this.lcn.config_entry, entity);
-    this._fetchEntities(this.lcn.config_entry, this.lcn.address);
   }
 
   private async _deleteSelected() {
@@ -280,12 +392,18 @@ export class LCNEntitiesPage extends LitElement {
     this._dataTable.clearSelection();
   }
 
+  private _clearFilter() {
+    this._filters = {};
+    this._filteredItems = {};
+  }
+
   private _handleSortingChanged(ev: CustomEvent) {
     this._activeSorting = ev.detail;
   }
 
   private _handleSearchChange(ev: CustomEvent) {
     this._filter = ev.detail.value;
+    history.replaceState({ filter: this._filter }, "");
   }
 
   private _handleColumnsChanged(ev: CustomEvent) {

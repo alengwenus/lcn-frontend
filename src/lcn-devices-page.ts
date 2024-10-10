@@ -15,15 +15,15 @@ import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup }
 import { customElement, property, state, query } from "lit/decorators";
 import { mdiPlus, mdiDelete, mdiDotsVertical } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
+import { lcnMainTabs } from "lcn-router";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/layouts/hass-tabs-subpage";
-import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
 import memoizeOne from "memoize-one";
-import { LCN, fetchDevices, scanDevices, deleteDevice, addDevice, LcnDeviceConfig, LcnAddress } from "types/lcn";
+import { LCN, fetchDevices, scanDevices, deleteDevice, addDevice, LcnDeviceConfig } from "types/lcn";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import type {
   DataTableColumnContainer,
@@ -46,7 +46,7 @@ interface DeviceRowData extends LcnDeviceConfig {
 };
 
 
-@customElement("lcn-config-dashboard")
+@customElement("lcn-devices-page")
 export class LCNConfigDashboard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
@@ -55,8 +55,6 @@ export class LCNConfigDashboard extends LitElement {
   @property({ type: Boolean }) public narrow!: boolean;
 
   @property({ attribute: false }) public route!: Route;
-
-  @property({ type: Array, reflect: false }) public tabs: PageNavigation[] = [];
 
   @state() private deviceConfigs: LcnDeviceConfig[] = [];
 
@@ -151,7 +149,8 @@ export class LCNConfigDashboard extends LitElement {
         .narrow=${this.narrow}
         .back-path="/config/integrations/integration/lcn"
         .route=${this.route}
-        .tabs=${this.tabs}
+        .tabs=${lcnMainTabs}
+        .localizeFunc=${this.lcn.localize}
         .columns=${this._columns()}
         .data=${this._devices(this.deviceConfigs)}
         selectable
@@ -229,8 +228,9 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   private _rowClicked(ev: CustomEvent) {
-    this.lcn.address = stringToAddress(ev.detail.id);
-    navigate("/lcn/entities");
+    const address_str: string = ev.detail.id;
+    this.lcn.address = stringToAddress(address_str);
+    navigate(`/lcn/entities?address=${address_str}`, { replace: true });
   }
 
   private async _scanDevices() {

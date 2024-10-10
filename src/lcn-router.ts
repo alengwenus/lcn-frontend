@@ -1,10 +1,25 @@
+import { mdiDevices, mdiShape } from "@mdi/js"
 import { customElement, property } from "lit/decorators";
 import { HassRouterPage, RouterOptions } from "@ha/layouts/hass-router-page";
 import type { HomeAssistant, Route } from "@ha/types";
+import { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import { LCNLogger } from "lcn-logger";
 import { LCN } from "./types/lcn";
 
 const logger = new LCNLogger("router");
+
+export const lcnMainTabs: PageNavigation[] = [
+  {
+    path: "/lcn/devices",
+    translationKey: "devices",
+    iconPath: mdiDevices,
+  },
+  {
+    path: "/lcn/entities",
+    translationKey: "entities",
+    iconPath: mdiShape,
+  },
+]
 
 @customElement("lcn-router")
 class LCNRouter extends HassRouterPage {
@@ -18,10 +33,9 @@ class LCNRouter extends HassRouterPage {
 
   protected routerOptions: RouterOptions = {
     defaultPage: "devices",
-    showLoading: true,
     routes: {
       devices: {
-        tag: "lcn-config-dashboard",
+        tag: "lcn-devices-page",
         load: () => {
           logger.debug("Importing lcn-devices-page");
           return import("./lcn-devices-page");
