@@ -1,3 +1,5 @@
+import { consume } from "@lit-labs/context";
+import { deviceConfigsContext } from "components/context";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
@@ -9,7 +11,8 @@ import { createCloseHeading } from "@ha/components/ha-dialog";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { HomeAssistant } from "@ha/types";
-import type { LCN, LcnEntityConfig } from "types/lcn";
+import type { LCN, LcnDeviceConfig, LcnEntityConfig } from "types/lcn";
+import { addressToString, stringToAddress } from "helpers/address_conversion";
 import "./lcn-config-binary-sensor";
 import "./lcn-config-climate";
 import "./lcn-config-cover";
@@ -40,6 +43,12 @@ export class CreateEntityDialog extends LitElement {
 
   @state() private _invalid: boolean = true;
 
+  @state() private _deviceConfig?: LcnDeviceConfig;
+
+  @state()
+  @consume({ context: deviceConfigsContext, subscribe: true })
+  deviceConfigs!: LcnDeviceConfig[];
+
   private get _domains(): DomainItem[] {
     return [
       { name: this.lcn.localize("binary-sensor"), domain: "binary_sensor" },
@@ -57,6 +66,10 @@ export class CreateEntityDialog extends LitElement {
     this.lcn = params.lcn;
     this._name = "";
     this._invalid = true;
+    this._deviceConfig = params.deviceConfig;
+
+    if (!this._deviceConfig) this._deviceConfig = this.deviceConfigs[0];
+
     await this.updateComplete;
   }
 
@@ -75,6 +88,24 @@ export class CreateEntityDialog extends LitElement {
         ) as unknown as string}
         @closed=${this._closeDialog}
       >
+        <ha-select
+          id="device-select"
+          .label=${this.lcn.localize("device")}
+          .value=${this._deviceConfig ? addressToString(this._deviceConfig.address) : undefined}
+          fixedMenuPosition
+          @selected=${this._deviceChanged}
+          @closed=${stopPropagation}
+        >
+          ${this.deviceConfigs.map(
+            (deviceConfig) => html`
+              <ha-list-item .value=${addressToString(deviceConfig.address)}>
+                <div class="primary">${deviceConfig.name}</div>
+                <div class="secondary">(${addressToString(deviceConfig.address)})</div>
+              </ha-list-item>
+            `,
+          )}
+        </ha-select>
+
         <ha-select
           id="domain-select"
           .label=${this.lcn.localize("domain")}
@@ -131,7 +162,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
-          .softwareSerial=${this._params.device.software_serial!}
+          .softwareSerial=${this._params.deviceConfig.software_serial!}
           @validity-changed=${this._validityChanged}
         ></lcn-config-climate-element>`;
       case "cover":
@@ -159,7 +190,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
-          .softwareSerial=${this._params.device.software_serial!}
+          .softwareSerial=${this._deviceConfig!.software_serial!}
         ></lcn-config-sensor-element>`;
       case "switch":
         return html`<lcn-config-switch-element
@@ -170,6 +201,17 @@ export class CreateEntityDialog extends LitElement {
       default:
         return nothing;
     }
+  }
+
+  private _deviceChanged(ev: CustomEvent): void {
+    const target = ev.target as HaTextField;
+    const address = stringToAddress(target.value);
+    this._deviceConfig = this.deviceConfigs.find(
+      (deviceConfig) =>
+        deviceConfig.address[0] === address[0] &&
+        deviceConfig.address[1] === address[1] &&
+        deviceConfig.address[2] === address[2],
+    );
   }
 
   private _nameChanged(ev: CustomEvent): void {
@@ -191,7 +233,7 @@ export class CreateEntityDialog extends LitElement {
 
     const values: Partial<LcnEntityConfig> = {
       name: this._name ? this._name : this.domain,
-      address: this._params!.device.address,
+      address: this._deviceConfig!.address,
       domain: this.domain,
       domain_data: domainElement.domainData,
     };
@@ -235,6 +277,9 @@ export class CreateEntityDialog extends LitElement {
           display: flex;
           justify-content: space-between;
           padding: 8px;
+        }
+        .secondary {
+          color: var(--secondary-text-color);
         }
       `,
     ];

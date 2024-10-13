@@ -7,7 +7,6 @@ export interface LCN {
   localize(string: string, replace?: Record<string, any>): string;
   log: LCNLogger;
   config_entry: ConfigEntry;
-  address: LcnAddress;
 }
 
 export type LcnAddress = [number, number, boolean];
@@ -87,7 +86,7 @@ export const fetchDevices = (
 export const fetchEntities = (
   hass: HomeAssistant,
   config_entry: ConfigEntry,
-  address: LcnAddress,
+  address: LcnAddress | undefined = undefined,
 ): Promise<LcnEntityConfig[]> =>
   hass.callWS({
     type: "lcn/entities",
