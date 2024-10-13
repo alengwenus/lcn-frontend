@@ -9,7 +9,7 @@ export function updateDeviceConfigs(node: HTMLElement | Window) {
 
 export function updateEntityConfigs(node: HTMLElement | Window) {
     node.dispatchEvent(
-        new CustomEvent("lcn-update-device-configs", {
+        new CustomEvent("lcn-update-entity-configs", {
           bubbles: true,
           composed: true,
         }),

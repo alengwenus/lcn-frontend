@@ -79,7 +79,7 @@ export class LCNEntitiesPage extends LitElement {
 
   @property({ attribute: false }) public route!: Route;
 
-  @state() private _deviceConfig!: LcnDeviceConfig;
+  @state() private _deviceConfig: LcnDeviceConfig | undefined;
 
   @state()
   @consume({ context: deviceConfigsContext, subscribe: true })
@@ -179,9 +179,10 @@ export class LCNEntitiesPage extends LitElement {
   private _filteredEntities = memoize(
     (
       filters: DataTableFiltersValues,
-      filteredItems: DataTableFiltersItems
+      filteredItems: DataTableFiltersItems,
+      entities: LcnEntityConfig[],
     ) => {
-      let filteredEntityConfigs = this._entities(this.entityConfigs);
+      let filteredEntityConfigs = this._entities(entities);
 
       Object.entries(filters).forEach(([key, filter]) => {
         if (key === "lcn-filter-address" && Array.isArray(filter) && filter.length) {
@@ -200,8 +201,7 @@ export class LCNEntitiesPage extends LitElement {
       });
 
       return filteredEntityConfigs;
-      }
-  )
+    });
 
   private _filterExpanded(ev) {
     if (ev.detail.expanded) {
@@ -216,6 +216,31 @@ export class LCNEntitiesPage extends LitElement {
 
     this._filters = { ...this._filters, [type]: ev.detail.value };
     this._filteredItems = { ...this._filteredItems, [type]: ev.detail.items };
+
+    this.updateFilteredDevice();
+  }
+
+  private updateFilteredDevice() {
+    let address: LcnAddress;
+    if (
+      "lcn-filter-address" in this._filters &&
+      this._filters["lcn-filter-address"] &&
+      this._filters["lcn-filter-address"][0]
+    ) {
+      address = stringToAddress(this._filters["lcn-filter-address"][0])
+    } else {
+      const filteredEntities = this._filteredEntities(this._filters, this._filteredItems, this.entityConfigs)
+      if (filteredEntities.length === 0) {
+        this._deviceConfig = undefined
+        return
+      }
+      address = filteredEntities[0].address;
+    }
+    this._deviceConfig = this.deviceConfigs.find((deviceConfig) =>
+      deviceConfig.address[0] === address[0] &&
+      deviceConfig.address[1] === address[1] &&
+      deviceConfig.address[2] === address[2]
+    );
   }
 
   protected async firstUpdated(changedProperties) {
@@ -237,14 +262,12 @@ export class LCNEntitiesPage extends LitElement {
     this._filters = {
       "lcn-filter-address": address_str ? [address_str] : [],
     }
+
+    this.updateFilteredDevice();
   }
 
   protected render() {
-    if (this.entityConfigs.length === 0) {
-      return nothing
-    }
-
-    const filteredEntities = this._filteredEntities(this._filters, this._filteredItems)
+    const filteredEntities = this._filteredEntities(this._filters, this._filteredItems, this.entityConfigs)
 
     return html`
       <hass-tabs-subpage-data-table
@@ -313,7 +336,7 @@ export class LCNEntitiesPage extends LitElement {
           .hass=${this.hass}
           .lcn=${this.lcn}
           .value=${this._filters["lcn-filter-address"]}
-          .entityConfigs=${this._entities(this.entityConfigs)}
+          .deviceConfigs=${this.deviceConfigs}
           @data-table-filter-changed=${this._filterChanged}
           slot="filter-pane"
           .expanded=${this._expandedFilter === "lcn-filter-address"}
@@ -321,14 +344,20 @@ export class LCNEntitiesPage extends LitElement {
           @expanded-changed=${this._filterExpanded}
         ></lcn-filter-address>
 
-        <ha-fab
-          slot="fab"
-          @click=${this._addEntity}
-          .label=${this.lcn.localize("dashboard-entities-add")}
-          extended
-        >
-          <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-        </ha-fab>
+        ${
+          this.deviceConfigs.length > 0
+          ? html`
+              <ha-fab
+                slot="fab"
+                @click=${this._addEntity}
+                .label=${this.lcn.localize("dashboard-entities-add")}
+                extended
+              >
+                <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
+              </ha-fab>
+            `
+          : nothing
+        }
     </hass-tabs-subpage-data-table>
     `;
   }
@@ -353,7 +382,7 @@ export class LCNEntitiesPage extends LitElement {
   private async _addEntity() {
     showLCNCreateEntityDialog(this, {
       lcn: this.lcn,
-      device: <LcnDeviceConfig>this._deviceConfig,
+      deviceConfig: <LcnDeviceConfig>this._deviceConfig,
       createEntity: async (entityParams) => {
         if (await addEntity(this.hass, this.lcn.config_entry, entityParams)) {
           updateEntityConfigs(this);
@@ -383,6 +412,7 @@ export class LCNEntitiesPage extends LitElement {
   private _clearFilter() {
     this._filters = {};
     this._filteredItems = {};
+    this.updateFilteredDevice();
   }
 
   private _handleSortingChanged(ev: CustomEvent) {

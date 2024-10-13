@@ -3,7 +3,7 @@ import { LCN, LcnEntityConfig, LcnDeviceConfig } from "types/lcn";
 
 export interface LcnEntityDialogParams {
   lcn: LCN;
-  device: LcnDeviceConfig;
+  deviceConfig: LcnDeviceConfig;
   createEntity: (values: Partial<LcnEntityConfig>) => Promise<unknown>;
 }
 

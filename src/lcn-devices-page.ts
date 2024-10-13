@@ -34,7 +34,7 @@ import type {
 } from "@ha/components/data-table/ha-data-table";
 import { navigate } from "@ha/common/navigate";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
-import { updateDeviceConfigs } from "helpers/events";
+import { updateDeviceConfigs, updateEntityConfigs } from "helpers/events";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -306,6 +306,7 @@ export class LCNConfigDashboard extends LitElement {
     };
     this._clearSelection();
     updateDeviceConfigs(this);
+    updateEntityConfigs(this);
   }
 
   private _clearSelection() {

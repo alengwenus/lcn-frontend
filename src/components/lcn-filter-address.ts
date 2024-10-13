@@ -5,15 +5,14 @@ import memoizeOne from "memoize-one";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import type { HomeAssistant } from "@ha/types";
 import { haStyleScrollbar } from "@ha/resources/styles";
-import { LCN, LcnAddress } from "types/lcn";
+import { LCN, LcnAddress, LcnDeviceConfig } from "types/lcn";
 import "@ha/components/ha-domain-icon";
 import "@ha/components/search-input-outlined";
-import type { EntityRowData } from "lcn-entities-page";
 import "@ha/components/ha-expansion-panel";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-icon";
 import "@ha/components/ha-check-list-item";
-import { stringToAddress } from "helpers/address_conversion";
+import { addressToString, stringToAddress } from "helpers/address_conversion";
 import { stringCompare } from "@ha/common/string/compare";
 
 
@@ -23,7 +22,7 @@ export class HaFilterDomains extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property({ attribute: false }) public entityConfigs!: EntityRowData[];
+  @property({ attribute: false }) public deviceConfigs!: LcnDeviceConfig[];
 
   @property({ attribute: false }) public value?: string[];
 
@@ -66,7 +65,7 @@ export class HaFilterDomains extends LitElement {
                 multi
                 @click=${this._handleItemClick}
               >
-                ${this._addresses(this.entityConfigs, this._filter).map(
+                ${this._addresses(this.deviceConfigs, this._filter).map(
                   (address_str: string) =>
                     html`<ha-check-list-item
                       .value=${address_str}
@@ -81,10 +80,10 @@ export class HaFilterDomains extends LitElement {
     `
   }
 
-  private _addresses = memoizeOne((entityConfigs, filter) => {
+  private _addresses = memoizeOne((deviceConfigs, filter) => {
     const addresses = new Set<string>();
-    entityConfigs.forEach((entityConfig) => {
-      addresses.add(entityConfig.address_str)
+    deviceConfigs.forEach((deviceConfig) => {
+      addresses.add(addressToString(deviceConfig.address))
     })
     return Array.from(addresses.values())
       .map((address_str) => ({

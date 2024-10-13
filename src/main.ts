@@ -1,4 +1,4 @@
-import { ContextProvider, provide } from "@lit-labs/context";
+import { ContextProvider } from "@lit-labs/context";
 import { deviceConfigsContext, entityConfigsContext } from "helpers/context";
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
@@ -15,9 +15,8 @@ import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
 import { LCNLogger } from "./lcn-logger";
 import { localize } from "./localize/localize";
-import { LCN, LcnAddress, LcnDeviceConfig, LcnEntityConfig, fetchDevices, fetchEntities } from "./types/lcn";
+import { LCN, LcnAddress, fetchDevices, fetchEntities } from "./types/lcn";
 import { LocationChangedEvent } from "./types/navigation";
-import { updateDeviceConfigs } from "helpers/events";
 
 
 @customElement("lcn-frontend")
