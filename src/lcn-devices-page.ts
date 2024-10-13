@@ -1,3 +1,5 @@
+import { consume } from "@lit-labs/context";
+import { deviceConfigsContext } from "helpers/context";
 import { haStyle } from "@ha/resources/styles";
 import "@material/mwc-button";
 import "@ha/components/ha-clickable-list-item";
@@ -23,7 +25,7 @@ import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
 import memoizeOne from "memoize-one";
-import { LCN, fetchDevices, scanDevices, deleteDevice, addDevice, LcnDeviceConfig } from "types/lcn";
+import { LCN, scanDevices, deleteDevice, addDevice, LcnDeviceConfig } from "types/lcn";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import type {
   DataTableColumnContainer,
@@ -32,6 +34,7 @@ import type {
 } from "@ha/components/data-table/ha-data-table";
 import { navigate } from "@ha/common/navigate";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
+import { updateDeviceConfigs } from "helpers/events";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -56,7 +59,9 @@ export class LCNConfigDashboard extends LitElement {
 
   @property({ attribute: false }) public route!: Route;
 
-  @state() private deviceConfigs: LcnDeviceConfig[] = [];
+  @state()
+  @consume({ context: deviceConfigsContext, subscribe: true })
+  deviceConfigs!: LcnDeviceConfig[];
 
   @state() private _selected: string[] = [];
 
@@ -136,11 +141,10 @@ export class LCNConfigDashboard extends LitElement {
     super.firstUpdated(changedProperties);
     loadProgressDialog();
     loadLCNCreateDeviceDialog();
-    this.deviceConfigs = await fetchDevices(this.hass!, this.lcn.config_entry);
   }
 
   protected render(): TemplateResult {
-    if (!(this.hass && this.lcn)) {
+    if (!(this.hass && this.lcn && this.deviceConfigs)) {
       return html` <hass-loading-screen></hass-loading-screen> `;
     }
     return html`
@@ -239,7 +243,8 @@ export class LCNConfigDashboard extends LitElement {
       text: this.lcn.localize("dashboard-dialog-scan-devices-text"),
     });
 
-    this.deviceConfigs = await scanDevices(this.hass!, this.lcn.config_entry);
+    await scanDevices(this.hass!, this.lcn.config_entry);
+    updateDeviceConfigs(this);
     await dialog()!.closeDialog();
   }
 
@@ -273,8 +278,8 @@ export class LCNConfigDashboard extends LitElement {
       });
       return;
     }
+    updateDeviceConfigs(this);
     dialog()!.closeDialog();
-    this.deviceConfigs = await fetchDevices(this.hass!, this.lcn.config_entry);
   }
 
   private async _deleteSelected() {
@@ -300,7 +305,7 @@ export class LCNConfigDashboard extends LitElement {
       await deleteDevice(this.hass, this.lcn.config_entry, device);
     };
     this._clearSelection();
-    this.deviceConfigs = await fetchDevices(this.hass!, this.lcn.config_entry);
+    updateDeviceConfigs(this);
   }
 
   private _clearSelection() {

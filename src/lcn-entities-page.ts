@@ -1,3 +1,5 @@
+import { consume } from "@lit-labs/context";
+import { deviceConfigsContext, entityConfigsContext } from "helpers/context";
 import { haStyle } from "@ha/resources/styles";
 import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators";
@@ -16,15 +18,13 @@ import "@ha/components/ha-fab";
 import { mainWindow } from "@ha/common/dom/get_main_window";
 import {
   LCN,
-  fetchEntities,
-  fetchDevices,
   addEntity,
   deleteEntity,
   LcnDeviceConfig,
   LcnEntityConfig,
   LcnAddress,
 } from "types/lcn";
-import { ConfigEntry } from "@ha/data/config_entries";
+import { updateEntityConfigs } from "helpers/events";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
 import type {
   DataTableColumnContainer,
@@ -81,7 +81,13 @@ export class LCNEntitiesPage extends LitElement {
 
   @state() private _deviceConfig!: LcnDeviceConfig;
 
-  @state() private entityConfigs: LcnEntityConfig[] = [];
+  @state()
+  @consume({ context: deviceConfigsContext, subscribe: true })
+  deviceConfigs!: LcnDeviceConfig[];
+
+  @state()
+  @consume({ context: entityConfigsContext, subscribe: true })
+  entityConfigs!: LcnEntityConfig[];
 
   @storage({
     storage: "sessionStorage",
@@ -215,7 +221,6 @@ export class LCNEntitiesPage extends LitElement {
   protected async firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
-    await this._fetchEntities(this.lcn.config_entry);
     this._setFiltersFromUrl();
   }
 
@@ -235,7 +240,7 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   protected render() {
-    if (!this._deviceConfig && this.entityConfigs.length === 0) {
+    if (this.entityConfigs.length === 0) {
       return nothing
     }
 
@@ -345,30 +350,13 @@ export class LCNEntitiesPage extends LitElement {
     this.lcn.log.debug(this.getEntityConfigByUniqueId(ev.detail.id));
   }
 
-  private async _fetchEntities(config_entry: ConfigEntry, address: LcnAddress | undefined = undefined) {
-    if (address !== undefined) {
-      const deviceConfigs = await fetchDevices(this.hass!, config_entry);
-      const deviceConfig = deviceConfigs.find(
-        (el) =>
-          el.address[0] === address![0] &&
-          el.address[1] === address![1] &&
-          el.address[2] === address![2],
-      );
-      if (deviceConfig !== undefined) {
-        this._deviceConfig = deviceConfig;
-      }
-    }
-
-    this.entityConfigs = await fetchEntities(this.hass!, config_entry, address);
-  }
-
   private async _addEntity() {
     showLCNCreateEntityDialog(this, {
       lcn: this.lcn,
       device: <LcnDeviceConfig>this._deviceConfig,
       createEntity: async (entityParams) => {
         if (await addEntity(this.hass, this.lcn.config_entry, entityParams)) {
-          await this._fetchEntities(this.lcn.config_entry, this.lcn.address);
+          updateEntityConfigs(this);
           return true;
         }
         return false;
@@ -385,7 +373,7 @@ export class LCNEntitiesPage extends LitElement {
       await deleteEntity(this.hass, this.lcn.config_entry, entity);
     };
     this._clearSelection();
-    this._fetchEntities(this.lcn.config_entry, this.lcn.address);
+    updateEntityConfigs(this);
   }
 
   private _clearSelection() {
