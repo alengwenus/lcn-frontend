@@ -1,5 +1,5 @@
 import { consume } from "@lit-labs/context";
-import { deviceConfigsContext } from "helpers/context";
+import { deviceConfigsContext } from "components/context";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
@@ -68,8 +68,7 @@ export class CreateEntityDialog extends LitElement {
     this._invalid = true;
     this._deviceConfig = params.deviceConfig;
 
-    if (!this._deviceConfig)
-      this._deviceConfig = this.deviceConfigs[0];
+    if (!this._deviceConfig) this._deviceConfig = this.deviceConfigs[0];
 
     await this.updateComplete;
   }
@@ -84,9 +83,9 @@ export class CreateEntityDialog extends LitElement {
         scrimClickAction
         escapeKeyAction
         .heading=${createCloseHeading(
-      this.hass,
-      this.lcn.localize("dashboard-entities-dialog-create-title"),
-    ) as unknown as string}
+          this.hass,
+          this.lcn.localize("dashboard-entities-dialog-create-title"),
+        ) as unknown as string}
         @closed=${this._closeDialog}
       >
         <ha-select
@@ -97,17 +96,14 @@ export class CreateEntityDialog extends LitElement {
           @selected=${this._deviceChanged}
           @closed=${stopPropagation}
         >
-          ${this.deviceConfigs.map((deviceConfig) => html`
-            <ha-list-item
-              .value=${addressToString(deviceConfig.address)}
-            >
-              <div class="primary">${deviceConfig.name}</div>
-              <div class="secondary">
-                (${addressToString(deviceConfig.address)})
-              </div>
-            </ha-list-item>
+          ${this.deviceConfigs.map(
+            (deviceConfig) => html`
+              <ha-list-item .value=${addressToString(deviceConfig.address)}>
+                <div class="primary">${deviceConfig.name}</div>
+                <div class="secondary">(${addressToString(deviceConfig.address)})</div>
+              </ha-list-item>
             `,
-            )}
+          )}
         </ha-select>
 
         <ha-select
@@ -210,11 +206,12 @@ export class CreateEntityDialog extends LitElement {
   private _deviceChanged(ev: CustomEvent): void {
     const target = ev.target as HaTextField;
     const address = stringToAddress(target.value);
-    this._deviceConfig = this.deviceConfigs.find((deviceConfig) =>
-      deviceConfig.address[0] === address[0] &&
-      deviceConfig.address[1] === address[1] &&
-      deviceConfig.address[2] === address[2]
-    )
+    this._deviceConfig = this.deviceConfigs.find(
+      (deviceConfig) =>
+        deviceConfig.address[0] === address[0] &&
+        deviceConfig.address[1] === address[1] &&
+        deviceConfig.address[2] === address[2],
+    );
   }
 
   private _nameChanged(ev: CustomEvent): void {
@@ -284,7 +281,6 @@ export class CreateEntityDialog extends LitElement {
         .secondary {
           color: var(--secondary-text-color);
         }
-
       `,
     ];
   }

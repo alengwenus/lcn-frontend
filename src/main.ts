@@ -1,5 +1,5 @@
 import { ContextProvider } from "@lit-labs/context";
-import { deviceConfigsContext, entityConfigsContext } from "helpers/context";
+import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 
@@ -15,9 +15,8 @@ import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
 import { LCNLogger } from "./lcn-logger";
 import { localize } from "./localize/localize";
-import { LCN, LcnAddress, fetchDevices, fetchEntities } from "./types/lcn";
+import { LCN, fetchDevices, fetchEntities } from "./types/lcn";
 import { LocationChangedEvent } from "./types/navigation";
-
 
 @customElement("lcn-frontend")
 class LcnFrontend extends ProvideHassLitMixin(LitElement) {
@@ -31,19 +30,15 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
 
   @state() private _searchParms = new URLSearchParams(window.location.search);
 
-  private _deviceConfigs = new ContextProvider(this,
-    {
-      context: deviceConfigsContext,
-      initialValue: [],
-    }
-  );
+  private _deviceConfigs = new ContextProvider(this, {
+    context: deviceConfigsContext,
+    initialValue: [],
+  });
 
-  private _entityConfigs = new ContextProvider(this,
-    {
-      context: entityConfigsContext,
-      initialValue: [],
-    }
-  );
+  private _entityConfigs = new ContextProvider(this, {
+    context: entityConfigsContext,
+    initialValue: [],
+  });
 
   protected firstUpdated(_changedProps) {
     super.firstUpdated(_changedProps);
@@ -68,11 +63,9 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       navigate("/lcn/devices", { replace: true });
     }
 
-    this.addEventListener("lcn-update-device-configs",
-      (_e) => this._fetchDevices());
+    this.addEventListener("lcn-update-device-configs", (_e) => this._fetchDevices());
 
-    this.addEventListener("lcn-update-entity-configs",
-      (_e) => this._fetchEntities());
+    this.addEventListener("lcn-update-entity-configs", (_e) => this._fetchEntities());
   }
 
   protected render() {
@@ -101,7 +94,6 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
         localize: (string, replace) => localize(this.hass, string, replace),
         log: new LCNLogger(),
         config_entry: res.config_entry,
-        address: <LcnAddress>[0, 0, false],
       };
     });
   }
@@ -133,15 +125,15 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
   }
 
   private async _fetchDevices() {
-    fetchDevices(this.hass, this.lcn.config_entry).then(
-      (deviceConfigs) => this._deviceConfigs.setValue(deviceConfigs)
-    )
+    fetchDevices(this.hass, this.lcn.config_entry).then((deviceConfigs) =>
+      this._deviceConfigs.setValue(deviceConfigs),
+    );
   }
 
   private async _fetchEntities() {
-    fetchEntities(this.hass, this.lcn.config_entry).then(
-      (entityConfigs) => this._entityConfigs.setValue(entityConfigs)
-    )
+    fetchEntities(this.hass, this.lcn.config_entry).then((entityConfigs) =>
+      this._entityConfigs.setValue(entityConfigs),
+    );
   }
 }
 

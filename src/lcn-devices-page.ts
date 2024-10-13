@@ -1,5 +1,5 @@
 import { consume } from "@lit-labs/context";
-import { deviceConfigsContext } from "helpers/context";
+import { deviceConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
 import "@material/mwc-button";
 import "@ha/components/ha-clickable-list-item";
@@ -7,22 +7,15 @@ import "@ha/components/ha-fab";
 import "@ha/components/ha-button-menu";
 import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
-import "@ha/components/ha-list-item";
-import "@ha/components/ha-select";
-import "@ha/components/ha-md-button-menu";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
-import { css, html, LitElement, PropertyValues, TemplateResult, CSSResultGroup } from "lit";
+import { css, html, LitElement, PropertyValues, CSSResultGroup, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators";
 import { mdiPlus, mdiDelete, mdiDotsVertical } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { lcnMainTabs } from "lcn-router";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
-import "@ha/layouts/hass-tabs-subpage";
-import "@ha/panels/config/ha-config-section";
-import "@ha/layouts/hass-loading-screen";
-import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
 import memoizeOne from "memoize-one";
 import { LCN, scanDevices, deleteDevice, addDevice, LcnDeviceConfig } from "types/lcn";
@@ -34,7 +27,7 @@ import type {
 } from "@ha/components/data-table/ha-data-table";
 import { navigate } from "@ha/common/navigate";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
-import { updateDeviceConfigs, updateEntityConfigs } from "helpers/events";
+import { updateDeviceConfigs, updateEntityConfigs } from "components/events";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -46,8 +39,7 @@ interface DeviceRowData extends LcnDeviceConfig {
   segment_id: number;
   address_id: number;
   type: string;
-};
-
+}
 
 @customElement("lcn-devices-page")
 export class LCNConfigDashboard extends LitElement {
@@ -61,7 +53,7 @@ export class LCNConfigDashboard extends LitElement {
 
   @state()
   @consume({ context: deviceConfigsContext, subscribe: true })
-  deviceConfigs!: LcnDeviceConfig[];
+  _deviceConfigs!: LcnDeviceConfig[];
 
   @state() private _selected: string[] = [];
 
@@ -98,7 +90,7 @@ export class LCNConfigDashboard extends LitElement {
   @query("hass-tabs-subpage-data-table", true)
   private _dataTable!: HaTabsSubpageDataTable;
 
-  private _devices = memoizeOne((devices: LcnDeviceConfig[]) => {
+  private extDeviceConfigs = memoizeOne((devices: LcnDeviceConfig[]) => {
     const deviceRowData: DeviceRowData[] = devices.map((device) => ({
       ...device,
       unique_id: addressToString(device.address),
@@ -134,7 +126,7 @@ export class LCNConfigDashboard extends LitElement {
         sortable: true,
         filterable: true,
       },
-    })
+    }),
   );
 
   protected async firstUpdated(changedProperties: PropertyValues): Promise<void> {
@@ -143,9 +135,9 @@ export class LCNConfigDashboard extends LitElement {
     loadLCNCreateDeviceDialog();
   }
 
-  protected render(): TemplateResult {
-    if (!(this.hass && this.lcn && this.deviceConfigs)) {
-      return html` <hass-loading-screen></hass-loading-screen> `;
+  protected render() {
+    if (!(this.hass && this.lcn && this._deviceConfigs)) {
+      return nothing;
     }
     return html`
       <hass-tabs-subpage-data-table
@@ -156,7 +148,7 @@ export class LCNConfigDashboard extends LitElement {
         .tabs=${lcnMainTabs}
         .localizeFunc=${this.lcn.localize}
         .columns=${this._columns()}
-        .data=${this._devices(this.deviceConfigs)}
+        .data=${this.extDeviceConfigs(this._deviceConfigs)}
         selectable
         .selected=${this._selected.length}
         .initialSorting=${this._activeSorting}
@@ -174,11 +166,7 @@ export class LCNConfigDashboard extends LitElement {
         class=${this.narrow ? "narrow" : ""}
       >
         <ha-button-menu activatable slot="toolbar-icon">
-          <ha-icon-button
-            .path=${mdiDotsVertical}
-            .label="Actions"
-            slot="trigger"
-          ></ha-icon-button>
+          <ha-icon-button .path=${mdiDotsVertical} .label="Actions" slot="trigger"></ha-icon-button>
           <ha-clickable-list-item @click=${this._scanDevices}>
             ${this.lcn.localize("dashboard-devices-scan")}
           </ha-clickable-list-item>
@@ -199,13 +187,9 @@ export class LCNConfigDashboard extends LitElement {
                   .path=${mdiDelete}
                   .label=${this.lcn.localize("delete-selected")}
                 ></ha-icon-button>
-                <ha-help-tooltip
-                  .label=${this.lcn.localize("delete-selected")}
-                  )}
-                >
+                <ha-help-tooltip .label=${this.lcn.localize("delete-selected")} )}>
                 </ha-help-tooltip>
-            `
-          }
+              `}
         </div>
 
         <ha-fab
@@ -222,7 +206,7 @@ export class LCNConfigDashboard extends LitElement {
 
   private getDeviceConfigByUniqueId(unique_id: string): LcnDeviceConfig {
     const address = stringToAddress(unique_id);
-    const deviceConfig = this.deviceConfigs.find(
+    const deviceConfig = this._deviceConfigs.find(
       (el) =>
         el.address[0] === address[0] &&
         el.address[1] === address[1] &&
@@ -233,7 +217,6 @@ export class LCNConfigDashboard extends LitElement {
 
   private _rowClicked(ev: CustomEvent) {
     const address_str: string = ev.detail.id;
-    this.lcn.address = stringToAddress(address_str);
     navigate(`/lcn/entities?address=${address_str}`, { replace: true });
   }
 
@@ -283,19 +266,19 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   private async _deleteSelected() {
-    const devices = this._selected.map((unique_id) =>
-      this.getDeviceConfigByUniqueId(unique_id)
-    );
+    const devices = this._selected.map((unique_id) => this.getDeviceConfigByUniqueId(unique_id));
 
     if (
       this._selected.length &&
       !(await showConfirmationDialog(this, {
         title: this.lcn.localize("dashboard-devices-dialog-delete-devices-title"),
         text: html`
-          ${this.lcn.localize("dashboard-devices-dialog-delete-text", { count: this._selected.length })}
+          ${this.lcn.localize("dashboard-devices-dialog-delete-text", {
+            count: this._selected.length,
+          })}
           <br />
           ${this.lcn.localize("dashboard-devices-dialog-delete-warning")}
-          `
+        `,
       }))
     ) {
       return;
@@ -303,7 +286,7 @@ export class LCNConfigDashboard extends LitElement {
 
     for await (const device of devices) {
       await deleteDevice(this.hass, this.lcn.config_entry, device);
-    };
+    }
     this._clearSelection();
     updateDeviceConfigs(this);
     updateEntityConfigs(this);

@@ -1,5 +1,5 @@
 import { consume } from "@lit-labs/context";
-import { deviceConfigsContext, entityConfigsContext } from "helpers/context";
+import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
 import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators";
@@ -7,12 +7,10 @@ import { mdiPlus, mdiDelete } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
-import "@ha/layouts/hass-tabs-subpage";
 import memoize from "memoize-one";
 import { storage } from "@ha/common/decorators/storage";
 import "@ha/panels/config/ha-config-section";
 import "@ha/layouts/hass-loading-screen";
-import "@ha/components/ha-card";
 import "@ha/components/ha-svg-icon";
 import "@ha/components/ha-fab";
 import { mainWindow } from "@ha/common/dom/get_main_window";
@@ -24,7 +22,7 @@ import {
   LcnEntityConfig,
   LcnAddress,
 } from "types/lcn";
-import { updateEntityConfigs } from "helpers/events";
+import { updateEntityConfigs } from "components/events";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
 import type {
   DataTableColumnContainer,
@@ -33,41 +31,39 @@ import type {
 } from "@ha/components/data-table/ha-data-table";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import { lcnMainTabs } from "lcn-router";
-import {
-  DataTableFiltersItems,
-  DataTableFiltersValues,
-} from "@ha/data/data_table_filters";
+import { DataTableFiltersItems, DataTableFiltersValues } from "@ha/data/data_table_filters";
 import {
   loadLCNCreateEntityDialog,
   showLCNCreateEntityDialog,
 } from "./dialogs/show-dialog-create-entity";
 import "components/lcn-filter-address";
 
-
 export interface EntityRowData extends LcnEntityConfig {
   unique_id: string;
   address_str: string;
-};
-
-function createUniqueEntityId(entity: LcnEntityConfig, includeDomain: boolean = true): string {
-  let unique_id = `${addressToString(entity.address)}-${entity.resource}`
-  if (includeDomain) {
-    unique_id = `${entity.domain}-` + unique_id
-  }
-  return unique_id
 }
 
-function parseUniqueEntityId(unique_id: string):
-    { address: LcnAddress; domain: string; resource: string } {
+function createUniqueEntityId(entity: LcnEntityConfig, includeDomain: boolean = true): string {
+  let unique_id = `${addressToString(entity.address)}-${entity.resource}`;
+  if (includeDomain) {
+    unique_id = `${entity.domain}-` + unique_id;
+  }
+  return unique_id;
+}
+
+function parseUniqueEntityId(unique_id: string): {
+  address: LcnAddress;
+  domain: string;
+  resource: string;
+} {
   const splitted = unique_id.split("-");
   const resource = splitted.pop()!;
   const address_str = splitted.pop();
   const domain = splitted.pop()!;
   const address = stringToAddress(address_str!);
   const result = { address: address, domain: domain, resource: resource };
-  return result
+  return result;
 }
-
 
 @customElement("lcn-entities-page")
 export class LCNEntitiesPage extends LitElement {
@@ -83,11 +79,11 @@ export class LCNEntitiesPage extends LitElement {
 
   @state()
   @consume({ context: deviceConfigsContext, subscribe: true })
-  deviceConfigs!: LcnDeviceConfig[];
+  _deviceConfigs!: LcnDeviceConfig[];
 
   @state()
   @consume({ context: entityConfigsContext, subscribe: true })
-  entityConfigs!: LcnEntityConfig[];
+  _entityConfigs!: LcnEntityConfig[];
 
   @storage({
     storage: "sessionStorage",
@@ -109,7 +105,7 @@ export class LCNEntitiesPage extends LitElement {
     state: true,
     subscribe: false,
   })
-  private _filter: string = history.state?.filter || "";;
+  private _filter: string = history.state?.filter || "";
 
   @state() private _searchParms = new URLSearchParams(mainWindow.location.search);
 
@@ -138,7 +134,7 @@ export class LCNEntitiesPage extends LitElement {
   @query("hass-tabs-subpage-data-table", true)
   private _dataTable!: HaTabsSubpageDataTable;
 
-  private _entities = (entities: LcnEntityConfig[]) => {
+  private extEntityConfigs = (entities: LcnEntityConfig[]) => {
     const entityRowData: EntityRowData[] = entities.map((entity) => ({
       ...entity,
       unique_id: createUniqueEntityId(entity),
@@ -173,7 +169,7 @@ export class LCNEntitiesPage extends LitElement {
         sortable: true,
         filterable: true,
       },
-    })
+    }),
   );
 
   private _filteredEntities = memoize(
@@ -182,26 +178,27 @@ export class LCNEntitiesPage extends LitElement {
       filteredItems: DataTableFiltersItems,
       entities: LcnEntityConfig[],
     ) => {
-      let filteredEntityConfigs = this._entities(entities);
+      let filteredEntityConfigs = this.extEntityConfigs(entities);
 
       Object.entries(filters).forEach(([key, filter]) => {
         if (key === "lcn-filter-address" && Array.isArray(filter) && filter.length) {
           filteredEntityConfigs = filteredEntityConfigs.filter((entityConfig) =>
-            filter.includes(entityConfig.address_str)
-          )
+            filter.includes(entityConfig.address_str),
+          );
         }
       });
 
       Object.values(filteredItems).forEach((items) => {
         if (items) {
           filteredEntityConfigs = filteredEntityConfigs.filter((entityConfig) =>
-            items.has(entityConfig.unique_id)
+            items.has(entityConfig.unique_id),
           );
         }
       });
 
       return filteredEntityConfigs;
-    });
+    },
+  );
 
   private _filterExpanded(ev) {
     if (ev.detail.expanded) {
@@ -227,19 +224,24 @@ export class LCNEntitiesPage extends LitElement {
       this._filters["lcn-filter-address"] &&
       this._filters["lcn-filter-address"][0]
     ) {
-      address = stringToAddress(this._filters["lcn-filter-address"][0])
+      address = stringToAddress(this._filters["lcn-filter-address"][0]);
     } else {
-      const filteredEntities = this._filteredEntities(this._filters, this._filteredItems, this.entityConfigs)
+      const filteredEntities = this._filteredEntities(
+        this._filters,
+        this._filteredItems,
+        this._entityConfigs,
+      );
       if (filteredEntities.length === 0) {
-        this._deviceConfig = undefined
-        return
+        this._deviceConfig = undefined;
+        return;
       }
       address = filteredEntities[0].address;
     }
-    this._deviceConfig = this.deviceConfigs.find((deviceConfig) =>
-      deviceConfig.address[0] === address[0] &&
-      deviceConfig.address[1] === address[1] &&
-      deviceConfig.address[2] === address[2]
+    this._deviceConfig = this._deviceConfigs.find(
+      (deviceConfig) =>
+        deviceConfig.address[0] === address[0] &&
+        deviceConfig.address[1] === address[1] &&
+        deviceConfig.address[2] === address[2],
     );
   }
 
@@ -253,21 +255,28 @@ export class LCNEntitiesPage extends LitElement {
     const address_str = this._searchParms.get("address");
 
     if (!address_str) {
-      this._filters = {}
-      return
+      this._filters = {};
+      return;
     }
 
     this._filter = history.state?.filter || "";
 
     this._filters = {
       "lcn-filter-address": address_str ? [address_str] : [],
-    }
+    };
 
     this.updateFilteredDevice();
   }
 
   protected render() {
-    const filteredEntities = this._filteredEntities(this._filters, this._filteredItems, this.entityConfigs)
+    if (!(this.hass && this.lcn && this._deviceConfigs && this._entityConfigs)) {
+      return nothing;
+    }
+    const filteredEntities = this._filteredEntities(
+      this._filters,
+      this._filteredItems,
+      this._entityConfigs,
+    );
 
     return html`
       <hass-tabs-subpage-data-table
@@ -280,16 +289,12 @@ export class LCNEntitiesPage extends LitElement {
         .columns=${this._columns()}
         .data=${filteredEntities}
         hasFilters
-        .filters=${
-          Object.values(this._filters).filter((filter) =>
-            Array.isArray(filter)
-              ? filter.length
-              : filter &&
-                Object.values(filter).some((val) =>
-                  Array.isArray(val) ? val.length : val
-                )
-          ).length
-        }
+        .filters=${Object.values(this._filters).filter((filter) =>
+          Array.isArray(filter)
+            ? filter.length
+            : filter &&
+              Object.values(filter).some((val) => (Array.isArray(val) ? val.length : val)),
+        ).length}
         selectable
         .selected=${this._selected.length}
         .initialSorting=${this._activeSorting}
@@ -307,7 +312,6 @@ export class LCNEntitiesPage extends LitElement {
         .hasfab
         class=${this.narrow ? "narrow" : ""}
       >
-
         <div class="header-btns" slot="selection-bar">
           ${!this.narrow
             ? html`
@@ -323,20 +327,16 @@ export class LCNEntitiesPage extends LitElement {
                   .path=${mdiDelete}
                   .label=${this.lcn.localize("delete-selected")}
                 ></ha-icon-button>
-                <ha-help-tooltip
-                  .label=${this.lcn.localize("delete-selected")}
-                  )}
-                >
+                <ha-help-tooltip .label=${this.lcn.localize("delete-selected")} )}>
                 </ha-help-tooltip>
-            `
-          }
+              `}
         </div>
 
         <lcn-filter-address
           .hass=${this.hass}
           .lcn=${this.lcn}
           .value=${this._filters["lcn-filter-address"]}
-          .deviceConfigs=${this.deviceConfigs}
+          .deviceConfigs=${this._deviceConfigs}
           @data-table-filter-changed=${this._filterChanged}
           slot="filter-pane"
           .expanded=${this._expandedFilter === "lcn-filter-address"}
@@ -344,8 +344,7 @@ export class LCNEntitiesPage extends LitElement {
           @expanded-changed=${this._filterExpanded}
         ></lcn-filter-address>
 
-        ${
-          this.deviceConfigs.length > 0
+        ${this._deviceConfigs.length > 0
           ? html`
               <ha-fab
                 slot="fab"
@@ -356,15 +355,14 @@ export class LCNEntitiesPage extends LitElement {
                 <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
               </ha-fab>
             `
-          : nothing
-        }
-    </hass-tabs-subpage-data-table>
+          : nothing}
+      </hass-tabs-subpage-data-table>
     `;
   }
 
   private getEntityConfigByUniqueId(unique_id: string): LcnEntityConfig {
     const { address, domain, resource } = parseUniqueEntityId(unique_id);
-    const entityConfig = this.entityConfigs.find(
+    const entityConfig = this._entityConfigs.find(
       (el) =>
         el.address[0] === address[0] &&
         el.address[1] === address[1] &&
@@ -394,13 +392,11 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   private async _deleteSelected() {
-    const entities = this._selected.map((unique_id) =>
-      this.getEntityConfigByUniqueId(unique_id)
-    );
+    const entities = this._selected.map((unique_id) => this.getEntityConfigByUniqueId(unique_id));
 
     for await (const entity of entities) {
       await deleteEntity(this.hass, this.lcn.config_entry, entity);
-    };
+    }
     this._clearSelection();
     updateEntityConfigs(this);
   }
@@ -446,7 +442,6 @@ export class LCNEntitiesPage extends LitElement {
       `,
     ];
   }
-
 }
 
 declare global {

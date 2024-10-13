@@ -15,7 +15,6 @@ import "@ha/components/ha-check-list-item";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import { stringCompare } from "@ha/common/string/compare";
 
-
 @customElement("lcn-filter-address")
 export class HaFilterDomains extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -34,7 +33,6 @@ export class HaFilterDomains extends LitElement {
 
   @state() private _filter?: string;
 
-
   protected render() {
     return html`
       <ha-expansion-panel
@@ -52,7 +50,7 @@ export class HaFilterDomains extends LitElement {
                   @click=${this._clearFilter}
                 ></ha-icon-button>`
             : nothing}
-          </div>
+        </div>
         ${this._shouldRender
           ? html`<search-input-outlined
                 .hass=${this.hass}
@@ -60,11 +58,7 @@ export class HaFilterDomains extends LitElement {
                 @value-changed=${this._handleSearchChange}
               ></search-input-outlined>
 
-              <mwc-list
-                class="ha-scrollbar"
-                multi
-                @click=${this._handleItemClick}
-              >
+              <mwc-list class="ha-scrollbar" multi @click=${this._handleItemClick}>
                 ${this._addresses(this.deviceConfigs, this._filter).map(
                   (address_str: string) =>
                     html`<ha-check-list-item
@@ -72,41 +66,41 @@ export class HaFilterDomains extends LitElement {
                       .selected=${(this.value || []).includes(address_str)}
                     >
                       ${this._address_repr(address_str)}
-                    </ha-check-list-item>`
+                    </ha-check-list-item>`,
                 )}
               </mwc-list>`
           : nothing}
       </ha-expansion-panel>
-    `
+    `;
   }
 
   private _addresses = memoizeOne((deviceConfigs, filter) => {
     const addresses = new Set<string>();
     deviceConfigs.forEach((deviceConfig) => {
-      addresses.add(addressToString(deviceConfig.address))
-    })
+      addresses.add(addressToString(deviceConfig.address));
+    });
     return Array.from(addresses.values())
       .map((address_str) => ({
         address_str,
-        name: this._address_repr(address_str)
+        name: this._address_repr(address_str),
       }))
       .filter(
         (entry) =>
           !filter ||
           entry.address_str.toLowerCase().includes(filter) ||
-          entry.name.toLowerCase().includes(filter)
+          entry.name.toLowerCase().includes(filter),
       )
       .sort((a, b) => stringCompare(a.name, b.name, this.hass.locale.language))
-      .map((entry) => entry.address_str)
-  })
+      .map((entry) => entry.address_str);
+  });
 
   private _address_repr(address_str: string): string {
     const address: LcnAddress = stringToAddress(address_str);
-    const device = address[2] ? this.lcn.localize("group") : this.lcn.localize("module")
+    const device = address[2] ? this.lcn.localize("group") : this.lcn.localize("module");
     const segment_id = address[0];
     const address_id = address[1];
-    const result: string = `${device} (${segment_id}, ${address_id})`
-    return result
+    const result: string = `${device} (${segment_id}, ${address_id})`;
+    return result;
   }
 
   protected updated(changed) {
@@ -209,7 +203,7 @@ export class HaFilterDomains extends LitElement {
 }
 
 declare global {
-interface HTMLElementTagNameMap {
+  interface HTMLElementTagNameMap {
     "lcn-filter-address": HaFilterDomains;
   }
 }

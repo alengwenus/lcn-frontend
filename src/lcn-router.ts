@@ -1,4 +1,4 @@
-import { mdiDevices, mdiShape } from "@mdi/js"
+import { mdiDevices, mdiShape } from "@mdi/js";
 import { customElement, property } from "lit/decorators";
 import { HassRouterPage, RouterOptions } from "@ha/layouts/hass-router-page";
 import type { HomeAssistant, Route } from "@ha/types";
@@ -19,7 +19,7 @@ export const lcnMainTabs: PageNavigation[] = [
     translationKey: "entities",
     iconPath: mdiShape,
   },
-]
+];
 
 @customElement("lcn-router")
 class LCNRouter extends HassRouterPage {
