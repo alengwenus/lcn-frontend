@@ -143,7 +143,7 @@ export class LCNConfigDashboard extends LitElement {
       <hass-tabs-subpage-data-table
         .hass=${this.hass}
         .narrow=${this.narrow}
-        .back-path="/config/integrations/integration/lcn"
+        back-path="/config/integrations/integration/lcn"
         .route=${this.route}
         .tabs=${lcnMainTabs}
         .localizeFunc=${this.lcn.localize}

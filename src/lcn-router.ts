@@ -49,7 +49,6 @@ class LCNRouter extends HassRouterPage {
         },
       },
     },
-    // initialLoad: () => this._initialLoad(),
   };
 
   protected updatePageEl(el): void {
@@ -59,9 +58,6 @@ class LCNRouter extends HassRouterPage {
     el.narrow = this.narrow;
     logger.debug(`Current Page: ${this._currentPage} Route: ${this.route.path}`);
   }
-
-  // private async _initialLoad() {
-  // }
 }
 
 declare global {
