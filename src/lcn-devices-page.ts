@@ -144,6 +144,7 @@ export class LCNConfigDashboard extends LitElement {
         .hass=${this.hass}
         .narrow=${this.narrow}
         back-path="/config/integrations/integration/lcn"
+        noDataText=${this.lcn.localize("dashboard-devices-no-data-text")}
         .route=${this.route}
         .tabs=${lcnMainTabs}
         .localizeFunc=${this.lcn.localize}

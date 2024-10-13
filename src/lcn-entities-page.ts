@@ -283,6 +283,9 @@ export class LCNEntitiesPage extends LitElement {
         .hass=${this.hass}
         .narrow=${this.narrow}
         back-path="/lcn/devices"
+        noDataText=${this._deviceConfigs.length === 0
+          ? this.lcn.localize("dashboard-entities-no-data-text-devices")
+          : this.lcn.localize("dashboard-entities-no-data-text-entities")}
         .route=${this.route}
         .tabs=${lcnMainTabs}
         .localizeFunc=${this.lcn.localize}
