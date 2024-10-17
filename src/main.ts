@@ -47,13 +47,14 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     initialValue: [],
   });
 
-  protected firstUpdated(_changedProps) {
+  protected async firstUpdated(_changedProps) {
     super.firstUpdated(_changedProps);
     if (!this.hass) {
       return;
     }
     if (!this.lcn) {
-      this._initLCN().then((_value) => this._postLCNSetup());
+      await this._initLCN();
+      await this._postLCNSetup();
     }
     this.addEventListener("lcn-location-changed", (e) => this._setRoute(e as LocationChangedEvent));
 
@@ -88,19 +89,17 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       window.localStorage.setItem("lcn_entry_id", entry_id);
     }
     entry_id = window.localStorage.getItem("lcn_entry_id")!;
-    return getConfigEntry(this.hass, entry_id).then((res) => {
-      this.lcn = {
-        language: this.hass.language,
-        localize: (string, replace) => localize(this.hass, string, replace),
-        log: new LCNLogger(),
-        config_entry: res.config_entry,
-      };
-    });
+    this.lcn = {
+      language: this.hass.language,
+      localize: (string, replace) => localize(this.hass, string, replace),
+      log: new LCNLogger(),
+      config_entry: (await getConfigEntry(this.hass, entry_id)).config_entry,
+    };
   }
 
   protected async _postLCNSetup(): Promise<void> {
-    this._fetchDevices();
-    this._fetchEntities();
+    await this._fetchDevices();
+    await this._fetchEntities();
     this.addEventListener("lcn-update-device-configs", (_e) => this._fetchDevices());
     this.addEventListener("lcn-update-entity-configs", (_e) => this._fetchEntities());
 
@@ -138,15 +137,13 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
   }
 
   private async _fetchDevices() {
-    fetchDevices(this.hass, this.lcn.config_entry).then((deviceConfigs) =>
-      this._deviceConfigs.setValue(deviceConfigs),
-    );
+    const deviceConfigs = await fetchDevices(this.hass, this.lcn.config_entry);
+    this._deviceConfigs.setValue(deviceConfigs);
   }
 
   private async _fetchEntities() {
-    fetchEntities(this.hass, this.lcn.config_entry).then((entityConfigs) =>
-      this._entityConfigs.setValue(entityConfigs),
-    );
+    const entityConfigs = await fetchEntities(this.hass, this.lcn.config_entry);
+    this._entityConfigs.setValue(entityConfigs);
   }
 }
 

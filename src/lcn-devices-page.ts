@@ -5,13 +5,15 @@ import "@material/mwc-button";
 import "@ha/components/ha-clickable-list-item";
 import "@ha/components/ha-fab";
 import "@ha/components/ha-button-menu";
+import "@ha/components/ha-list-item";
+import "@ha/components/ha-md-menu-item";
 import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
 import { css, html, LitElement, PropertyValues, CSSResultGroup, nothing } from "lit";
-import { customElement, property, state, query } from "lit/decorators";
+import { customElement, property, state, queryAsync } from "lit/decorators";
 import { mdiPlus, mdiDelete, mdiDotsVertical, mdiHexagon, mdiHexagonMultiple } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { lcnMainTabs } from "lcn-router";
@@ -88,8 +90,8 @@ export class LCNConfigDashboard extends LitElement {
   })
   private _activeHiddenColumns?: string[];
 
-  @query("hass-tabs-subpage-data-table", true)
-  private _dataTable!: HaTabsSubpageDataTable;
+  @queryAsync("hass-tabs-subpage-data-table")
+  private _dataTable!: Promise<HaTabsSubpageDataTable>;
 
   private extDeviceConfigs = memoizeOne((devices: LcnDeviceConfig[]) => {
     const deviceRowData: DeviceRowData[] = devices.map((device) => ({
@@ -149,7 +151,7 @@ export class LCNConfigDashboard extends LitElement {
 
   protected async updated(changedProperties: PropertyValues): Promise<void> {
     super.updated(changedProperties);
-    await renderBrandLogo(this.hass, this._dataTable);
+    this._dataTable.then(renderBrandLogo);
   }
 
   protected render() {
@@ -183,11 +185,11 @@ export class LCNConfigDashboard extends LitElement {
         .hasfab
         class=${this.narrow ? "narrow" : ""}
       >
-        <ha-button-menu activatable slot="toolbar-icon">
+        <ha-button-menu slot="toolbar-icon">
           <ha-icon-button .path=${mdiDotsVertical} .label="Actions" slot="trigger"></ha-icon-button>
-          <ha-clickable-list-item @click=${this._scanDevices}>
+          <ha-list-item @click=${this._scanDevices}>
             ${this.lcn.localize("dashboard-devices-scan")}
-          </ha-clickable-list-item>
+          </ha-list-item>
         </ha-button-menu>
 
         <div class="header-btns" slot="selection-bar">
