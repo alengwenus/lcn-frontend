@@ -10,6 +10,8 @@ import { makeDialogManager } from "@ha/dialogs/make-dialog-manager";
 import "@ha/resources/ha-style";
 import { getConfigEntry } from "@ha/data/config_entries";
 import type { HomeAssistant, Route } from "@ha/types";
+import { fullEntitiesContext } from "@ha/data/context";
+import { subscribeEntityRegistry } from "@ha/data/entity_registry";
 
 import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
@@ -40,16 +42,18 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     initialValue: [],
   });
 
+  private _entitiesContext = new ContextProvider(this, {
+    context: fullEntitiesContext,
+    initialValue: [],
+  });
+
   protected firstUpdated(_changedProps) {
     super.firstUpdated(_changedProps);
     if (!this.hass) {
       return;
     }
     if (!this.lcn) {
-      this._initLCN().then((_arg) => {
-        this._fetchDevices();
-        this._fetchEntities();
-      });
+      this._initLCN().then((_value) => this._postLCNSetup());
     }
     this.addEventListener("lcn-location-changed", (e) => this._setRoute(e as LocationChangedEvent));
 
@@ -62,10 +66,6 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     if (this.route.path === "" || this.route.path === "/") {
       navigate("/lcn/devices", { replace: true });
     }
-
-    this.addEventListener("lcn-update-device-configs", (_e) => this._fetchDevices());
-
-    this.addEventListener("lcn-update-entity-configs", (_e) => this._fetchEntities());
   }
 
   protected render() {
@@ -95,6 +95,21 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
         log: new LCNLogger(),
         config_entry: res.config_entry,
       };
+    });
+  }
+
+  protected async _postLCNSetup(): Promise<void> {
+    this._fetchDevices();
+    this._fetchEntities();
+    this.addEventListener("lcn-update-device-configs", (_e) => this._fetchDevices());
+    this.addEventListener("lcn-update-entity-configs", (_e) => this._fetchEntities());
+
+    subscribeEntityRegistry(this.hass.connection, (entities) => {
+      this._entitiesContext.setValue(
+        entities.filter((entry) =>
+          entry.config_entry_id === this.lcn.config_entry.entry_id
+        )
+      );
     });
   }
 

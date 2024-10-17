@@ -1,17 +1,24 @@
 import { consume } from "@lit-labs/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
+import { fullEntitiesContext } from "@ha/data/context";
 import { haStyle } from "@ha/resources/styles";
+import { EntityRegistryEntry } from "@ha/data/entity_registry";
 import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
+import { ifDefined } from "lit/directives/if-defined";
 import { customElement, property, state, query } from "lit/decorators";
 import { mdiPlus, mdiDelete } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
+import { computeDomain } from "@ha/common/entity/compute_domain";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import memoize from "memoize-one";
 import { storage } from "@ha/common/decorators/storage";
 import "@ha/panels/config/ha-config-section";
-import "@ha/layouts/hass-loading-screen";
 import "@ha/components/ha-svg-icon";
+import "@ha/components/ha-icon";
+import "@ha/components/ha-icon-button";
+import "@ha/components/ha-state-icon";
+import "@ha/components/ha-domain-icon";
 import "@ha/components/ha-fab";
 import { mainWindow } from "@ha/common/dom/get_main_window";
 import {
@@ -41,6 +48,7 @@ import "components/lcn-filter-address";
 export interface EntityRowData extends LcnEntityConfig {
   unique_id: string;
   address_str: string;
+  entityRegistryEntry: EntityRegistryEntry;
 }
 
 function createUniqueEntityId(entity: LcnEntityConfig, includeDomain: boolean = true): string {
@@ -84,6 +92,10 @@ export class LCNEntitiesPage extends LitElement {
   @state()
   @consume({ context: entityConfigsContext, subscribe: true })
   _entityConfigs!: LcnEntityConfig[];
+
+  @state()
+  @consume({ context: fullEntitiesContext, subscribe: true })
+  _entityRegistryEntries!: EntityRegistryEntry[];
 
   @storage({
     storage: "sessionStorage",
@@ -134,17 +146,44 @@ export class LCNEntitiesPage extends LitElement {
   @query("hass-tabs-subpage-data-table", true)
   private _dataTable!: HaTabsSubpageDataTable;
 
-  private extEntityConfigs = (entities: LcnEntityConfig[]) => {
+  private extEntityConfigs = memoize(
+    (entities: LcnEntityConfig[], entityRegistryEntries: EntityRegistryEntry[]) => {
     const entityRowData: EntityRowData[] = entities.map((entity) => ({
       ...entity,
       unique_id: createUniqueEntityId(entity),
       address_str: addressToString(entity.address),
+      entityRegistryEntry: entityRegistryEntries.find((entry) =>
+        computeDomain(entry.entity_id) === entity.domain &&
+        createUniqueEntityId(entity, false) === entry.unique_id.split("-").slice(1).join("-")
+      )!
     }));
     return entityRowData;
-  };
+  });
 
   private _columns = memoize(
     (): DataTableColumnContainer => ({
+      icon: {
+        title: "",
+        label: "Icon",
+        type: "icon",
+        showNarrow: true,
+        moveable: false,
+        template: (entry) =>
+          entry.entityRegistryEntry.icon
+            ? html`<ha-icon .icon=${entry.entityRegistryEntry.icon}></ha-icon>`
+            : this.hass.states[entry.entityRegistryEntry.entity_id]
+              ? html`
+                  <ha-state-icon
+                    title=${ifDefined(this.hass.states[entry.entityRegistryEntry.entity_id].state)}
+                    slot="item-icon"
+                    .hass=${this.hass}
+                    .stateObj=${this.hass.states[entry.entityRegistryEntry.entity_id]}
+                  ></ha-state-icon>
+                `
+              : html`<ha-domain-icon
+                  .domain=${computeDomain(entry.entityRegistryEntry.entity_id)}
+                ></ha-domain-icon>`,
+      },
       name: {
         main: true,
         title: this.lcn.localize("name"),
@@ -178,7 +217,7 @@ export class LCNEntitiesPage extends LitElement {
       filteredItems: DataTableFiltersItems,
       entities: LcnEntityConfig[],
     ) => {
-      let filteredEntityConfigs = this.extEntityConfigs(entities);
+      let filteredEntityConfigs = this.extEntityConfigs(entities, this._entityRegistryEntries);
 
       Object.entries(filters).forEach(([key, filter]) => {
         if (key === "lcn-filter-address" && Array.isArray(filter) && filter.length) {
@@ -245,8 +284,7 @@ export class LCNEntitiesPage extends LitElement {
     );
   }
 
-  protected async firstUpdated(changedProperties) {
-    super.firstUpdated(changedProperties);
+  protected async firstUpdated() {
     loadLCNCreateEntityDialog();
     this._setFiltersFromUrl();
   }
@@ -254,7 +292,7 @@ export class LCNEntitiesPage extends LitElement {
   private _setFiltersFromUrl() {
     const address_str = this._searchParms.get("address");
 
-    if (!address_str) {
+    if (!address_str && this._filters) {
       this._filters = {};
       return;
     }
@@ -278,6 +316,7 @@ export class LCNEntitiesPage extends LitElement {
       this._entityConfigs,
     );
 
+    const hasFab = (this._deviceConfigs.length > 0);
     return html`
       <hass-tabs-subpage-data-table
         .hass=${this.hass}
@@ -312,7 +351,7 @@ export class LCNEntitiesPage extends LitElement {
         @search-changed=${this._handleSearchChange}
         @row-click=${this._rowClicked}
         id="unique_id"
-        .hasfab
+        .hasfab=${hasFab}
         class=${this.narrow ? "narrow" : ""}
       >
         <div class="header-btns" slot="selection-bar">
@@ -347,7 +386,7 @@ export class LCNEntitiesPage extends LitElement {
           @expanded-changed=${this._filterExpanded}
         ></lcn-filter-address>
 
-        ${this._deviceConfigs.length > 0
+        ${hasFab
           ? html`
               <ha-fab
                 slot="fab"
