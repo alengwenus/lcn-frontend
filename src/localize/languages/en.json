@@ -18,6 +18,7 @@
   "entities": "Entities",
   "address": "Address",
   "addresses": "Addresses",
+  "modulesgroups": "Modules / Groups",
 
   "domain": "Domain",
   "binary-sensor": "Binary sensor",
