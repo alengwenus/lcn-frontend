@@ -28,6 +28,7 @@ import type {
 import { navigate } from "@ha/common/navigate";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
 import { updateDeviceConfigs, updateEntityConfigs } from "components/events";
+import { renderBrandLogo } from "helpers/brand_logo";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -110,14 +111,9 @@ export class LCNConfigDashboard extends LitElement {
         showNarrow: true,
         moveable: false,
         template: (entry) =>
-          html`
-            <ha-svg-icon
-              .path=${
-                entry.address[2]
-                  ? mdiHexagonMultiple
-                  : mdiHexagon
-              }
-            ></ha-svg-icon>`,
+          html` <ha-svg-icon
+            .path=${entry.address[2] ? mdiHexagonMultiple : mdiHexagon}
+          ></ha-svg-icon>`,
       },
       name: {
         main: true,
@@ -149,6 +145,11 @@ export class LCNConfigDashboard extends LitElement {
     super.firstUpdated(changedProperties);
     loadProgressDialog();
     loadLCNCreateDeviceDialog();
+  }
+
+  protected async updated(changedProperties: PropertyValues): Promise<void> {
+    super.updated(changedProperties);
+    await renderBrandLogo(this.hass, this._dataTable);
   }
 
   protected render() {

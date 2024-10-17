@@ -3,7 +3,7 @@ import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { fullEntitiesContext } from "@ha/data/context";
 import { haStyle } from "@ha/resources/styles";
 import { EntityRegistryEntry } from "@ha/data/entity_registry";
-import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
+import { css, html, LitElement, CSSResultGroup, nothing, PropertyValues } from "lit";
 import { ifDefined } from "lit/directives/if-defined";
 import { customElement, property, state, query } from "lit/decorators";
 import { mdiPlus, mdiDelete } from "@mdi/js";
@@ -39,6 +39,7 @@ import type {
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import { lcnMainTabs } from "lcn-router";
 import { DataTableFiltersItems, DataTableFiltersValues } from "@ha/data/data_table_filters";
+import { renderBrandLogo } from "helpers/brand_logo";
 import {
   loadLCNCreateEntityDialog,
   showLCNCreateEntityDialog,
@@ -148,17 +149,19 @@ export class LCNEntitiesPage extends LitElement {
 
   private extEntityConfigs = memoize(
     (entities: LcnEntityConfig[], entityRegistryEntries: EntityRegistryEntry[]) => {
-    const entityRowData: EntityRowData[] = entities.map((entity) => ({
-      ...entity,
-      unique_id: createUniqueEntityId(entity),
-      address_str: addressToString(entity.address),
-      entityRegistryEntry: entityRegistryEntries.find((entry) =>
-        computeDomain(entry.entity_id) === entity.domain &&
-        createUniqueEntityId(entity, false) === entry.unique_id.split("-").slice(1).join("-")
-      )!
-    }));
-    return entityRowData;
-  });
+      const entityRowData: EntityRowData[] = entities.map((entity) => ({
+        ...entity,
+        unique_id: createUniqueEntityId(entity),
+        address_str: addressToString(entity.address),
+        entityRegistryEntry: entityRegistryEntries.find(
+          (entry) =>
+            computeDomain(entry.entity_id) === entity.domain &&
+            createUniqueEntityId(entity, false) === entry.unique_id.split("-").slice(1).join("-"),
+        )!,
+      }));
+      return entityRowData;
+    },
+  );
 
   private _columns = memoize(
     (): DataTableColumnContainer<EntityRowData> => ({
@@ -169,7 +172,7 @@ export class LCNEntitiesPage extends LitElement {
         showNarrow: true,
         moveable: false,
         template: (entry) =>
-          entry.entityRegistryEntry.icon
+          entry.entityRegistryEntry && entry.entityRegistryEntry.icon
             ? html`<ha-icon .icon=${entry.entityRegistryEntry.icon}></ha-icon>`
             : this.hass.states[entry.entityRegistryEntry.entity_id]
               ? html`
@@ -284,9 +287,15 @@ export class LCNEntitiesPage extends LitElement {
     );
   }
 
-  protected async firstUpdated() {
+  protected async firstUpdated(changedProperties: PropertyValues): Promise<void> {
+    super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
     this._setFiltersFromUrl();
+  }
+
+  protected async updated(changedProperties: PropertyValues): Promise<void> {
+    super.updated(changedProperties);
+    await renderBrandLogo(this.hass, this._dataTable);
   }
 
   private _setFiltersFromUrl() {
@@ -316,7 +325,7 @@ export class LCNEntitiesPage extends LitElement {
       this._entityConfigs,
     );
 
-    const hasFab = (this._deviceConfigs.length > 0);
+    const hasFab = this._deviceConfigs.length > 0;
     return html`
       <hass-tabs-subpage-data-table
         .hass=${this.hass}
