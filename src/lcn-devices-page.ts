@@ -12,7 +12,7 @@ import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-
 import { storage } from "@ha/common/decorators/storage";
 import { css, html, LitElement, PropertyValues, CSSResultGroup, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators";
-import { mdiPlus, mdiDelete, mdiDotsVertical } from "@mdi/js";
+import { mdiPlus, mdiDelete, mdiDotsVertical, mdiHexagon, mdiHexagonMultiple } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { lcnMainTabs } from "lcn-router";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
@@ -103,6 +103,22 @@ export class LCNConfigDashboard extends LitElement {
 
   private _columns = memoizeOne(
     (): DataTableColumnContainer<DeviceRowData> => ({
+      icon: {
+        title: "",
+        label: "Icon",
+        type: "icon",
+        showNarrow: true,
+        moveable: false,
+        template: (entry) =>
+          html`
+            <ha-svg-icon
+              .path=${
+                entry.address[2]
+                  ? mdiHexagonMultiple
+                  : mdiHexagon
+              }
+            ></ha-svg-icon>`,
+      },
       name: {
         main: true,
         title: this.lcn.localize("name"),

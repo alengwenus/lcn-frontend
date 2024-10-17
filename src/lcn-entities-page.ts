@@ -161,7 +161,7 @@ export class LCNEntitiesPage extends LitElement {
   });
 
   private _columns = memoize(
-    (): DataTableColumnContainer => ({
+    (): DataTableColumnContainer<EntityRowData> => ({
       icon: {
         title: "",
         label: "Icon",

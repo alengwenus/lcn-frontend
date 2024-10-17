@@ -11,7 +11,7 @@ const logger = new LCNLogger("router");
 export const lcnMainTabs: PageNavigation[] = [
   {
     path: "/lcn/devices",
-    translationKey: "devices",
+    translationKey: "modulesgroups",
     iconPath: mdiDevices,
   },
   {
