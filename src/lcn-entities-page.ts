@@ -21,6 +21,7 @@ import "@ha/components/ha-state-icon";
 import "@ha/components/ha-domain-icon";
 import "@ha/components/ha-fab";
 import { mainWindow } from "@ha/common/dom/get_main_window";
+import { debounce } from "@ha/common/util/debounce";
 import {
   LCN,
   addEntity,
@@ -302,12 +303,16 @@ export class LCNEntitiesPage extends LitElement {
   protected async firstUpdated(changedProperties: PropertyValues): Promise<void> {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
+    updateEntityConfigs(this);
     this._setFiltersFromUrl();
   }
+
+  private debouncedUpdateEntityConfig = debounce(() => updateEntityConfigs(this), 500, true);
 
   protected async updated(changedProperties: PropertyValues): Promise<void> {
     super.updated(changedProperties);
     this._dataTable.then(renderBrandLogo);
+    if (changedProperties.has("hass")) this.debouncedUpdateEntityConfig();
   }
 
   private _setFiltersFromUrl() {
@@ -438,20 +443,16 @@ export class LCNEntitiesPage extends LitElement {
 
   private async _openEditEntry(ev: CustomEvent): Promise<void> {
     const unique_id = (ev.detail as RowClickedEvent).id;
-    const entityConfig = this.getEntityConfigByUniqueId(unique_id)
+    const entityConfig = this.getEntityConfigByUniqueId(unique_id);
     const entityRegistryEntry = this._entityRegistryEntries.find(
       (entry) =>
         computeDomain(entry.entity_id) === entityConfig.domain &&
         createUniqueEntityId(entityConfig, false) === entry.unique_id.split("-").slice(1).join("-"),
     )!;
 
-    fireEvent(
-      mainWindow.document.querySelector("home-assistant")!,
-      "hass-more-info",
-      {
-        entityId: entityRegistryEntry.entity_id
-      }
-    )
+    fireEvent(mainWindow.document.querySelector("home-assistant")!, "hass-more-info", {
+      entityId: entityRegistryEntry.entity_id,
+    });
   }
 
   private async _addEntity() {
