@@ -104,9 +104,8 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     this.addEventListener("lcn-update-entity-configs", (_e) => this._fetchEntities());
 
     subscribeEntityRegistry(this.hass.connection, (entities) => {
-      this._entitiesContext.setValue(
-        entities.filter((entry) => entry.config_entry_id === this.lcn.config_entry.entry_id),
-      );
+      const entries = entities.filter((entry) => entry.config_entry_id === this.lcn.config_entry.entry_id);
+      this._entitiesContext.setValue(entries);
     });
   }
 

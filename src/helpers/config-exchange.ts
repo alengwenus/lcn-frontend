@@ -9,11 +9,13 @@ import {
   addEntity,
 } from "types/lcn";
 import { fileDownload } from "@ha/util/file_download";
+import { addressToString } from "./address_conversion";
 
 export function openFileDialog(): Promise<File> {
   return new Promise<File>((resolve, _reject) => {
     const input = document.createElement("input");
     input.type = "file";
+    input.accept = ".json";
 
     input.onchange = (ev: Event) => {
       const file: File = (ev.target as HTMLInputElement).files![0];
@@ -55,17 +57,26 @@ export async function exportConfig(hass: HomeAssistant, lcn: LCN) {
 }
 
 export async function importConfig(hass: HomeAssistant, lcn: LCN) {
-  lcn.log.debug("Importing configuration");
   const file: File = await openFileDialog();
   const config: LcnConfig = await readConfigFile(file);
 
+  lcn.log.debug("Importing configuration");
+  let devices_success: number = 0;
+  let entities_success: number = 0;
+
   for await (const device of config.devices) {
-    await addDevice(hass, lcn.config_entry, device);
+    if (await addDevice(hass, lcn.config_entry, device))
+      devices_success++;
+    else
+      lcn.log.debug(`Skipping device ${addressToString(device.address)}. Already present.`)
   }
-  lcn.log.debug(`Imported ${config.devices.length} devices`);
 
   for await (const entity of config.entities) {
-    await addEntity(hass, lcn.config_entry, entity);
-  }
-  lcn.log.debug(`Imported ${config.entities.length} entities`);
+    if (await addEntity(hass, lcn.config_entry, entity))
+      entities_success++;
+    else
+    lcn.log.debug(`Skipping entity ${addressToString(entity.address)}-${entity.name}. Already present.`)
+}
+  lcn.log.debug(`Sucessfully imported ${devices_success} out of ${config.devices.length} devices.`);
+  lcn.log.debug(`Sucessfully imported ${entities_success} out of ${config.entities.length} entities.`);
 }
