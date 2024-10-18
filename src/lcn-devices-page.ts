@@ -371,12 +371,7 @@ export class LCNConfigDashboard extends LitElement {
   private async _importConfig() {
     await importConfig(this.hass, this.lcn);
     updateDeviceConfigs(this);
-    // this.dispatchEvent(
-    //   new CustomEvent("lcn-config-changed", {
-    //     bubbles: true,
-    //     composed: true,
-    //   })
-    // );
+    updateEntityConfigs(this);
   }
 
   private async _exportConfig() {
