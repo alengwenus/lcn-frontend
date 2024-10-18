@@ -65,18 +65,19 @@ export async function importConfig(hass: HomeAssistant, lcn: LCN) {
   let entities_success: number = 0;
 
   for await (const device of config.devices) {
-    if (await addDevice(hass, lcn.config_entry, device))
-      devices_success++;
-    else
-      lcn.log.debug(`Skipping device ${addressToString(device.address)}. Already present.`)
+    if (await addDevice(hass, lcn.config_entry, device)) devices_success++;
+    else lcn.log.debug(`Skipping device ${addressToString(device.address)}. Already present.`);
   }
 
   for await (const entity of config.entities) {
-    if (await addEntity(hass, lcn.config_entry, entity))
-      entities_success++;
+    if (await addEntity(hass, lcn.config_entry, entity)) entities_success++;
     else
-    lcn.log.debug(`Skipping entity ${addressToString(entity.address)}-${entity.name}. Already present.`)
-}
+      lcn.log.debug(
+        `Skipping entity ${addressToString(entity.address)}-${entity.name}. Already present.`,
+      );
+  }
   lcn.log.debug(`Sucessfully imported ${devices_success} out of ${config.devices.length} devices.`);
-  lcn.log.debug(`Sucessfully imported ${entities_success} out of ${config.entities.length} entities.`);
+  lcn.log.debug(
+    `Sucessfully imported ${entities_success} out of ${config.entities.length} entities.`,
+  );
 }
