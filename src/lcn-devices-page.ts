@@ -312,8 +312,8 @@ export class LCNConfigDashboard extends LitElement {
     updateEntityConfigs(this);
   }
 
-  private _clearSelection() {
-    this._dataTable.clearSelection();
+  private async _clearSelection() {
+    (await this._dataTable).clearSelection();
   }
 
   private _handleSortingChanged(ev: CustomEvent) {

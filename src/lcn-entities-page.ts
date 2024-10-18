@@ -2,7 +2,7 @@ import { consume } from "@lit-labs/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { fullEntitiesContext } from "@ha/data/context";
 import { haStyle } from "@ha/resources/styles";
-import { EntityRegistryEntry } from "@ha/data/entity_registry";
+import { EntityRegistryEntry, fetchEntityRegistry } from "@ha/data/entity_registry";
 import { css, html, LitElement, CSSResultGroup, nothing, PropertyValues } from "lit";
 import { ifDefined } from "lit/directives/if-defined";
 import { customElement, property, state, queryAsync } from "lit/decorators";
@@ -21,6 +21,7 @@ import "@ha/components/ha-state-icon";
 import "@ha/components/ha-domain-icon";
 import "@ha/components/ha-fab";
 import { mainWindow } from "@ha/common/dom/get_main_window";
+import { debounce } from "@ha/common/util/debounce";
 import {
   LCN,
   addEntity,
@@ -33,9 +34,11 @@ import { updateEntityConfigs } from "components/events";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
 import type {
   DataTableColumnContainer,
+  RowClickedEvent,
   SelectionChangedEvent,
   SortingChangedEvent,
 } from "@ha/components/data-table/ha-data-table";
+import { fireEvent } from "@ha/common/dom/fire_event";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import { lcnMainTabs } from "lcn-router";
 import { DataTableFiltersItems, DataTableFiltersValues } from "@ha/data/data_table_filters";
@@ -291,15 +294,25 @@ export class LCNEntitiesPage extends LitElement {
     );
   }
 
+  protected async willUpdate(_changedProperties: PropertyValues): Promise<void> {
+    super.willUpdate(_changedProperties);
+    if (this._entityRegistryEntries.length === 0)
+      this._entityRegistryEntries = await fetchEntityRegistry(this.hass.connection);
+  }
+
   protected async firstUpdated(changedProperties: PropertyValues): Promise<void> {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
+    updateEntityConfigs(this);
     this._setFiltersFromUrl();
   }
+
+  private debouncedUpdateEntityConfig = debounce(() => updateEntityConfigs(this), 500, true);
 
   protected async updated(changedProperties: PropertyValues): Promise<void> {
     super.updated(changedProperties);
     this._dataTable.then(renderBrandLogo);
+    if (changedProperties.has("hass")) this.debouncedUpdateEntityConfig();
   }
 
   private _setFiltersFromUrl() {
@@ -362,7 +375,7 @@ export class LCNEntitiesPage extends LitElement {
         @clear-filter=${this._clearFilter}
         .filter=${this._filter}
         @search-changed=${this._handleSearchChange}
-        @row-click=${this._rowClicked}
+        @row-click=${this._openEditEntry}
         id="unique_id"
         .hasfab=${hasFab}
         class=${this.narrow ? "narrow" : ""}
@@ -428,8 +441,18 @@ export class LCNEntitiesPage extends LitElement {
     return entityConfig!;
   }
 
-  private _rowClicked(ev: CustomEvent) {
-    this.lcn.log.debug(this.getEntityConfigByUniqueId(ev.detail.id));
+  private async _openEditEntry(ev: CustomEvent): Promise<void> {
+    const unique_id = (ev.detail as RowClickedEvent).id;
+    const entityConfig = this.getEntityConfigByUniqueId(unique_id);
+    const entityRegistryEntry = this._entityRegistryEntries.find(
+      (entry) =>
+        computeDomain(entry.entity_id) === entityConfig.domain &&
+        createUniqueEntityId(entityConfig, false) === entry.unique_id.split("-").slice(1).join("-"),
+    )!;
+
+    fireEvent(mainWindow.document.querySelector("home-assistant")!, "hass-more-info", {
+      entityId: entityRegistryEntry.entity_id,
+    });
   }
 
   private async _addEntity() {
@@ -456,8 +479,8 @@ export class LCNEntitiesPage extends LitElement {
     updateEntityConfigs(this);
   }
 
-  private _clearSelection() {
-    this._dataTable.clearSelection();
+  private async _clearSelection() {
+    (await this._dataTable).clearSelection();
   }
 
   private _clearFilter() {
