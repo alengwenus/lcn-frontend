@@ -5,7 +5,7 @@ import { haStyle } from "@ha/resources/styles";
 import { EntityRegistryEntry } from "@ha/data/entity_registry";
 import { css, html, LitElement, CSSResultGroup, nothing, PropertyValues } from "lit";
 import { ifDefined } from "lit/directives/if-defined";
-import { customElement, property, state, query } from "lit/decorators";
+import { customElement, property, state, queryAsync } from "lit/decorators";
 import { mdiPlus, mdiDelete } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
 import { computeDomain } from "@ha/common/entity/compute_domain";
@@ -144,8 +144,8 @@ export class LCNEntitiesPage extends LitElement {
   })
   private _activeHiddenColumns?: string[];
 
-  @query("hass-tabs-subpage-data-table", true)
-  private _dataTable!: HaTabsSubpageDataTable;
+  @queryAsync("hass-tabs-subpage-data-table")
+  private _dataTable!: Promise<HaTabsSubpageDataTable>;
 
   private extEntityConfigs = memoize(
     (entities: LcnEntityConfig[], entityRegistryEntries: EntityRegistryEntry[]) => {
@@ -172,20 +172,24 @@ export class LCNEntitiesPage extends LitElement {
         showNarrow: true,
         moveable: false,
         template: (entry) =>
-          entry.entityRegistryEntry && entry.entityRegistryEntry.icon
-            ? html`<ha-icon .icon=${entry.entityRegistryEntry.icon}></ha-icon>`
-            : this.hass.states[entry.entityRegistryEntry.entity_id]
-              ? html`
-                  <ha-state-icon
-                    title=${ifDefined(this.hass.states[entry.entityRegistryEntry.entity_id].state)}
-                    slot="item-icon"
-                    .hass=${this.hass}
-                    .stateObj=${this.hass.states[entry.entityRegistryEntry.entity_id]}
-                  ></ha-state-icon>
-                `
-              : html`<ha-domain-icon
-                  .domain=${computeDomain(entry.entityRegistryEntry.entity_id)}
-                ></ha-domain-icon>`,
+          entry.entityRegistryEntry
+            ? entry.entityRegistryEntry.icon
+              ? html`<ha-icon .icon=${entry.entityRegistryEntry.icon}></ha-icon>`
+              : this.hass.states[entry.entityRegistryEntry.entity_id]
+                ? html`
+                    <ha-state-icon
+                      title=${ifDefined(
+                        this.hass.states[entry.entityRegistryEntry.entity_id].state,
+                      )}
+                      slot="item-icon"
+                      .hass=${this.hass}
+                      .stateObj=${this.hass.states[entry.entityRegistryEntry.entity_id]}
+                    ></ha-state-icon>
+                  `
+                : html`<ha-domain-icon
+                    .domain=${computeDomain(entry.entityRegistryEntry.entity_id)}
+                  ></ha-domain-icon>`
+            : nothing,
       },
       name: {
         main: true,
@@ -295,7 +299,7 @@ export class LCNEntitiesPage extends LitElement {
 
   protected async updated(changedProperties: PropertyValues): Promise<void> {
     super.updated(changedProperties);
-    await renderBrandLogo(this.hass, this._dataTable);
+    this._dataTable.then(renderBrandLogo);
   }
 
   private _setFiltersFromUrl() {
