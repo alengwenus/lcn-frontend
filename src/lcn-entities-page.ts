@@ -322,7 +322,6 @@ export class LCNEntitiesPage extends LitElement {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
     updateEntityConfigs(this);
-    this._entityRegistryEntries = await fetchEntityRegistry(this.hass.connection);
     this._setFiltersFromUrl();
   }
 
