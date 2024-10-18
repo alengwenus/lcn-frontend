@@ -22,6 +22,7 @@ import "@ha/components/ha-svg-icon";
 import memoize from "memoize-one";
 import { LCN, scanDevices, deleteDevice, addDevice, LcnDeviceConfig } from "types/lcn";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
+import { importConfig, exportConfig } from "helpers/config-exchange";
 import type {
   DataTableColumnContainer,
   SelectionChangedEvent,
@@ -236,6 +237,13 @@ export class LCNConfigDashboard extends LitElement {
           <ha-list-item @click=${this._scanDevices}>
             ${this.lcn.localize("dashboard-devices-scan")}
           </ha-list-item>
+          <li divider role="separator"></li>
+          <ha-list-item @click=${this._importConfig}>
+            ${this.lcn.localize("import-config")}
+          </ha-list-item>
+          <ha-list-item @click=${this._exportConfig}>
+            ${this.lcn.localize("export-config")}
+          </ha-list-item>
         </ha-button-menu>
 
         <div class="header-btns" slot="selection-bar">
@@ -358,6 +366,21 @@ export class LCNConfigDashboard extends LitElement {
     }
     updateDeviceConfigs(this);
     updateEntityConfigs(this);
+  }
+
+  private async _importConfig() {
+    await importConfig(this.hass, this.lcn);
+    updateDeviceConfigs(this);
+    // this.dispatchEvent(
+    //   new CustomEvent("lcn-config-changed", {
+    //     bubbles: true,
+    //     composed: true,
+    //   })
+    // );
+  }
+
+  private async _exportConfig() {
+    exportConfig(this.hass, this.lcn);
   }
 
   private async _clearSelection() {

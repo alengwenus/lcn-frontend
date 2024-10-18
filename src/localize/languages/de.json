@@ -77,6 +77,8 @@
 
   "more-help": "mehr Hilfe...",
   "delete-selected": "Ausgewählte entfernen",
+  "import-config": "Konfiguration importieren",
+  "export-config": "Konfiguration exportieren",
 
   "dashboard-devices-no-data-text": "Sieht aus, als wäre noch nichts konfiguriert. Beginne mit dem Hinzufügen eines Moduls/einer Gruppe oder suche nach Modulen.",
   "dashboard-devices-hosts": "Hosts",

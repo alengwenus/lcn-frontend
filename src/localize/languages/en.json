@@ -78,6 +78,8 @@
 
   "more-help": "more help...",
   "delete-selected": "Delete selected",
+  "import-config": "Import configuration",
+  "export-config": "Export configuration",
 
   "dashboard-devices-no-data-text": "Looks like nothing is set up. Start by adding a module/group or scan for modules.",
   "dashboard-devices-hosts": "Hosts",
