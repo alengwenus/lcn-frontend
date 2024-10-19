@@ -307,7 +307,7 @@ export class LCNConfigDashboard extends LitElement {
     for await (const device of devices) {
       await deleteDevice(this.hass, this.lcn.config_entry, device);
     }
-    this._clearSelection();
+    await this._clearSelection();
     updateDeviceConfigs(this);
     updateEntityConfigs(this);
   }

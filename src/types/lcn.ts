@@ -74,6 +74,11 @@ export interface LcnDeviceConfig {
   hardware_type: number;
 }
 
+export interface LcnConfig {
+  devices: LcnDeviceConfig[];
+  entities: LcnEntityConfig[];
+}
+
 export const fetchDevices = (
   hass: HomeAssistant,
   config_entry: ConfigEntry,

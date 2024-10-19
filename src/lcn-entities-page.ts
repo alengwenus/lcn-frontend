@@ -2,7 +2,7 @@ import { consume } from "@lit-labs/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { fullEntitiesContext } from "@ha/data/context";
 import { haStyle } from "@ha/resources/styles";
-import { EntityRegistryEntry, fetchEntityRegistry } from "@ha/data/entity_registry";
+import { EntityRegistryEntry } from "@ha/data/entity_registry";
 import { css, html, LitElement, CSSResultGroup, nothing, PropertyValues } from "lit";
 import { ifDefined } from "lit/directives/if-defined";
 import { customElement, property, state, queryAsync } from "lit/decorators";
@@ -21,7 +21,6 @@ import "@ha/components/ha-state-icon";
 import "@ha/components/ha-domain-icon";
 import "@ha/components/ha-fab";
 import { mainWindow } from "@ha/common/dom/get_main_window";
-import { debounce } from "@ha/common/util/debounce";
 import {
   LCN,
   addEntity,
@@ -201,6 +200,10 @@ export class LCNEntitiesPage extends LitElement {
         filterable: true,
         direction: "asc",
         flex: 2,
+        template: (entry) =>
+          entry.entityRegistryEntry
+            ? entry.entityRegistryEntry.name || entry.entityRegistryEntry.original_name!
+            : entry.name,
       },
       address_str: {
         title: this.lcn.localize("address"),
@@ -226,8 +229,9 @@ export class LCNEntitiesPage extends LitElement {
       filters: DataTableFiltersValues,
       filteredItems: DataTableFiltersItems,
       entities: LcnEntityConfig[],
+      entityRegistryEntries: EntityRegistryEntry[],
     ) => {
-      let filteredEntityConfigs = this.extEntityConfigs(entities, this._entityRegistryEntries);
+      let filteredEntityConfigs = this.extEntityConfigs(entities, entityRegistryEntries);
 
       Object.entries(filters).forEach(([key, filter]) => {
         if (key === "lcn-filter-address" && Array.isArray(filter) && filter.length) {
@@ -279,6 +283,7 @@ export class LCNEntitiesPage extends LitElement {
         this._filters,
         this._filteredItems,
         this._entityConfigs,
+        this._entityRegistryEntries,
       );
       if (filteredEntities.length === 0) {
         this._deviceConfig = undefined;
@@ -294,12 +299,6 @@ export class LCNEntitiesPage extends LitElement {
     );
   }
 
-  protected async willUpdate(_changedProperties: PropertyValues): Promise<void> {
-    super.willUpdate(_changedProperties);
-    if (this._entityRegistryEntries.length === 0)
-      this._entityRegistryEntries = await fetchEntityRegistry(this.hass.connection);
-  }
-
   protected async firstUpdated(changedProperties: PropertyValues): Promise<void> {
     super.firstUpdated(changedProperties);
     loadLCNCreateEntityDialog();
@@ -307,12 +306,9 @@ export class LCNEntitiesPage extends LitElement {
     this._setFiltersFromUrl();
   }
 
-  private debouncedUpdateEntityConfig = debounce(() => updateEntityConfigs(this), 500, true);
-
   protected async updated(changedProperties: PropertyValues): Promise<void> {
     super.updated(changedProperties);
     this._dataTable.then(renderBrandLogo);
-    if (changedProperties.has("hass")) this.debouncedUpdateEntityConfig();
   }
 
   private _setFiltersFromUrl() {
@@ -340,6 +336,7 @@ export class LCNEntitiesPage extends LitElement {
       this._filters,
       this._filteredItems,
       this._entityConfigs,
+      this._entityRegistryEntries,
     );
 
     const hasFab = this._deviceConfigs.length > 0;

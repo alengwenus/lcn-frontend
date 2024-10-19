@@ -2,7 +2,7 @@ import { ContextProvider } from "@lit-labs/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
-
+import { debounce } from "@ha/common/util/debounce";
 import { applyThemesOnElement } from "@ha/common/dom/apply_themes_on_element";
 import { listenMediaQuery } from "@ha/common/dom/media_query";
 import { navigate } from "@ha/common/navigate";
@@ -11,8 +11,7 @@ import "@ha/resources/ha-style";
 import { getConfigEntry } from "@ha/data/config_entries";
 import type { HomeAssistant, Route } from "@ha/types";
 import { fullEntitiesContext } from "@ha/data/context";
-import { subscribeEntityRegistry } from "@ha/data/entity_registry";
-
+import { fetchEntityRegistry } from "@ha/data/entity_registry";
 import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
 import { LCNLogger } from "./lcn-logger";
@@ -42,7 +41,7 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     initialValue: [],
   });
 
-  private _entitiesContext = new ContextProvider(this, {
+  private _entityRegistryEntries = new ContextProvider(this, {
     context: fullEntitiesContext,
     initialValue: [],
   });
@@ -100,14 +99,15 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
   protected async _postLCNSetup(): Promise<void> {
     await this._fetchDevices();
     await this._fetchEntities();
+    this._fetchEntityRegistryEntries();
+
     this.addEventListener("lcn-update-device-configs", (_e) => this._fetchDevices());
     this.addEventListener("lcn-update-entity-configs", (_e) => this._fetchEntities());
 
-    subscribeEntityRegistry(this.hass.connection, (entities) => {
-      this._entitiesContext.setValue(
-        entities.filter((entry) => entry.config_entry_id === this.lcn.config_entry.entry_id),
-      );
-    });
+    this.hass.connection.subscribeEvents(
+      debounce(async () => this._fetchEntityRegistryEntries(), 500, false),
+      "entity_registry_updated",
+    );
   }
 
   private _setRoute(ev: LocationChangedEvent): void {
@@ -144,6 +144,14 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
   private async _fetchEntities() {
     const entityConfigs = await fetchEntities(this.hass, this.lcn.config_entry);
     this._entityConfigs.setValue(entityConfigs);
+  }
+
+  private async _fetchEntityRegistryEntries() {
+    const entityRegistryEntries = await fetchEntityRegistry(this.hass.connection).then((entries) =>
+      entries.filter((entry) => entry.config_entry_id === this.lcn.config_entry.entry_id),
+    );
+    this._entityRegistryEntries.setValue(entityRegistryEntries);
+    this.lcn.log.debug("EntityRegistry:", entityRegistryEntries.length);
   }
 }
 
