@@ -1,6 +1,7 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
+import "@ha/components/ha-textfield";
 import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
@@ -60,10 +61,55 @@ export class LCNConfigSwitchElement extends LitElement {
     ];
   }
 
+  private get _regulators(): ConfigItem[] {
+    const regulator: string = this.lcn.localize("regulator");
+    return [
+      { name: regulator + " 1", value: "R1VARSETPOINT" },
+      { name: regulator + " 2", value: "R2VARSETPOINT" },
+    ];
+  }
+
+  private _keys: ConfigItem[] = [
+    { name: "A1", value: "A1" },
+    { name: "A2", value: "A2" },
+    { name: "A3", value: "A3" },
+    { name: "A4", value: "A4" },
+    { name: "A5", value: "A5" },
+    { name: "A6", value: "A6" },
+    { name: "A7", value: "A7" },
+    { name: "A8", value: "A8" },
+    { name: "B1", value: "B1" },
+    { name: "B2", value: "B2" },
+    { name: "B3", value: "B3" },
+    { name: "B4", value: "B4" },
+    { name: "B5", value: "B5" },
+    { name: "B6", value: "B6" },
+    { name: "B7", value: "B7" },
+    { name: "B8", value: "B8" },
+    { name: "C1", value: "C1" },
+    { name: "C2", value: "C2" },
+    { name: "C3", value: "C3" },
+    { name: "C4", value: "C4" },
+    { name: "C5", value: "C5" },
+    { name: "C6", value: "C6" },
+    { name: "C7", value: "C7" },
+    { name: "C8", value: "C8" },
+    { name: "D1", value: "D1" },
+    { name: "D2", value: "D2" },
+    { name: "D3", value: "D3" },
+    { name: "D4", value: "D4" },
+    { name: "D5", value: "D5" },
+    { name: "D6", value: "D6" },
+    { name: "D7", value: "D7" },
+    { name: "D8", value: "D8" },
+  ];
+
   private get _portTypes(): ConfigItemCollection[] {
     return [
       { name: this.lcn.localize("output"), value: this._outputPorts, id: "output" },
       { name: this.lcn.localize("relay"), value: this._relayPorts, id: "relay" },
+      { name: this.lcn.localize("regulator"), value: this._regulators, id: "regulator-locks" },
+      { name: this.lcn.localize("key"), value: this._keys, id: "key-locks" },
     ];
   }
 
@@ -98,9 +144,27 @@ export class LCNConfigSwitchElement extends LitElement {
         ></ha-radio>
       </ha-formfield>
 
+      <ha-formfield label=${this.lcn.localize("regulator-lock")}>
+        <ha-radio
+          name="port"
+          value="regulator-locks"
+          .checked=${this._portType.id === "regulator-locks"}
+          @change=${this._portTypeChanged}
+        ></ha-radio>
+      </ha-formfield>
+
+      <ha-formfield label=${this.lcn.localize("key-lock")}>
+        <ha-radio
+          name="port"
+          value="key-locks"
+          .checked=${this._portType.id === "key-locks"}
+          @change=${this._portTypeChanged}
+        ></ha-radio>
+      </ha-formfield>
+
       <ha-select
         id="port-select"
-        .label=${this.lcn.localize("port")}
+        .label=${this._portType.name}
         .value=${this._port.value}
         fixedMenuPosition
         @selected=${this._portChanged}
@@ -135,6 +199,11 @@ export class LCNConfigSwitchElement extends LitElement {
       css`
         #port-type {
           margin-top: 16px;
+        }
+        .lock-time {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          column-gap: 4px;
         }
         ha-select {
           display: block;
