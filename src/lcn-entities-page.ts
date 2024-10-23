@@ -226,6 +226,22 @@ export class LCNEntitiesPage extends LitElement {
         sortable: true,
         filterable: true,
       },
+      delete: {
+        title: this.lcn.localize("delete"),
+        showNarrow: true,
+        moveable: false,
+        type: "icon-button",
+        template: (entry) => {
+          const handler = (_ev) => this._deleteEntities([entry]);
+          return html`
+            <ha-icon-button
+              .label=${this.lcn.localize("dashboard-devices-table-delete")}
+              .path=${mdiDelete}
+              @click=${handler}
+            ></ha-icon-button>
+          `;
+        },
+      },
     }),
   );
 
@@ -470,11 +486,15 @@ export class LCNEntitiesPage extends LitElement {
 
   private async _deleteSelected() {
     const entities = this._selected.map((unique_id) => this.getEntityConfigByUniqueId(unique_id));
+    this._deleteEntities(entities);
+    this._clearSelection();
+  }
 
+  private async _deleteEntities(entities: LcnEntityConfig[]) {
+    if (entities.length === 0) return;
     for await (const entity of entities) {
       await deleteEntity(this.hass, this.lcn.config_entry, entity);
     }
-    this._clearSelection();
     updateEntityConfigs(this);
   }
 

@@ -151,7 +151,6 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       entries.filter((entry) => entry.config_entry_id === this.lcn.config_entry.entry_id),
     );
     this._entityRegistryEntries.setValue(entityRegistryEntries);
-    this.lcn.log.debug("EntityRegistry:", entityRegistryEntries.length);
   }
 }
 

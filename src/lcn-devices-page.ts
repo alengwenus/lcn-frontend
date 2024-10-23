@@ -141,6 +141,22 @@ export class LCNConfigDashboard extends LitElement {
         template: (entry) =>
           entry.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
       },
+      delete: {
+        title: this.lcn.localize("delete"),
+        showNarrow: true,
+        moveable: false,
+        type: "icon-button",
+        template: (entry) => {
+          const handler = (_ev) => this._deleteDevices([entry]);
+          return html`
+            <ha-icon-button
+              .label=${this.lcn.localize("dashboard-devices-table-delete")}
+              .path=${mdiDelete}
+              @click=${handler}
+            ></ha-icon-button>
+          `;
+        },
+      },
     }),
   );
 
@@ -288,27 +304,29 @@ export class LCNConfigDashboard extends LitElement {
 
   private async _deleteSelected() {
     const devices = this._selected.map((unique_id) => this.getDeviceConfigByUniqueId(unique_id));
+    await this._deleteDevices(devices);
+    await this._clearSelection();
+  }
 
+  private async _deleteDevices(devices: LcnDeviceConfig[]) {
     if (
-      this._selected.length &&
+      devices.length > 0 &&
       !(await showConfirmationDialog(this, {
         title: this.lcn.localize("dashboard-devices-dialog-delete-devices-title"),
         text: html`
           ${this.lcn.localize("dashboard-devices-dialog-delete-text", {
-            count: this._selected.length,
+            count: devices.length,
           })}
           <br />
           ${this.lcn.localize("dashboard-devices-dialog-delete-warning")}
         `,
       }))
-    ) {
+    )
       return;
-    }
 
     for await (const device of devices) {
       await deleteDevice(this.hass, this.lcn.config_entry, device);
     }
-    await this._clearSelection();
     updateDeviceConfigs(this);
     updateEntityConfigs(this);
   }
