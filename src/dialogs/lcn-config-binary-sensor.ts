@@ -49,11 +49,11 @@ export class LCNConfigBinarySensorElement extends LitElement {
     ];
   }
 
-  private get _regulators(): ConfigItem[] {
-    const regulator: string = this.lcn.localize("regulator");
+  private get _setpoints(): ConfigItem[] {
+    const setpoint: string = this.lcn.localize("setpoint");
     return [
-      { name: regulator + " 1", value: "R1VARSETPOINT" },
-      { name: regulator + " 2", value: "R2VARSETPOINT" },
+      { name: setpoint + " 1", value: "R1VARSETPOINT" },
+      { name: setpoint + " 2", value: "R2VARSETPOINT" },
     ];
   }
 
@@ -95,17 +95,17 @@ export class LCNConfigBinarySensorElement extends LitElement {
   private get _sourceTypes(): ConfigItemCollection[] {
     return [
       {
-        name: this.lcn.localize("binsensors"),
+        name: this.lcn.localize("binary-sensor-type-binsensors"),
         value: this._binsensorPorts,
         id: "binsensors",
       },
       {
-        name: this.lcn.localize("regulator-locks"),
-        value: this._regulators,
-        id: "regulator-locks",
+        name: this.lcn.localize("binary-sensor-type-setpoint-locks"),
+        value: this._setpoints,
+        id: "setpoint-locks",
       },
       {
-        name: this.lcn.localize("key-locks"),
+        name: this.lcn.localize("binary-sensor-type-keys-locks"),
         value: this._keys,
         id: "key-locks",
       },
