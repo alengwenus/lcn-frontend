@@ -19,7 +19,7 @@ import type { HomeAssistant, Route } from "@ha/types";
 import { lcnMainTabs } from "lcn-router";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/components/ha-svg-icon";
-import memoizeOne from "memoize-one";
+import memoize from "memoize-one";
 import { LCN, scanDevices, deleteDevice, addDevice, LcnDeviceConfig } from "types/lcn";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import type {
@@ -39,9 +39,7 @@ import {
 import { loadProgressDialog, showProgressDialog } from "./dialogs/show-dialog-progress";
 
 interface DeviceRowData extends LcnDeviceConfig {
-  segment_id: number;
-  address_id: number;
-  type: string;
+  unique_id: string;
 }
 
 @customElement("lcn-devices-page")
@@ -93,18 +91,17 @@ export class LCNConfigDashboard extends LitElement {
   @queryAsync("hass-tabs-subpage-data-table")
   private _dataTable!: Promise<HaTabsSubpageDataTable>;
 
-  private extDeviceConfigs = memoizeOne((devices: LcnDeviceConfig[]) => {
-    const deviceRowData: DeviceRowData[] = devices.map((device) => ({
-      ...device,
-      unique_id: addressToString(device.address),
-      segment_id: device.address[0],
-      address_id: device.address[1],
-      type: device.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
-    }));
-    return deviceRowData;
-  });
+  private get _extDeviceConfigs(): DeviceRowData[] {
+    const extDeviceConfigs = memoize((deviceConfigs: LcnDeviceConfig[] = this._deviceConfigs) =>
+      deviceConfigs.map((deviceConfig) => ({
+        ...deviceConfig,
+        unique_id: addressToString(deviceConfig.address),
+      })),
+    );
+    return extDeviceConfigs();
+  }
 
-  private _columns = memoizeOne(
+  private _columns = memoize(
     (): DataTableColumnContainer<DeviceRowData> => ({
       icon: {
         title: "",
@@ -129,16 +126,20 @@ export class LCNConfigDashboard extends LitElement {
         title: this.lcn.localize("segment"),
         sortable: true,
         filterable: true,
+        template: (entry) => entry.address[0].toString(),
       },
       address_id: {
         title: this.lcn.localize("id"),
         sortable: true,
         filterable: true,
+        template: (entry) => entry.address[1].toString(),
       },
       type: {
         title: this.lcn.localize("type"),
         sortable: true,
         filterable: true,
+        template: (entry) =>
+          entry.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
       },
     }),
   );
@@ -168,7 +169,7 @@ export class LCNConfigDashboard extends LitElement {
         .tabs=${lcnMainTabs}
         .localizeFunc=${this.lcn.localize}
         .columns=${this._columns()}
-        .data=${this.extDeviceConfigs(this._deviceConfigs)}
+        .data=${this._extDeviceConfigs}
         selectable
         .selected=${this._selected.length}
         .initialSorting=${this._activeSorting}
@@ -307,7 +308,7 @@ export class LCNConfigDashboard extends LitElement {
     for await (const device of devices) {
       await deleteDevice(this.hass, this.lcn.config_entry, device);
     }
-    this._clearSelection();
+    await this._clearSelection();
     updateDeviceConfigs(this);
     updateEntityConfigs(this);
   }
