@@ -12,18 +12,26 @@ If you want to participate in development (great!) head down to the [development
 
 ## Features
 
-- Device Configuration
-  ![Device Configuration](./screenshots/lcn_devices.png?raw=true)
+### Device Configuration
 
-  - Set up modules and groups for all your LCN integrations.
-  - Search for modules and groups and have them added automatically.
-  - Select a module or group to access the respective Entity Configuration panel.
+- Set up modules and groups for all your LCN integrations.
 
-- Entity Configuration
-  ![Entity Configuration](./screenshots/lcn_create_entity.png?raw=true)
-  - Set up Home Assistant entities for each module or group.
-  - Create new entities that map the functions of your LCN modules and configure their parameters.
-  - New entities are automatically added to your Home Assistant configuration and you can add them to your dashboards just like for any other integration.
+  ![Device Configuration](./screenshots/lcn_device_page.png?raw=true)
+
+- Search for modules and groups and have them added automatically.
+- Select a module or group to access the respective Entity Configuration panel.
+
+### Entity Configuration
+
+- Set up Home Assistant entities for each module or group.
+
+  ![Entity Configuration](./screenshots/lcn_entities_page.png?raw=true)
+
+- Create new entities that map the functions of your LCN modules and configure their parameters.
+
+  ![Create entity](./screenshots/lcn_create_entity.png?raw=true)
+
+- New entities are automatically added to your Home Assistant configuration and you can add them to your dashboards just like for any other integration.
 
 ## Development
 
