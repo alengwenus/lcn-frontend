@@ -40,6 +40,9 @@ import { loadProgressDialog, showProgressDialog } from "./dialogs/show-dialog-pr
 
 interface DeviceRowData extends LcnDeviceConfig {
   unique_id: string;
+  address_id: number;
+  segment_id: number;
+  type: string;
 }
 
 @customElement("lcn-devices-page")
@@ -96,6 +99,9 @@ export class LCNConfigDashboard extends LitElement {
       deviceConfigs.map((deviceConfig) => ({
         ...deviceConfig,
         unique_id: addressToString(deviceConfig.address),
+        address_id: deviceConfig.address[1],
+        segment_id: deviceConfig.address[0],
+        type: deviceConfig.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
       })),
     );
     return extDeviceConfigs();
@@ -126,20 +132,16 @@ export class LCNConfigDashboard extends LitElement {
         title: this.lcn.localize("segment"),
         sortable: true,
         filterable: true,
-        template: (entry) => entry.address[0].toString(),
       },
       address_id: {
         title: this.lcn.localize("id"),
         sortable: true,
         filterable: true,
-        template: (entry) => entry.address[1].toString(),
       },
       type: {
         title: this.lcn.localize("type"),
         sortable: true,
         filterable: true,
-        template: (entry) =>
-          entry.address[2] ? this.lcn.localize("group") : this.lcn.localize("module"),
       },
       delete: {
         title: this.lcn.localize("delete"),
@@ -253,8 +255,8 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   private _rowClicked(ev: CustomEvent) {
-    const address_str: string = ev.detail.id;
-    navigate(`/lcn/entities?address=${address_str}`, { replace: true });
+    const unique_id: string = ev.detail.id;
+    navigate(`/lcn/entities?address=${unique_id}`, { replace: true });
   }
 
   private async _scanDevices() {
