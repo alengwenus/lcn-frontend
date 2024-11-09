@@ -96,6 +96,23 @@ Start Home Assistant using:
 $ hass -c config
 ```
 
+### Updating the Home Assistant frontend
+
+Replace `[commit_id]` with the desired commit or tag name.
+
+```shell
+$ cd homeassistant-frontend
+$ git fetch
+...
+$ git switch [commit_id]
+...
+$ cd ..
+$ rm -f yarn.lock
+$ node ./script/merge_requirements.js
+...
+$ make bootstrap
+```
+
 ### Code quality
 
 You may use the following commands to ensure code quality:
