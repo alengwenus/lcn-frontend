@@ -31,6 +31,7 @@ import { navigate } from "@ha/common/navigate";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
 import { updateDeviceConfigs, updateEntityConfigs } from "components/events";
 import { renderBrandLogo } from "helpers/brand_logo";
+import { getHardwareType } from "helpers/hardware_types";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -143,10 +144,36 @@ export class LCNConfigDashboard extends LitElement {
         sortable: true,
         filterable: true,
       },
+      hardware_serial: {
+        title: this.lcn.localize("hardware-serial"),
+        sortable: true,
+        filterable: true,
+        defaultHidden: true,
+        template: (entry) =>
+          entry.hardware_serial !== -1 ? entry.hardware_serial.toString(16).toUpperCase() : "-",
+      },
+      software_serial: {
+        title: this.lcn.localize("software-serial"),
+        sortable: true,
+        filterable: true,
+        defaultHidden: true,
+        template: (entry) =>
+          entry.software_serial !== -1 ? entry.software_serial.toString(16).toUpperCase() : "-",
+      },
+      hardware_type: {
+        title: this.lcn.localize("hardware-type"),
+        sortable: true,
+        filterable: true,
+        defaultHidden: true,
+        template: (entry) => {
+          const type = getHardwareType(entry.hardware_type);
+          if (type) return type;
+          return "-";
+        },
+      },
       delete: {
         title: this.lcn.localize("delete"),
         showNarrow: true,
-        moveable: false,
         type: "icon-button",
         template: (entry) => {
           const handler = (_ev) => this._deleteDevices([entry]);
