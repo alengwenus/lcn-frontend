@@ -104,13 +104,14 @@ Replace `[commit_id]` with the desired commit or tag name.
 $ cd homeassistant-frontend
 $ git fetch
 ...
-$ git switch [commit_id]
+$ git checkout [commit_id]
 ...
 $ cd ..
 $ rm -f yarn.lock
 $ node ./script/merge_requirements.js
 ...
 $ make bootstrap
+$ yarn install
 ```
 
 ### Code quality
