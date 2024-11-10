@@ -23,6 +23,10 @@
   "addresses": "Addresses",
   "modulesgroups": "Modules / Groups",
 
+  "firmware-date": "Firmware date: {month}/{day}/{year}",
+  "hardware-date": "Module date: {month}/{day}/{year}",
+  "hardware-number": "Module number: {serial}",
+
   "domain": "Domain",
   "binary-sensor": "Binary sensor",
   "climate": "Climate",

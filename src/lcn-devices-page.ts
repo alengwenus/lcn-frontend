@@ -1,6 +1,7 @@
 import { consume } from "@lit-labs/context";
 import { deviceConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
+import "@lrnwebcomponents/simple-tooltip/simple-tooltip";
 import "@material/mwc-button";
 import "@ha/components/ha-clickable-list-item";
 import "@ha/components/ha-fab";
@@ -9,7 +10,6 @@ import "@ha/components/ha-list-item";
 import "@ha/components/ha-md-menu-item";
 import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
-import "@ha/components/ha-switch";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
@@ -36,7 +36,7 @@ import { navigate } from "@ha/common/navigate";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
 import { updateDeviceConfigs, updateEntityConfigs } from "components/events";
 import { renderBrandLogo } from "helpers/brand_logo";
-import { getHardwareType } from "helpers/hardware_types";
+import { getHardwareType, parseSerialNumber, LcnSerial } from "helpers/module_properties";
 import { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
@@ -162,16 +162,14 @@ export class LCNConfigDashboard extends LitElement {
         sortable: true,
         filterable: true,
         defaultHidden: true,
-        template: (entry) =>
-          entry.hardware_serial !== -1 ? entry.hardware_serial.toString(16).toUpperCase() : "-",
+        template: (entry) => this.renderHardwareSerial(entry.hardware_serial),
       },
       software_serial: {
         title: this.lcn.localize("software-serial"),
         sortable: true,
         filterable: true,
         defaultHidden: true,
-        template: (entry) =>
-          entry.software_serial !== -1 ? entry.software_serial.toString(16).toUpperCase() : "-",
+        template: (entry) => this.renderSoftwareSerial(entry.software_serial),
       },
       hardware_type: {
         title: this.lcn.localize("hardware-type"),
@@ -211,6 +209,48 @@ export class LCNConfigDashboard extends LitElement {
   protected async updated(changedProperties: PropertyValues): Promise<void> {
     super.updated(changedProperties);
     this._dataTable.then(renderBrandLogo);
+  }
+
+  protected renderSoftwareSerial(software_serial: number) {
+    let serial: LcnSerial;
+    try {
+      serial = parseSerialNumber(software_serial);
+    } catch (error) {
+      return html`-`;
+    }
+
+    return html`
+      ${software_serial.toString(16).toUpperCase()}
+      <simple-tooltip animation-delay="0">
+        ${this.lcn.localize("firmware-date", {
+          year: serial.year,
+          month: serial.month,
+          day: serial.day,
+        })}
+      </simple-tooltip>
+    `;
+  }
+
+  protected renderHardwareSerial(hardware_serial: number) {
+    let serial: LcnSerial;
+    try {
+      serial = parseSerialNumber(hardware_serial);
+    } catch (error) {
+      return html`-`;
+    }
+
+    return html`
+      ${hardware_serial.toString(16).toUpperCase()}
+      <simple-tooltip animation-delay="0">
+        ${this.lcn.localize("hardware-date", {
+          year: serial.year,
+          month: serial.month,
+          day: serial.day,
+        })}
+        <br />
+        ${this.lcn.localize("hardware-number", { serial: serial.serial })}
+      </simple-tooltip>
+    `;
   }
 
   protected render() {
