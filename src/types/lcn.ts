@@ -75,7 +75,7 @@ export interface LcnDeviceConfig {
 }
 
 export interface LcnConfig {
-  devices: LcnDeviceConfig[];
+  devices: Partial<LcnDeviceConfig>[];
   entities: LcnEntityConfig[];
 }
 

@@ -39,7 +39,9 @@ async function readConfigFile(file: File): Promise<LcnConfig> {
 export async function exportConfig(hass: HomeAssistant, lcn: LCN) {
   lcn.log.debug("Exporting config");
   const config: LcnConfig = { devices: [], entities: [] };
-  config.devices = await fetchDevices(hass!, lcn.config_entry);
+  config.devices = (await fetchDevices(hass!, lcn.config_entry)).map((device) => ({
+    address: device.address,
+  }));
   for await (const device of config.devices) {
     const device_entities: LcnEntityConfig[] = await fetchEntities(
       hass!,
@@ -66,7 +68,7 @@ export async function importConfig(hass: HomeAssistant, lcn: LCN) {
 
   for await (const device of config.devices) {
     if (await addDevice(hass, lcn.config_entry, device)) devices_success++;
-    else lcn.log.debug(`Skipping device ${addressToString(device.address)}. Already present.`);
+    else lcn.log.debug(`Skipping device ${addressToString(device.address!)}. Already present.`);
   }
 
   for await (const entity of config.entities) {
