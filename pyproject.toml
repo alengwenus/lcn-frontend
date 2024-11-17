@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name         = "lcn_frontend"
-license      = {text = "MIT License"}
+license      = {text = "MIT"}
 description  = "LCN panel for Home Assistant"
 keywords     = ["Home Assistant", "LCN"]
 readme       = "README.md"
