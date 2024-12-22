@@ -130,11 +130,17 @@
 
   "dashboard-entities-dialog-unit-of-measurement": "Unit of measurement",
 
-  "dashboard-entities-dialog-climate-lockable": "Lockable",
   "dashboard-entities-dialog-climate-min-temperature": "Minimum temperature",
   "dashboard-entities-dialog-climate-max-temperature": "Maximum temperature",
   "dashboard-entities-dialog-climate-min-temperature-error": "Invalid minimum temperature",
   "dashboard-entities-dialog-climate-max-temperature-error": "Invalid maximum temperature",
+  "dashboard-entities-dialog-climate-regulator-not-lockable": "Not lockable",
+  "dashboard-entities-dialog-climate-regulator-lockable": "Lockable",
+  "dashboard-entities-dialog-climate-regulator-lockable-with-target-value": "Lockable with target value",
+  "dashboard-entities-dialog-climate-regulator-lock": "Regulator lock",
+  "dashboard-entities-dialog-climate-target-value": "Target value",
+  "dashboard-entities-dialog-climate-target-value-error": "Invalid target value",
+  "dashboard-entities-dialog-climate-target-value-helper": "This value will be sent to the regulator's target. For relays use 100%=ON",
 
   "dashboard-entities-dialog-light-dimmable": "Dimmable",
   "dashboard-entities-dialog-light-transition": "Transition",

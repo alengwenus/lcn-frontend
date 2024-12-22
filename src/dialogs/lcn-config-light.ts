@@ -157,6 +157,7 @@ export class LCNConfigLightElement extends LitElement {
             id="transition"
             .label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
             type="number"
+            suffix="s"
             .value=${this.domainData.transition.toString()}
             min="0"
             max="486"

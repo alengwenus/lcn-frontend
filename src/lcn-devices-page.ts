@@ -190,10 +190,14 @@ export class LCNConfigDashboard extends LitElement {
           const handler = (_ev) => this._deleteDevices([entry]);
           return html`
             <ha-icon-button
+              id=${"delete-device-" + entry.unique_id}
               .label=${this.lcn.localize("dashboard-devices-table-delete")}
               .path=${mdiDelete}
               @click=${handler}
             ></ha-icon-button>
+            <simple-tooltip animation-delay="0" offset="0" for=${"delete-device-" + entry.unique_id}>
+              ${this.lcn.localize("dashboard-devices-table-delete")}
+            </simple-tooltip>
           `;
         },
       },

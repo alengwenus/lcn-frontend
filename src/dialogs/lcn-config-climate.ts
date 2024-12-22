@@ -4,6 +4,7 @@ import type { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-textfield";
 import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-switch";
+import "@lrnwebcomponents/simple-tooltip/simple-tooltip";
 import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
@@ -89,9 +90,9 @@ export class LCNConfigClimateElement extends LitElement {
 
   private get _regulatorLockOptions(): ConfigItem[] {
     const regulatorLockOptions: ConfigItem[] = [
-      { name: "Not lockable", value: "NOT_LOCKABLE" },
-      { name: "Lockable", value: "LOCKABLE" },
-      { name: "Lockable with target value", value: "LOCKABLE_WITH_TARGET_VALUE" }
+      { name: this.lcn.localize("dashboard-entities-dialog-climate-regulator-not-lockable"), value: "NOT_LOCKABLE" },
+      { name: this.lcn.localize("dashboard-entities-dialog-climate-regulator-lockable"), value: "LOCKABLE" },
+      { name: this.lcn.localize("dashboard-entities-dialog-climate-regulator-lockable-with-target-value"), value: "LOCKABLE_WITH_TARGET_VALUE" }
     ];
     if (this.softwareSerial < 0x120301)
       return regulatorLockOptions.slice(0, 2);
@@ -188,6 +189,7 @@ export class LCNConfigClimateElement extends LitElement {
           id="min-temperature"
           .label=${this.lcn.localize("dashboard-entities-dialog-climate-min-temperature")}
           type="number"
+          .suffix=${this._unit.value}
           .value=${this.domainData.min_temp.toString()}
           required
           autoValidate
@@ -202,6 +204,7 @@ export class LCNConfigClimateElement extends LitElement {
           id="max-temperature"
           .label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
           type="number"
+          .suffix=${this._unit.value}
           .value=${this.domainData.max_temp.toString()}
           required
           autoValidate
@@ -216,7 +219,7 @@ export class LCNConfigClimateElement extends LitElement {
       <div class="lock-options">
         <ha-select
           id="lock-options-select"
-          .label=${"Regulator Lock Options"}
+          .label=${this.lcn.localize("dashboard-entities-dialog-climate-regulator-lock")}
           .value=${this._lockOption.value}
           fixedMenuPosition
           @selected=${this._lockOptionChanged}
@@ -231,15 +234,18 @@ export class LCNConfigClimateElement extends LitElement {
 
         <ha-textfield
           id="target-value"
-          .label=${"Target value"}
+          .label=${this.lcn.localize("dashboard-entities-dialog-climate-target-value")}
           type="number"
+          suffix="%"
           .value=${this._targetValueLocked.toString()}
           .disabled=${this._lockOption.value !== "LOCKABLE_WITH_TARGET_VALUE"}
+          .helper=${this.lcn.localize("dashboard-entities-dialog-climate-target-value-helper")}
+          .helperPersistent=${this._lockOption.value === "LOCKABLE_WITH_TARGET_VALUE"}
           required
           autoValidate
           @input=${this._targetValueLockedChanged}
           .validityTransform=${this._validityTransformTargetValueLocked}
-          .validationMessage=${"Target value validation error"}
+          .validationMessage=${this.lcn.localize("dashboard-entities-dialog-climate-target-value-error")}
         >
         </ha-textfield>
       </div>
