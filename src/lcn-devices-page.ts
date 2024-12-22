@@ -448,6 +448,7 @@ export class LCNConfigDashboard extends LitElement {
     await importConfig(this.hass, this.lcn);
     updateDeviceConfigs(this);
     updateEntityConfigs(this);
+    window.location.reload();
   }
 
   private async _exportConfig() {

@@ -4,7 +4,6 @@ import type { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-textfield";
 import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-switch";
-import type { HaSwitch } from "@ha/components/ha-switch";
 import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
@@ -31,6 +30,7 @@ export class LCNConfigClimateElement extends LitElement {
     max_temp: 35,
     min_temp: 7,
     lockable: false,
+    target_value_locked: -1,
     unit_of_measurement: "°C",
   };
 
@@ -39,6 +39,10 @@ export class LCNConfigClimateElement extends LitElement {
   @state() private _setpoint!: ConfigItem;
 
   @state() private _unit!: ConfigItem;
+
+  @state() private _lockOption!: ConfigItem;
+
+  @state() private _targetValueLocked: number = 0;
 
   private _invalid = false;
 
@@ -83,6 +87,17 @@ export class LCNConfigClimateElement extends LitElement {
     { name: "Fahrenheit", value: "°F" },
   ];
 
+  private get _regulatorLockOptions(): ConfigItem[] {
+    const regulatorLockOptions: ConfigItem[] = [
+      { name: "Not lockable", value: "NOT_LOCKABLE" },
+      { name: "Lockable", value: "LOCKABLE" },
+      { name: "Lockable with target value", value: "LOCKABLE_WITH_TARGET_VALUE" }
+    ];
+    if (this.softwareSerial < 0x120301)
+      return regulatorLockOptions.slice(0, 2);
+    return regulatorLockOptions;
+  }
+
   private get _sources(): ConfigItem[] {
     return this._is2012 ? this._variablesNew : this._variablesOld;
   }
@@ -96,13 +111,15 @@ export class LCNConfigClimateElement extends LitElement {
     this._source = this._sources[0];
     this._setpoint = this._setpoints[0];
     this._unit = this._varUnits[0];
+    this._lockOption = this._regulatorLockOptions[0];
   }
 
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
     this._invalid =
       !this._validateMinTemp(this.domainData.min_temp) ||
-      !this._validateMaxTemp(this.domainData.max_temp);
+      !this._validateMaxTemp(this.domainData.max_temp) ||
+      !this._validateTargetValueLocked(this._targetValueLocked);
   }
 
   protected update(changedProperties: PropertyValues) {
@@ -117,7 +134,7 @@ export class LCNConfigClimateElement extends LitElement {
   }
 
   protected render() {
-    if (!(this._source || this._setpoint || this._unit)) {
+    if (!(this._source && this._setpoint && this._unit && this._lockOption)) {
       return nothing;
     }
     return html`
@@ -153,42 +170,6 @@ export class LCNConfigClimateElement extends LitElement {
         </ha-select>
       </div>
 
-      <div class="lockable">
-        <label>${this.lcn.localize("dashboard-entities-dialog-climate-lockable")}:</label>
-        <ha-switch
-          .checked=${this.domainData.lockable}
-          @change=${this._lockableChanged}
-        ></ha-switch>
-      </div>
-
-      <ha-textfield
-        id="min-textfield"
-        .label=${this.lcn.localize("dashboard-entities-dialog-climate-min-temperature")}
-        type="number"
-        .value=${this.domainData.min_temp.toString()}
-        required
-        autoValidate
-        @input=${this._minTempChanged}
-        .validityTransform=${this._validityTransformMinTemp}
-        .validationMessage=${this.lcn.localize(
-          "dashboard-entities-dialog-climate-min-temperature-error",
-        )}
-      ></ha-textfield>
-
-      <ha-textfield
-        id="max-textfield"
-        .label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
-        type="number"
-        .value=${this.domainData.max_temp.toString()}
-        required
-        autoValidate
-        @input=${this._maxTempChanged}
-        .validityTransform=${this._validityTransformMaxTemp}
-        .validationMessage=${this.lcn.localize(
-          "dashboard-entities-dialog-climate-max-temperature-error",
-        )}
-      ></ha-textfield>
-
       <ha-select
         id="unit-select"
         .label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
@@ -201,6 +182,67 @@ export class LCNConfigClimateElement extends LitElement {
           (unit) => html` <ha-list-item .value=${unit.value}> ${unit.name} </ha-list-item> `,
         )}
       </ha-select>
+
+      <div class="temperatures">
+        <ha-textfield
+          id="min-temperature"
+          .label=${this.lcn.localize("dashboard-entities-dialog-climate-min-temperature")}
+          type="number"
+          .value=${this.domainData.min_temp.toString()}
+          required
+          autoValidate
+          @input=${this._minTempChanged}
+          .validityTransform=${this._validityTransformMinTemp}
+          .validationMessage=${this.lcn.localize(
+            "dashboard-entities-dialog-climate-min-temperature-error",
+          )}
+        ></ha-textfield>
+
+        <ha-textfield
+          id="max-temperature"
+          .label=${this.lcn.localize("dashboard-entities-dialog-climate-max-temperature")}
+          type="number"
+          .value=${this.domainData.max_temp.toString()}
+          required
+          autoValidate
+          @input=${this._maxTempChanged}
+          .validityTransform=${this._validityTransformMaxTemp}
+          .validationMessage=${this.lcn.localize(
+            "dashboard-entities-dialog-climate-max-temperature-error",
+          )}
+        ></ha-textfield>
+      </div>
+
+      <div class="lock-options">
+        <ha-select
+          id="lock-options-select"
+          .label=${"Regulator Lock Options"}
+          .value=${this._lockOption.value}
+          fixedMenuPosition
+          @selected=${this._lockOptionChanged}
+          @closed=${stopPropagation}
+        >
+          ${this._regulatorLockOptions.map(
+            (lockOption) => html`
+              <ha-list-item .value=${lockOption.value}> ${lockOption.name} </ha-list-item>
+            `,
+          )}
+        </ha-select>
+
+        <ha-textfield
+          id="target-value"
+          .label=${"Target value"}
+          type="number"
+          .value=${this._targetValueLocked.toString()}
+          .disabled=${this._lockOption.value !== "LOCKABLE_WITH_TARGET_VALUE"}
+          required
+          autoValidate
+          @input=${this._targetValueLockedChanged}
+          .validityTransform=${this._validityTransformTargetValueLocked}
+          .validationMessage=${"Target value validation error"}
+        >
+        </ha-textfield>
+      </div>
     `;
   }
 
@@ -223,7 +265,7 @@ export class LCNConfigClimateElement extends LitElement {
   private _minTempChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaTextField;
     this.domainData.min_temp = +target.value;
-    const maxTextfield: HaTextField = this.shadowRoot!.querySelector("#max-textfield")!;
+    const maxTextfield: HaTextField = this.shadowRoot!.querySelector("#max-temperature")!;
     maxTextfield.reportValidity();
     this.requestUpdate();
   }
@@ -231,13 +273,9 @@ export class LCNConfigClimateElement extends LitElement {
   private _maxTempChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaTextField;
     this.domainData.max_temp = +target.value;
-    const minTextfield: HaTextField = this.shadowRoot!.querySelector("#min-textfield")!;
+    const minTextfield: HaTextField = this.shadowRoot!.querySelector("#min-temperature")!;
     minTextfield.reportValidity();
     this.requestUpdate();
-  }
-
-  private _lockableChanged(ev: ValueChangedEvent<string>): void {
-    this.domainData.lockable = (ev.target as HaSwitch).checked;
   }
 
   private _unitChanged(ev: ValueChangedEvent<string>): void {
@@ -248,12 +286,46 @@ export class LCNConfigClimateElement extends LitElement {
     this.domainData.unit_of_measurement = this._unit.value;
   }
 
+  private _lockOptionChanged(ev: ValueChangedEvent<string>): void {
+    const target = ev.target as HaSelect;
+
+    if (target.index === -1)
+      this._lockOption = this._regulatorLockOptions[0];
+    else
+      this._lockOption = this._regulatorLockOptions.find((option) => option.value === target.value)!;
+
+    switch (this._lockOption.value) {
+      case "LOCKABLE":
+        this.domainData.lockable = true;
+        this.domainData.target_value_locked = -1;
+        break;
+      case "LOCKABLE_WITH_TARGET_VALUE":
+        this.domainData.lockable = true;
+        this.domainData.target_value_locked = this._targetValueLocked;
+        break;
+      default: // NOT_LOCKABLE
+        this.domainData.lockable = false;
+        this.domainData.target_value_locked = -1;
+        break;
+    }
+  }
+
+  private _targetValueLockedChanged(ev: ValueChangedEvent<string>): void {
+    const target = ev.target as HaTextField;
+    this._targetValueLocked = +target.value;
+    this.domainData.target_value_locked = +target.value;
+  }
+
   private _validateMaxTemp(max_temp: number): boolean {
     return max_temp > this.domainData.min_temp;
   }
 
   private _validateMinTemp(min_temp: number): boolean {
     return min_temp < this.domainData.max_temp;
+  }
+
+  private _validateTargetValueLocked(target_value_locked: number): boolean {
+    return (target_value_locked >= 0) && (target_value_locked <= 100);
   }
 
   private get _validityTransformMaxTemp() {
@@ -264,11 +336,17 @@ export class LCNConfigClimateElement extends LitElement {
     return (value: string) => ({ valid: this._validateMinTemp(+value) });
   }
 
+  private get _validityTransformTargetValueLocked() {
+    return (value: string) => ({ valid: this._validateTargetValueLocked(+value) });
+  }
+
   static get styles(): CSSResultGroup[] {
     return [
       haStyleDialog,
       css`
-        .sources {
+        .sources,
+        .temperatures,
+        .lock-options {
           display: grid;
           grid-template-columns: 1fr 1fr;
           column-gap: 4px;
@@ -277,12 +355,6 @@ export class LCNConfigClimateElement extends LitElement {
         ha-textfield {
           display: block;
           margin-bottom: 8px;
-        }
-        .lockable {
-          margin-top: 10px;
-        }
-        ha-switch {
-          margin-left: 25px;
         }
       `,
     ];

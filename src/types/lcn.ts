@@ -21,6 +21,7 @@ export interface ClimateConfig {
   max_temp: number;
   min_temp: number;
   lockable: boolean;
+  target_value_locked: number;
   unit_of_measurement: string;
 }
 
