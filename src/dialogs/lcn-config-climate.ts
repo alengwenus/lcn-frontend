@@ -90,12 +90,22 @@ export class LCNConfigClimateElement extends LitElement {
 
   private get _regulatorLockOptions(): ConfigItem[] {
     const regulatorLockOptions: ConfigItem[] = [
-      { name: this.lcn.localize("dashboard-entities-dialog-climate-regulator-not-lockable"), value: "NOT_LOCKABLE" },
-      { name: this.lcn.localize("dashboard-entities-dialog-climate-regulator-lockable"), value: "LOCKABLE" },
-      { name: this.lcn.localize("dashboard-entities-dialog-climate-regulator-lockable-with-target-value"), value: "LOCKABLE_WITH_TARGET_VALUE" }
+      {
+        name: this.lcn.localize("dashboard-entities-dialog-climate-regulator-not-lockable"),
+        value: "NOT_LOCKABLE",
+      },
+      {
+        name: this.lcn.localize("dashboard-entities-dialog-climate-regulator-lockable"),
+        value: "LOCKABLE",
+      },
+      {
+        name: this.lcn.localize(
+          "dashboard-entities-dialog-climate-regulator-lockable-with-target-value",
+        ),
+        value: "LOCKABLE_WITH_TARGET_VALUE",
+      },
     ];
-    if (this.softwareSerial < 0x120301)
-      return regulatorLockOptions.slice(0, 2);
+    if (this.softwareSerial < 0x120301) return regulatorLockOptions.slice(0, 2);
     return regulatorLockOptions;
   }
 
@@ -245,7 +255,9 @@ export class LCNConfigClimateElement extends LitElement {
           autoValidate
           @input=${this._targetValueLockedChanged}
           .validityTransform=${this._validityTransformTargetValueLocked}
-          .validationMessage=${this.lcn.localize("dashboard-entities-dialog-climate-target-value-error")}
+          .validationMessage=${this.lcn.localize(
+            "dashboard-entities-dialog-climate-target-value-error",
+          )}
         >
         </ha-textfield>
       </div>
@@ -295,10 +307,11 @@ export class LCNConfigClimateElement extends LitElement {
   private _lockOptionChanged(ev: ValueChangedEvent<string>): void {
     const target = ev.target as HaSelect;
 
-    if (target.index === -1)
-      this._lockOption = this._regulatorLockOptions[0];
+    if (target.index === -1) this._lockOption = this._regulatorLockOptions[0];
     else
-      this._lockOption = this._regulatorLockOptions.find((option) => option.value === target.value)!;
+      this._lockOption = this._regulatorLockOptions.find(
+        (option) => option.value === target.value,
+      )!;
 
     switch (this._lockOption.value) {
       case "LOCKABLE":
@@ -331,7 +344,7 @@ export class LCNConfigClimateElement extends LitElement {
   }
 
   private _validateTargetValueLocked(target_value_locked: number): boolean {
-    return (target_value_locked >= 0) && (target_value_locked <= 100);
+    return target_value_locked >= 0 && target_value_locked <= 100;
   }
 
   private get _validityTransformMaxTemp() {

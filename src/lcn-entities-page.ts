@@ -240,7 +240,11 @@ export class LCNEntitiesPage extends LitElement {
               .path=${mdiDelete}
               @click=${handler}
             ></ha-icon-button>
-            <simple-tooltip animation-delay="0" offset="0" for=${"delete-entity-" + entry.unique_id.replace(".", "-")}>
+            <simple-tooltip
+              animation-delay="0"
+              offset="0"
+              for=${"delete-entity-" + entry.unique_id.replace(".", "-")}
+            >
               ${this.lcn.localize("dashboard-entities-table-delete")}
             </simple-tooltip>
           `;
