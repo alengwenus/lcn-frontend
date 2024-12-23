@@ -147,7 +147,7 @@ export class CreateEntityDialog extends LitElement {
   }
 
   private renderDomain(domain: string) {
-    if (!this._params) {
+    if (!(this._params && this._deviceConfig)) {
       return nothing;
     }
     switch (domain) {
@@ -162,7 +162,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
-          .softwareSerial=${this._params.deviceConfig.software_serial!}
+          .softwareSerial=${this._deviceConfig.software_serial}
           @validity-changed=${this._validityChanged}
         ></lcn-config-climate-element>`;
       case "cover":
@@ -190,7 +190,7 @@ export class CreateEntityDialog extends LitElement {
           id="domain"
           .hass=${this.hass}
           .lcn=${this.lcn}
-          .softwareSerial=${this._deviceConfig!.software_serial!}
+          .softwareSerial=${this._deviceConfig.software_serial}
         ></lcn-config-sensor-element>`;
       case "switch":
         return html`<lcn-config-switch-element
@@ -272,6 +272,9 @@ export class CreateEntityDialog extends LitElement {
         ha-textfield {
           display: block;
           margin-bottom: 8px;
+        }
+        #name-input {
+          margin-bottom: 25px;
         }
         .buttons {
           display: flex;

@@ -174,6 +174,7 @@ export class LCNConfigSceneElement extends LitElement {
       <ha-textfield
         .label=${this.lcn.localize("dashboard-entities-dialog-scene-transition")}
         type="number"
+        suffix="s"
         .value=${this.domainData.transition.toString()}
         min="0"
         max="486"

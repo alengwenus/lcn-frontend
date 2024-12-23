@@ -129,11 +129,17 @@
 
   "dashboard-entities-dialog-unit-of-measurement": "Messeinheit",
 
-  "dashboard-entities-dialog-climate-lockable": "Sperrbar",
   "dashboard-entities-dialog-climate-min-temperature": "Minimale Temperatur",
   "dashboard-entities-dialog-climate-max-temperature": "Maximale Temperatur",
   "dashboard-entities-dialog-climate-min-temperature-error": "Ungültige minimale Temperatur",
   "dashboard-entities-dialog-climate-max-temperature-error": "Ungültige maximale Temperatur",
+  "dashboard-entities-dialog-climate-regulator-not-lockable": "Nicht sperrbar",
+  "dashboard-entities-dialog-climate-regulator-lockable": "Sperrbar",
+  "dashboard-entities-dialog-climate-regulator-lockable-with-target-value": "Sperrbar mit Zielwert",
+  "dashboard-entities-dialog-climate-regulator-lock": "Reglersperre",
+  "dashboard-entities-dialog-climate-target-value": "Zielwert",
+  "dashboard-entities-dialog-climate-target-value-error": "Ungültiger Zielwert",
+  "dashboard-entities-dialog-climate-target-value-helper": "Dieser Wert wird an das Reglerziel gesendet. Für Relais bedeutet 100%=EIN",
 
   "dashboard-entities-dialog-light-dimmable": "Dimmbar",
   "dashboard-entities-dialog-light-transition": "Rampe",

@@ -235,10 +235,18 @@ export class LCNEntitiesPage extends LitElement {
           const handler = (_ev) => this._deleteEntities([entry]);
           return html`
             <ha-icon-button
-              .label=${this.lcn.localize("dashboard-devices-table-delete")}
+              id=${"delete-entity-" + entry.unique_id.replace(".", "-")}
+              .label=${this.lcn.localize("dashboard-entities-table-delete")}
               .path=${mdiDelete}
               @click=${handler}
             ></ha-icon-button>
+            <simple-tooltip
+              animation-delay="0"
+              offset="0"
+              for=${"delete-entity-" + entry.unique_id.replace(".", "-")}
+            >
+              ${this.lcn.localize("dashboard-entities-table-delete")}
+            </simple-tooltip>
           `;
         },
       },
