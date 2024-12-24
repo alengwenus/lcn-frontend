@@ -52,19 +52,20 @@ export interface SwitchConfig {
   output: string;
 }
 
+export type LcnDomainData =
+  | BinarySensorConfig
+  | ClimateConfig
+  | CoverConfig
+  | LightConfig
+  | SceneConfig
+  | SensorConfig
+  | SwitchConfig;
+
 export interface LcnEntityConfig {
   address: LcnAddress;
   name: string;
   domain: string;
-  resource: string;
-  domain_data:
-    | BinarySensorConfig
-    | ClimateConfig
-    | CoverConfig
-    | LightConfig
-    | SceneConfig
-    | SensorConfig
-    | SwitchConfig;
+  domain_data: LcnDomainData;
 }
 
 export interface LcnDeviceConfig {
@@ -133,7 +134,7 @@ export const deleteEntity = (
     entry_id: config_entry.entry_id,
     address: entity.address,
     domain: entity.domain,
-    resource: entity.resource,
+    domain_data: entity.domain_data,
   });
 
 export const addDevice = (

@@ -28,6 +28,14 @@ import {
   LcnDeviceConfig,
   LcnEntityConfig,
   LcnAddress,
+  LcnDomainData,
+  SwitchConfig,
+  LightConfig,
+  BinarySensorConfig,
+  SensorConfig,
+  ClimateConfig,
+  SceneConfig,
+  CoverConfig,
 } from "types/lcn";
 import { updateEntityConfigs } from "components/events";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
@@ -54,8 +62,36 @@ export interface EntityRowData extends LcnEntityConfig {
   entityRegistryEntry: EntityRegistryEntry;
 }
 
+function get_resource(domain_name: string, domain_data: LcnDomainData): string {
+  let resource: string = "";
+  switch (domain_name) {
+    case "switch":
+      resource = (domain_data as SwitchConfig).output;
+      break;
+    case "light":
+      resource = (domain_data as LightConfig).output;
+      break;
+    case "sensor":
+      resource = (domain_data as SensorConfig).source;
+      break;
+    case "binary_sensor":
+      resource = (domain_data as BinarySensorConfig).source;
+      break;
+    case "cover":
+      resource = (domain_data as CoverConfig).motor;
+      break;
+    case "climate":
+      resource = `${(domain_data as ClimateConfig).source}.${(domain_data as ClimateConfig).setpoint}`;
+      break;
+    case "scene":
+      resource = `${(domain_data as SceneConfig).register}.${(domain_data as SceneConfig).scene}`;
+      break;
+  }
+  return resource.toLowerCase();
+}
+
 function createUniqueEntityId(entity: LcnEntityConfig, includeDomain: boolean = true): string {
-  let unique_id = `${addressToString(entity.address)}-${entity.resource}`;
+  let unique_id = `${addressToString(entity.address)}-${get_resource(entity.domain, entity.domain_data)}`;
   if (includeDomain) {
     unique_id = `${entity.domain}-` + unique_id;
   }
@@ -459,7 +495,7 @@ export class LCNEntitiesPage extends LitElement {
         el.address[1] === address[1] &&
         el.address[2] === address[2] &&
         el.domain === domain &&
-        el.resource === resource,
+        get_resource(el.domain, el.domain_data) === resource,
     );
     return entityConfig!;
   }
