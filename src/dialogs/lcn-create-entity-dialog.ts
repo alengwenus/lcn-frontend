@@ -12,7 +12,7 @@ import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { HomeAssistant } from "@ha/types";
 import type { LCN, LcnDeviceConfig, LcnEntityConfig } from "types/lcn";
-import { addressToString, stringToAddress } from "helpers/address_conversion";
+import { addressToString, stringToAddress, addressToHumanString } from "helpers/address_conversion";
 import "./lcn-config-binary-sensor";
 import "./lcn-config-climate";
 import "./lcn-config-cover";
@@ -74,7 +74,7 @@ export class CreateEntityDialog extends LitElement {
   }
 
   protected render() {
-    if (!this._params) {
+    if (!this._params || !this.lcn || !this._deviceConfig) {
       return nothing;
     }
     return html`
@@ -100,7 +100,7 @@ export class CreateEntityDialog extends LitElement {
             (deviceConfig) => html`
               <ha-list-item .value=${addressToString(deviceConfig.address)}>
                 <div class="primary">${deviceConfig.name}</div>
-                <div class="secondary">(${addressToString(deviceConfig.address)})</div>
+                <div class="secondary">(${addressToHumanString(deviceConfig.address)})</div>
               </ha-list-item>
             `,
           )}

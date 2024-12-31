@@ -15,3 +15,7 @@ export function stringToAddress(address_str: string): LcnAddress {
   const address: LcnAddress = [address_id, segment_id, is_group];
   return address;
 }
+
+export function addressToHumanString(address: LcnAddress): string {
+  return `S${address[0]} ${address[2] ? "G" : "M"}${address[1]}`;
+}
