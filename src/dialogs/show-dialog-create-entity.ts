@@ -3,19 +3,19 @@ import { LCN, LcnEntityConfig, LcnDeviceConfig } from "types/lcn";
 
 export interface LcnEntityDialogParams {
   lcn: LCN;
-  deviceConfig: LcnDeviceConfig;
-  createEntity: (values: Partial<LcnEntityConfig>) => Promise<unknown>;
+  deviceConfig: LcnDeviceConfig | undefined;
+  createEntity: (entityParams: Partial<LcnEntityConfig>) => Promise<boolean>;
 }
 
 export const loadLCNCreateEntityDialog = () => import("./lcn-create-entity-dialog");
 
 export const showLCNCreateEntityDialog = (
   element: HTMLElement,
-  lcnEntityParams: LcnEntityDialogParams,
+  lcnEntityDialogParams: LcnEntityDialogParams,
 ): void => {
   fireEvent(element, "show-dialog", {
     dialogTag: "lcn-create-entity-dialog",
     dialogImport: loadLCNCreateEntityDialog,
-    dialogParams: lcnEntityParams,
+    dialogParams: lcnEntityDialogParams,
   });
 };
