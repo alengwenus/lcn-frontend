@@ -81,10 +81,10 @@ function get_resource(domain_name: string, domain_data: LcnDomainData): string {
       resource = (domain_data as CoverConfig).motor;
       break;
     case "climate":
-      resource = `${(domain_data as ClimateConfig).source}.${(domain_data as ClimateConfig).setpoint}`;
+      resource = `${(domain_data as ClimateConfig).setpoint}`;
       break;
     case "scene":
-      resource = `${(domain_data as SceneConfig).register}.${(domain_data as SceneConfig).scene}`;
+      resource = `${(domain_data as SceneConfig).register}${(domain_data as SceneConfig).scene}`;
       break;
   }
   return resource.toLowerCase();
@@ -261,6 +261,7 @@ export class LCNEntitiesPage extends LitElement {
         title: this.lcn.localize("resource"),
         sortable: true,
         filterable: true,
+        template: (entry) => get_resource(entry.domain, entry.domain_data),
       },
       delete: {
         title: this.lcn.localize("delete"),
@@ -271,7 +272,7 @@ export class LCNEntitiesPage extends LitElement {
           const handler = (_ev) => this._deleteEntities([entry]);
           return html`
             <ha-icon-button
-              id=${"delete-entity-" + entry.unique_id.replace(".", "-")}
+              id=${"delete-entity-" + entry.unique_id}
               .label=${this.lcn.localize("dashboard-entities-table-delete")}
               .path=${mdiDelete}
               @click=${handler}
@@ -279,7 +280,7 @@ export class LCNEntitiesPage extends LitElement {
             <simple-tooltip
               animation-delay="0"
               offset="0"
-              for=${"delete-entity-" + entry.unique_id.replace(".", "-")}
+              for=${"delete-entity-" + entry.unique_id}
             >
               ${this.lcn.localize("dashboard-entities-table-delete")}
             </simple-tooltip>

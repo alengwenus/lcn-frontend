@@ -119,7 +119,7 @@
   "dashboard-entities-add": "Entität erstellen",
 
   "dashboard-entities-dialog-add-alert-title": "LCN Ressource existiert bereits",
-  "dashboard-entities-dialog-add-alert-text": "Die angegebene LCN Ressource ist der Entität bereits zugewiesen.",
+  "dashboard-entities-dialog-add-alert-text": "Die angegebene LCN Ressource ist bereits einer Entität zugewiesen.",
   "dashboard-entities-dialog-add-alert-hint": "LCN Ressourcen dürfen für jede Domäne nur einmal existieren.",
 
   "dashboard-entities-table-delete": "Lösche Eintrag",
