@@ -120,7 +120,7 @@
   "dashboard-entities-add": "Create entity",
 
   "dashboard-entities-dialog-add-alert-title": "LCN resource already assigned",
-  "dashboard-entities-dialog-add-alert-text": "The specified LCN resource is already assigned to this entity.",
+  "dashboard-entities-dialog-add-alert-text": "The specified LCN resource is already assigned to an entity.",
   "dashboard-entities-dialog-add-alert-hint": "LCN resources may only be assigned once within a domain.",
 
   "dashboard-entities-table-delete": "Delete entry",
