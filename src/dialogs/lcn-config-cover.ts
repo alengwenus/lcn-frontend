@@ -24,20 +24,22 @@ export class LCNConfigCoverElement extends LitElement {
 
   @property({ attribute: false }) public domainData: CoverConfig = {
     motor: "MOTOR1",
+    positioning_mode: "NONE",
     reverse_time: "RT1200",
   };
 
   @state() private _motor!: ConfigItem;
 
+  @state() private _positioningMode!: ConfigItem;
+
   @state() private _reverseDelay!: ConfigItem;
 
   private get _motors(): ConfigItem[] {
-    const motor: string = this.lcn.localize("motor");
     return [
-      { name: motor + " 1", value: "MOTOR1" },
-      { name: motor + " 2", value: "MOTOR2" },
-      { name: motor + " 3", value: "MOTOR3" },
-      { name: motor + " 4", value: "MOTOR4" },
+      { name: this.lcn.localize("motor-port", { port: 1 }), value: "MOTOR1" },
+      { name: this.lcn.localize("motor-port", { port: 2 }), value: "MOTOR2" },
+      { name: this.lcn.localize("motor-port", { port: 3 }), value: "MOTOR3" },
+      { name: this.lcn.localize("motor-port", { port: 4 }), value: "MOTOR4" },
       { name: this.lcn.localize("outputs"), value: "OUTPUTS" },
     ];
   }
@@ -48,14 +50,23 @@ export class LCNConfigCoverElement extends LitElement {
     { name: "1200ms", value: "RT1200" },
   ];
 
+  private get _positioningModes(): ConfigItem[] {
+    return [
+      { name: this.lcn.localize("motor-positioning-none"), value: "NONE" },
+      { name: this.lcn.localize("motor-positioning-bs4"), value: "BS4" },
+      { name: this.lcn.localize("motor-positioning-module"), value: "MODULE" },
+    ];
+  }
+
   public connectedCallback(): void {
     super.connectedCallback();
     this._motor = this._motors[0];
+    this._positioningMode = this._positioningModes[0];
     this._reverseDelay = this._reverseDelays[0];
   }
 
   protected render() {
-    if (!(this._motor || this._reverseDelay)) {
+    if (!(this._motor || this._positioningMode || this._reverseDelay)) {
       return nothing;
     }
     return html`
@@ -89,7 +100,24 @@ export class LCNConfigCoverElement extends LitElement {
               )}
             </ha-select>
           `
-        : nothing}
+        : html`
+            <ha-select
+              id="positioning-mode-select"
+              .label=${this.lcn.localize("motor-positioning-mode")}
+              .value=${this._positioningMode.value}
+              fixedMenuPosition
+              @selected=${this._positioningModeChanged}
+              @closed=${stopPropagation}
+            >
+              ${this._positioningModes.map(
+                (positioningMode) => html`
+                  <ha-list-item .value=${positioningMode.value}>
+                    ${positioningMode.name}
+                  </ha-list-item>
+                `,
+              )}
+            </ha-select>
+          `}
     `;
   }
 
@@ -98,8 +126,21 @@ export class LCNConfigCoverElement extends LitElement {
     if (target.index === -1) return;
 
     this._motor = this._motors.find((motor) => motor.value === target.value)!;
+    this._positioningMode = this._positioningModes[0];
     this._reverseDelay = this._reverseDelays[0];
     this.domainData.motor = this._motor.value;
+    if (this._motor.value === "OUTPUTS") this.domainData.positioning_mode = "NONE";
+    else this.domainData.reverse_time = "RT1200";
+  }
+
+  private _positioningModeChanged(ev: CustomEvent): void {
+    const target = ev.target as HaSelect;
+    if (target.index === -1) return;
+
+    this._positioningMode = this._positioningModes.find(
+      (positioningMode) => positioningMode.value === target.value,
+    )!;
+    this.domainData.positioning_mode = this._positioningMode.value;
   }
 
   private _reverseDelayChanged(ev: CustomEvent): void {
