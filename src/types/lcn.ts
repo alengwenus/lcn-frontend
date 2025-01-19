@@ -27,6 +27,7 @@ export interface ClimateConfig {
 
 export interface CoverConfig {
   motor: string;
+  positioning_mode: string;
   reverse_time: string;
 }
 
