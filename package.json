@@ -14,8 +14,8 @@
   "scripts": {
     "develop": "./script/develop",
     "build": "./script/build",
-    "lint:eslint": "eslint --flag unstable_config_lookup_from_file \"**./src/**/*.{js,ts,html}\" --ignore-pattern=.gitignore --max-warnings=0",
-    "format:eslint": "eslint --flag unstable_config_lookup_from_file \"**./src/**/*.{js,ts,html}\" --ignore-pattern=.gitignore --fix",
+    "lint:eslint": "eslint --flag unstable_config_lookup_from_file \"./src/**/*.{js,ts,html}\" --ignore-pattern=.gitignore --max-warnings=0",
+    "format:eslint": "eslint --flag unstable_config_lookup_from_file \"./src/**/*.{js,ts,html}\" --ignore-pattern=.gitignore --fix",
     "lint:prettier": "prettier \"./src/**/*.{js,ts,json,css,md}\" --check",
     "format:prettier": "prettier \"./src/**/*.{js,ts,json,css,md}\" --write",
     "lint:types": "tsc --project tsconfig.json",

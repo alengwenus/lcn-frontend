@@ -1,6 +1,6 @@
-import { TemplateResult } from "lit";
+import type { TemplateResult } from "lit";
 import { fireEvent } from "@ha/common/dom/fire_event";
-import { ProgressDialog } from "./progress-dialog";
+import type { ProgressDialog } from "./progress-dialog";
 
 const getDialog = () =>
   document.querySelector("lcn-frontend")!.shadowRoot!.querySelector("progress-dialog") as

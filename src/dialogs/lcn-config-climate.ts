@@ -5,12 +5,13 @@ import "@ha/components/ha-textfield";
 import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-switch";
 import "@lrnwebcomponents/simple-tooltip/simple-tooltip";
-import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
+import type { CSSResultGroup, PropertyValues } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
-import { LCN, ClimateConfig } from "types/lcn";
+import type { LCN, ClimateConfig } from "types/lcn";
 
 interface ConfigItem {
   name: string;

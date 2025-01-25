@@ -1,4 +1,4 @@
-import { LcnAddress } from "types/lcn";
+import type { LcnAddress } from "types/lcn";
 
 export function addressToString(address: LcnAddress): string {
   const result =

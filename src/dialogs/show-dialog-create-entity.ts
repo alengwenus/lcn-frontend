@@ -1,5 +1,5 @@
 import { fireEvent } from "@ha/common/dom/fire_event";
-import { LCN, LcnEntityConfig, LcnDeviceConfig } from "types/lcn";
+import type { LCN, LcnEntityConfig, LcnDeviceConfig } from "types/lcn";
 
 export interface LcnEntityDialogParams {
   lcn: LCN;

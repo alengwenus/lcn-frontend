@@ -1,11 +1,12 @@
 import { mdiFilterVariantRemove } from "@mdi/js";
-import { css, CSSResultGroup, html, LitElement, nothing } from "lit";
+import type { CSSResultGroup } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import type { HomeAssistant } from "@ha/types";
 import { haStyleScrollbar } from "@ha/resources/styles";
-import { LCN, LcnAddress, LcnDeviceConfig } from "types/lcn";
+import type { LCN, LcnAddress, LcnDeviceConfig } from "types/lcn";
 import "@ha/components/ha-domain-icon";
 import "@ha/components/search-input-outlined";
 import "@ha/components/ha-expansion-panel";
@@ -65,7 +66,7 @@ export class HaFilterDomains extends LitElement {
                       .value=${address_str}
                       .selected=${(this.value || []).includes(address_str)}
                     >
-                      ${this._address_repr(address_str)}
+                      ${this._addressRepr(address_str)}
                     </ha-check-list-item>`,
                 )}
               </mwc-list>`
@@ -82,7 +83,7 @@ export class HaFilterDomains extends LitElement {
     return Array.from(addresses.values())
       .map((address_str) => ({
         address_str,
-        name: this._address_repr(address_str),
+        name: this._addressRepr(address_str),
       }))
       .filter(
         (entry) =>
@@ -94,7 +95,7 @@ export class HaFilterDomains extends LitElement {
       .map((entry) => entry.address_str);
   });
 
-  private _address_repr(address_str: string): string {
+  private _addressRepr(address_str: string): string {
     const address: LcnAddress = stringToAddress(address_str);
     const device = address[2] ? this.lcn.localize("group") : this.lcn.localize("module");
     const segment_id = address[0];

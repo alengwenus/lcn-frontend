@@ -4,7 +4,8 @@ import type { HaSelect } from "@ha/components/ha-select";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield";
-import { css, html, LitElement, CSSResultGroup, PropertyValues, nothing } from "lit";
+import type { CSSResultGroup, PropertyValues } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import type { HaRadio } from "@ha/components/ha-radio";
 import type { HaSwitch } from "@ha/components/ha-switch";
@@ -136,11 +137,11 @@ export class LCNConfigLightElement extends LitElement {
         )}
       </ha-select>
 
-      ${this.renderOutputFeatures()}
+      ${this._renderOutputFeatures()}
     `;
   }
 
-  private renderOutputFeatures() {
+  private _renderOutputFeatures() {
     switch (this._portType.id) {
       case "output":
         return html`

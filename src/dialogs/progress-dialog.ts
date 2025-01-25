@@ -1,5 +1,6 @@
 import "@ha/components/ha-circular-progress";
-import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
+import type { CSSResultGroup } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { HomeAssistant } from "@ha/types";
