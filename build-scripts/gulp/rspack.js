@@ -1,11 +1,12 @@
-// Tasks to run webpack.
+// Tasks to run rspack.
 
 import log from "fancy-log";
 import fs from "fs";
 import gulp from "gulp";
-import webpack from "webpack";
+import rspack from "@rspack/core";
+import { RspackDevServer } from "@rspack/dev-server";
 import paths from "../paths.cjs";
-import { createLCNConfig } from "../webpack.cjs";
+import { createLCNConfig } from "../rspack.cjs";
 
 const bothBuilds = (createConfigFunc, params) => [
   createConfigFunc({ ...params, latestBuild: true }),
@@ -49,24 +50,24 @@ const doneHandler = (done) => (err, stats) => {
 
 const prodBuild = (conf) =>
   new Promise((resolve) => {
-    webpack(
+    rspack(
       conf,
-      // Resolve promise when done. Because we pass a callback, webpack closes itself
-      doneHandler(resolve)
+      // Resolve promise when done. Because we pass a callback, rspack closes itself
+      doneHandler(resolve),
     );
   });
 
-gulp.task("webpack-watch-lcn", () => {
+gulp.task("rspack-watch-lcn", () => {
   // This command will run forever because we don't close compiler
-  webpack(
+  rspack(
     createLCNConfig({
       isProdBuild: false,
       latestBuild: true,
-    })
+    }),
   ).watch({ ignored: /build/, poll: isWsl }, doneHandler());
 });
 
-gulp.task("webpack-prod-lcn", () =>
+gulp.task("rspack-prod-lcn", () =>
   prodBuild(
     bothBuilds(createLCNConfig, {
       isProdBuild: true,
