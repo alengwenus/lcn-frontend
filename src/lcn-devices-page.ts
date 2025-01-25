@@ -16,7 +16,8 @@ import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
-import { css, html, LitElement, PropertyValues, CSSResultGroup, nothing } from "lit";
+import type { PropertyValues, CSSResultGroup } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state, queryAsync } from "lit/decorators";
 import { mdiPlus, mdiDelete, mdiDotsVertical, mdiHexagon, mdiHexagonMultiple } from "@mdi/js";
 import type { HomeAssistant, Route } from "@ha/types";
@@ -24,7 +25,8 @@ import { lcnMainTabs } from "lcn-router";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import "@ha/components/ha-svg-icon";
 import memoize from "memoize-one";
-import { LCN, scanDevices, deleteDevice, addDevice, LcnDeviceConfig } from "types/lcn";
+import type { LCN, LcnDeviceConfig } from "types/lcn";
+import { scanDevices, deleteDevice, addDevice } from "types/lcn";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import { importConfig, exportConfig } from "helpers/config-exchange";
 import type {
@@ -36,8 +38,9 @@ import { navigate } from "@ha/common/navigate";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
 import { updateDeviceConfigs, updateEntityConfigs } from "components/events";
 import { renderBrandLogo } from "helpers/brand_logo";
-import { getHardwareType, parseSerialNumber, LcnSerial } from "helpers/module_properties";
-import { ProgressDialog } from "./dialogs/progress-dialog";
+import type { LcnSerial } from "helpers/module_properties";
+import { getHardwareType, parseSerialNumber } from "helpers/module_properties";
+import type { ProgressDialog } from "./dialogs/progress-dialog";
 import {
   loadLCNCreateDeviceDialog,
   showLCNCreateDeviceDialog,
@@ -358,7 +361,7 @@ export class LCNConfigDashboard extends LitElement {
     `;
   }
 
-  private getDeviceConfigByUniqueId(unique_id: string): LcnDeviceConfig {
+  private _getDeviceConfigByUniqueId(unique_id: string): LcnDeviceConfig {
     const address = stringToAddress(unique_id);
     const deviceConfig = this._deviceConfigs.find(
       (el) =>
@@ -424,7 +427,7 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   private async _deleteSelected() {
-    const devices = this._selected.map((unique_id) => this.getDeviceConfigByUniqueId(unique_id));
+    const devices = this._selected.map((unique_id) => this._getDeviceConfigByUniqueId(unique_id));
     await this._deleteDevices(devices);
     await this._clearSelection();
   }

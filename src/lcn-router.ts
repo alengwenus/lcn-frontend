@@ -1,10 +1,11 @@
 import { mdiDevices, mdiShape } from "@mdi/js";
 import { customElement, property } from "lit/decorators";
-import { HassRouterPage, RouterOptions } from "@ha/layouts/hass-router-page";
+import type { RouterOptions } from "@ha/layouts/hass-router-page";
+import { HassRouterPage } from "@ha/layouts/hass-router-page";
 import type { HomeAssistant, Route } from "@ha/types";
-import { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
+import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import { LCNLogger } from "lcn-logger";
-import { LCN } from "./types/lcn";
+import type { LCN } from "./types/lcn";
 
 const logger = new LCNLogger("router");
 

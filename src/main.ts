@@ -16,8 +16,9 @@ import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
 import { LCNLogger } from "./lcn-logger";
 import { localize } from "./localize/localize";
-import { LCN, fetchDevices, fetchEntities } from "./types/lcn";
-import { LocationChangedEvent } from "./types/navigation";
+import type { LCN } from "./types/lcn";
+import { fetchDevices, fetchEntities } from "./types/lcn";
+import type { LocationChangedEvent } from "./types/navigation";
 
 @customElement("lcn-frontend")
 class LcnFrontend extends ProvideHassLitMixin(LitElement) {

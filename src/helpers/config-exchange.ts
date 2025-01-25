@@ -1,13 +1,6 @@
 import type { HomeAssistant } from "@ha/types";
-import {
-  LCN,
-  fetchDevices,
-  fetchEntities,
-  LcnConfig,
-  LcnEntityConfig,
-  addDevice,
-  addEntity,
-} from "types/lcn";
+import type { LCN, LcnConfig, LcnEntityConfig } from "types/lcn";
+import { fetchDevices, fetchEntities, addDevice, addEntity } from "types/lcn";
 import { fileDownload } from "@ha/util/file_download";
 import { addressToString } from "./address_conversion";
 

@@ -5,7 +5,8 @@ import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import type { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
+import type { CSSResultGroup } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { createCloseHeading } from "@ha/components/ha-dialog";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
@@ -127,7 +128,7 @@ export class CreateEntityDialog extends LitElement {
           @input=${this._nameChanged}
         ></ha-textfield>
 
-        ${this.renderDomain(this.domain)}
+        ${this._renderDomain(this.domain)}
 
         <div class="buttons">
           <mwc-button
@@ -146,7 +147,7 @@ export class CreateEntityDialog extends LitElement {
     `;
   }
 
-  private renderDomain(domain: string) {
+  private _renderDomain(domain: string) {
     if (!(this._params && this._deviceConfig)) {
       return nothing;
     }

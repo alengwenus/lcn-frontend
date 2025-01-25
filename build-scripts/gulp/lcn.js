@@ -1,12 +1,12 @@
-/* eslint @typescript-eslint/no-var-requires: "off", import/extensions: "off" */
 import gulp from "gulp";
 import env from "../env.cjs";
 
 import "./clean.js";
-import "./webpack.js";
 import "./compress.js";
 import "./entry-html.js";
 import "./gen-icons-json.js";
+import "./rspack.js";
+import "./translations.js";
 
 gulp.task(
   "develop-lcn",
@@ -16,9 +16,11 @@ gulp.task(
     },
     "clean-lcn",
     "gen-icons-json",
+    "build-translations",
+    "build-locale-data",
     "gen-index-lcn-dev",
-    "webpack-watch-lcn"
-  )
+    "rspack-watch-lcn",
+  ),
 );
 
 gulp.task(
@@ -30,9 +32,11 @@ gulp.task(
     "clean-lcn",
     "ensure-lcn-build-dir",
     "gen-icons-json",
-    "webpack-prod-lcn",
+    "build-translations",
+    "build-locale-data",
+    "rspack-prod-lcn",
     "gen-index-lcn-prod",
     ...// Don't compress running tests
-    (env.isTest() ? [] : ["compress-lcn"])
-  )
+    (env.isTestBuild() ? [] : ["compress-lcn"]),
+  ),
 );

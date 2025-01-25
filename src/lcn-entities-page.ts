@@ -2,8 +2,9 @@ import { consume } from "@lit-labs/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { fullEntitiesContext } from "@ha/data/context";
 import { haStyle } from "@ha/resources/styles";
-import { EntityRegistryEntry } from "@ha/data/entity_registry";
-import { css, html, LitElement, CSSResultGroup, nothing, PropertyValues } from "lit";
+import type { EntityRegistryEntry } from "@ha/data/entity_registry";
+import type { CSSResultGroup, PropertyValues } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { ifDefined } from "lit/directives/if-defined";
 import { customElement, property, state, queryAsync } from "lit/decorators";
 import { mdiPlus, mdiDelete } from "@mdi/js";
@@ -21,10 +22,8 @@ import "@ha/components/ha-state-icon";
 import "@ha/components/ha-domain-icon";
 import "@ha/components/ha-fab";
 import { mainWindow } from "@ha/common/dom/get_main_window";
-import {
+import type {
   LCN,
-  addEntity,
-  deleteEntity,
   LcnDeviceConfig,
   LcnEntityConfig,
   LcnAddress,
@@ -37,6 +36,7 @@ import {
   SceneConfig,
   CoverConfig,
 } from "types/lcn";
+import { addEntity, deleteEntity } from "types/lcn";
 import { updateEntityConfigs } from "components/events";
 import type { HASSDomEvent } from "@ha/common/dom/fire_event";
 import type {
@@ -48,7 +48,7 @@ import type {
 import { fireEvent } from "@ha/common/dom/fire_event";
 import { addressToString, stringToAddress } from "helpers/address_conversion";
 import { lcnMainTabs } from "lcn-router";
-import { DataTableFiltersItems, DataTableFiltersValues } from "@ha/data/data_table_filters";
+import type { DataTableFiltersItems, DataTableFiltersValues } from "@ha/data/data_table_filters";
 import { renderBrandLogo } from "helpers/brand_logo";
 import {
   loadLCNCreateEntityDialog,
@@ -332,10 +332,10 @@ export class LCNEntitiesPage extends LitElement {
     this._filters = { ...this._filters, [type]: ev.detail.value };
     this._filteredItems = { ...this._filteredItems, [type]: ev.detail.items };
 
-    this.updateFilteredDevice();
+    this._updateFilteredDevice();
   }
 
-  private updateFilteredDevice() {
+  private _updateFilteredDevice() {
     let address: LcnAddress;
     if (
       "lcn-filter-address" in this._filters &&
@@ -389,7 +389,7 @@ export class LCNEntitiesPage extends LitElement {
       "lcn-filter-address": address_str ? [address_str] : [],
     };
 
-    this.updateFilteredDevice();
+    this._updateFilteredDevice();
   }
 
   protected render() {
@@ -488,7 +488,7 @@ export class LCNEntitiesPage extends LitElement {
     `;
   }
 
-  private getEntityConfigByUniqueId(unique_id: string): LcnEntityConfig {
+  private _getEntityConfigByUniqueId(unique_id: string): LcnEntityConfig {
     const { address, domain, resource } = parseUniqueEntityId(unique_id);
     const entityConfig = this._entityConfigs.find(
       (el) =>
@@ -503,7 +503,7 @@ export class LCNEntitiesPage extends LitElement {
 
   private async _openEditEntry(ev: CustomEvent): Promise<void> {
     const unique_id = (ev.detail as RowClickedEvent).id;
-    const entityConfig = this.getEntityConfigByUniqueId(unique_id);
+    const entityConfig = this._getEntityConfigByUniqueId(unique_id);
     const entityRegistryEntry = this._entityRegistryEntries.find(
       (entry) =>
         computeDomain(entry.entity_id) === entityConfig.domain &&
@@ -530,7 +530,7 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   private async _deleteSelected() {
-    const entities = this._selected.map((unique_id) => this.getEntityConfigByUniqueId(unique_id));
+    const entities = this._selected.map((unique_id) => this._getEntityConfigByUniqueId(unique_id));
     this._deleteEntities(entities);
     this._clearSelection();
   }
@@ -550,7 +550,7 @@ export class LCNEntitiesPage extends LitElement {
   private _clearFilter() {
     this._filters = {};
     this._filteredItems = {};
-    this.updateFilteredDevice();
+    this._updateFilteredDevice();
   }
 
   private _handleSortingChanged(ev: CustomEvent) {

@@ -1,7 +1,8 @@
 import "@ha/components/ha-list-item";
 import "@ha/components/ha-select";
 import type { HaSelect } from "@ha/components/ha-select";
-import { css, html, LitElement, CSSResultGroup, nothing } from "lit";
+import type { CSSResultGroup } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import type { HomeAssistant } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
