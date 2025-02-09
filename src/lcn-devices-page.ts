@@ -1,3 +1,4 @@
+import { isDevBuild } from "helpers/build-info";
 import { consume } from "@lit-labs/context";
 import { deviceConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
@@ -12,7 +13,6 @@ import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
-import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
@@ -66,14 +66,6 @@ export class LCNConfigDashboard extends LitElement {
   _deviceConfigs!: LcnDeviceConfig[];
 
   @state() private _selected: string[] = [];
-
-  @storage({
-    storage: "sessionStorage",
-    key: "lcn-devices-dev-options",
-    state: true,
-    subscribe: false,
-  })
-  private _devOptionsEnabled: boolean = false;
 
   @storage({
     storage: "sessionStorage",
@@ -298,30 +290,13 @@ export class LCNConfigDashboard extends LitElement {
             ${this.lcn.localize("dashboard-devices-scan")}
           </ha-list-item>
 
-          <li divider role="separator"></li>
-
-          <ha-list-item>
-            <ha-formfield
-              alignEnd
-              spaceBetween
-              .label=${this.lcn.localize("dev-options")}
-              @click=${stopPropagation}
-            >
-              <ha-checkbox
-                name="dev-switch"
-                .checked=${this._devOptionsEnabled}
-                @change=${this._toggleDevOptions}
-              ></ha-checkbox>
-              <span slot="label" class="form-label"> ${this.lcn.localize("dev-options")} </span>
-            </ha-formfield>
-          </ha-list-item>
-
-          ${this._devOptionsEnabled
-            ? html` <ha-list-item @click=${this._importConfig}>
-                  <span class="dev-item"> ${this.lcn.localize("import-config")} </span>
+          ${isDevBuild()
+            ? html` <li divider role="separator"></li>
+                <ha-list-item @click=${this._importConfig}>
+                  ${this.lcn.localize("import-config")}
                 </ha-list-item>
                 <ha-list-item @click=${this._exportConfig}>
-                  <span class="dev-item"> ${this.lcn.localize("export-config")} </span>
+                  ${this.lcn.localize("export-config")}
                 </ha-list-item>`
             : nothing}
         </ha-button-menu>
@@ -372,10 +347,6 @@ export class LCNConfigDashboard extends LitElement {
   private _rowClicked(ev: CustomEvent) {
     const unique_id: string = ev.detail.id;
     navigate(`/lcn/entities?address=${unique_id}`, { replace: true });
-  }
-
-  private _toggleDevOptions(_ev: CustomEvent) {
-    this._devOptionsEnabled = !this._devOptionsEnabled;
   }
 
   private async _scanDevices() {
@@ -497,9 +468,6 @@ export class LCNConfigDashboard extends LitElement {
         .form-label {
           font-size: 1rem;
           cursor: pointer;
-        }
-        .dev-item {
-          margin-left: 20px;
         }
       `,
     ];
