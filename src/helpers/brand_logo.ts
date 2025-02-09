@@ -1,5 +1,6 @@
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { brandsUrl } from "@ha/util/brands-url";
+import { VERSION } from "version";
 
 export async function renderBrandLogo(hassTabsSubpageDataTable: HaTabsSubpageDataTable) {
   const brandHTML = `<img
@@ -12,7 +13,14 @@ export async function renderBrandLogo(hassTabsSubpageDataTable: HaTabsSubpageDat
           domain: "lcn",
           type: "icon",
         })}
-      />`;
+      />
+      <simple-tooltip
+        animation-delay="0"
+        offset="0"
+        for=${"brand-logo"}>
+        LCN Frontend Panel<br/>Version: ${VERSION}
+      </simple-tooltip>
+      `;
 
   const toolbar_content = hassTabsSubpageDataTable
     .shadowRoot!.querySelector("hass-tabs-subpage")!
