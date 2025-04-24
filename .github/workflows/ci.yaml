@@ -48,10 +48,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Node ${{ env.NODE_VERSION }}
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: ".nvmrc"
           cache: yarn
 
       - name: Install dependencies
