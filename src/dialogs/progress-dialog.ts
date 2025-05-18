@@ -1,4 +1,4 @@
-import "@ha/components/ha-circular-progress";
+import "@ha/components/ha-spinner";
 import type { CSSResultGroup } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
@@ -36,7 +36,7 @@ export class ProgressDialog extends LitElement {
         <p>${this._params?.text}</p>
 
         <div id="dialog-content">
-          <ha-circular-progress active></ha-circular-progress>
+          <ha-spinner></ha-spinner>
         </div>
       </ha-dialog>
     `;

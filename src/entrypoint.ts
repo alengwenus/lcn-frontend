@@ -1,5 +1,4 @@
 // Compat needs to be first import
-import "@ha/resources/compatibility";
 import "@ha/resources/roboto";
 import "./main";
 

@@ -1,3 +1,5 @@
+// @ts-check
+
 /* eslint-disable import/no-extraneous-dependencies */
 import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
@@ -6,6 +8,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
+import tseslint from "typescript-eslint";
+import eslintConfigPrettier from "eslint-config-prettier";
+import { configs as litConfigs } from "eslint-plugin-lit";
+import { configs as wcConfigs } from "eslint-plugin-wc";
 
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = path.dirname(_filename);
@@ -15,16 +21,14 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-export default [
-  ...compat.extends(
-    "airbnb-base",
-    "airbnb-typescript/base",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:wc/recommended",
-    "plugin:lit/all",
-    "plugin:lit-a11y/recommended",
-    "prettier"
-  ),
+export default tseslint.config(
+  ...compat.extends("airbnb-base", "plugin:lit-a11y/recommended"),
+  eslintConfigPrettier,
+  litConfigs["flat/all"],
+  tseslint.configs.recommended,
+  tseslint.configs.strict,
+  tseslint.configs.stylistic,
+  wcConfigs["flat/recommended"],
   {
     plugins: {
       "unused-imports": unusedImports,
@@ -42,7 +46,7 @@ export default [
         Polymer: true,
       },
 
-      parser: tsParser,
+      parser: tseslint.parser,
       ecmaVersion: 2020,
       sourceType: "module",
 
@@ -176,4 +180,4 @@ export default [
       "@typescript-eslint/no-import-type-side-effects": "error",
     },
   },
-];
+);
