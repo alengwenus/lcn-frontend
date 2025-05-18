@@ -186,7 +186,7 @@ export class LCNConfigDashboard extends LitElement {
           return html`
             <ha-tooltip
               content=${this.lcn.localize("dashboard-devices-table-delete")}
-              distance=-5
+              distance="-5"
               placement="left"
             >
               <ha-icon-button

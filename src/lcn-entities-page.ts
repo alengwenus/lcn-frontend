@@ -274,7 +274,7 @@ export class LCNEntitiesPage extends LitElement {
           return html`
             <ha-tooltip
               content=${this.lcn.localize("dashboard-entities-table-delete")}
-              distance=-5
+              distance="-5"
               placement="left"
             >
               <ha-icon-button
