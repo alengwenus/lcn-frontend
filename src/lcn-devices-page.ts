@@ -2,7 +2,6 @@ import { isDevBuild } from "helpers/build-info";
 import { consume } from "@lit-labs/context";
 import { deviceConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
-import "@lrnwebcomponents/simple-tooltip/simple-tooltip";
 import "@material/mwc-button";
 import "@ha/components/ha-clickable-list-item";
 import "@ha/components/ha-fab";
@@ -13,6 +12,7 @@ import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
+import "@ha/components/ha-tooltip";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
@@ -184,19 +184,17 @@ export class LCNConfigDashboard extends LitElement {
         template: (entry) => {
           const handler = (_ev) => this._deleteDevices([entry]);
           return html`
-            <ha-icon-button
-              id=${"delete-device-" + entry.unique_id}
-              .label=${this.lcn.localize("dashboard-devices-table-delete")}
-              .path=${mdiDelete}
-              @click=${handler}
-            ></ha-icon-button>
-            <simple-tooltip
-              animation-delay="0"
-              offset="0"
-              for=${"delete-device-" + entry.unique_id}
+            <ha-tooltip
+              content=${this.lcn.localize("dashboard-devices-table-delete")}
+              distance="-5"
+              placement="left"
             >
-              ${this.lcn.localize("dashboard-devices-table-delete")}
-            </simple-tooltip>
+              <ha-icon-button
+                id=${"delete-device-" + entry.unique_id}
+                .path=${mdiDelete}
+                @click=${handler}
+              ></ha-icon-button>
+            </ha-tooltip>
           `;
         },
       },
@@ -223,14 +221,16 @@ export class LCNConfigDashboard extends LitElement {
     }
 
     return html`
-      ${softwareSerial.toString(16).toUpperCase()}
-      <simple-tooltip animation-delay="0">
-        ${this.lcn.localize("firmware-date", {
+      <ha-tooltip
+        placement="bottom-start"
+        content=${this.lcn.localize("firmware-date", {
           year: serial.year,
           month: serial.month,
           day: serial.day,
         })}
-      </simple-tooltip>
+      >
+        <span>${softwareSerial.toString(16).toUpperCase()}</span>
+      </ha-tooltip>
     `;
   }
 
@@ -243,16 +243,18 @@ export class LCNConfigDashboard extends LitElement {
     }
 
     return html`
-      ${hardwareSerial.toString(16).toUpperCase()}
-      <simple-tooltip animation-delay="0">
-        ${this.lcn.localize("hardware-date", {
-          year: serial.year,
-          month: serial.month,
-          day: serial.day,
-        })}
-        <br />
-        ${this.lcn.localize("hardware-number", { serial: serial.serial })}
-      </simple-tooltip>
+      <ha-tooltip placement="bottom-start">
+        <span slot="content">
+          ${this.lcn.localize("hardware-date", {
+            year: serial.year,
+            month: serial.month,
+            day: serial.day,
+          })}
+          <br />
+          ${this.lcn.localize("hardware-number", { serial: serial.serial })}
+        </span>
+        <span>${hardwareSerial.toString(16).toUpperCase()}</span>
+      </ha-tooltip>
     `;
   }
 
