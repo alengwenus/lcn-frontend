@@ -21,6 +21,7 @@ import "@ha/components/ha-icon-button";
 import "@ha/components/ha-state-icon";
 import "@ha/components/ha-domain-icon";
 import "@ha/components/ha-fab";
+import "@ha/components/ha-tooltip";
 import { mainWindow } from "@ha/common/dom/get_main_window";
 import type {
   LCN,
@@ -271,19 +272,18 @@ export class LCNEntitiesPage extends LitElement {
         template: (entry) => {
           const handler = (_ev) => this._deleteEntities([entry]);
           return html`
-            <ha-icon-button
-              id=${"delete-entity-" + entry.unique_id}
-              .label=${this.lcn.localize("dashboard-entities-table-delete")}
-              .path=${mdiDelete}
-              @click=${handler}
-            ></ha-icon-button>
-            <simple-tooltip
-              animation-delay="0"
-              offset="0"
-              for=${"delete-entity-" + entry.unique_id}
+            <ha-tooltip
+              content=${this.lcn.localize("dashboard-entities-table-delete")}
+              distance=-5
+              placement="left"
             >
-              ${this.lcn.localize("dashboard-entities-table-delete")}
-            </simple-tooltip>
+              <ha-icon-button
+                id=${"delete-entity-" + entry.unique_id}
+                .label=${this.lcn.localize("dashboard-entities-table-delete")}
+                .path=${mdiDelete}
+                @click=${handler}
+              ></ha-icon-button>
+            </ha-tooltip>
           `;
         },
       },
