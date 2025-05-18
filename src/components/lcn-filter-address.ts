@@ -61,12 +61,12 @@ export class HaFilterDomains extends LitElement {
 
               <mwc-list class="ha-scrollbar" multi @click=${this._handleItemClick}>
                 ${this._addresses(this.deviceConfigs, this._filter).map(
-                  (address_str: string) =>
+                  (address: string) =>
                     html`<ha-check-list-item
-                      .value=${address_str}
-                      .selected=${(this.value || []).includes(address_str)}
+                      .value=${address}
+                      .selected=${(this.value || []).includes(address)}
                     >
-                      ${this._addressRepr(address_str)}
+                      ${this._addressRepr(address)}
                     </ha-check-list-item>`,
                 )}
               </mwc-list>`
@@ -81,26 +81,26 @@ export class HaFilterDomains extends LitElement {
       addresses.add(addressToString(deviceConfig.address));
     });
     return Array.from(addresses.values())
-      .map((address_str) => ({
-        address_str,
-        name: this._addressRepr(address_str),
+      .map((address: string) => ({
+        address,
+        name: this._addressRepr(address),
       }))
       .filter(
         (entry) =>
           !filter ||
-          entry.address_str.toLowerCase().includes(filter) ||
+          entry.address.toLowerCase().includes(filter) ||
           entry.name.toLowerCase().includes(filter),
       )
       .sort((a, b) => stringCompare(a.name, b.name, this.hass.locale.language))
-      .map((entry) => entry.address_str);
+      .map((entry) => entry.address);
   });
 
-  private _addressRepr(address_str: string): string {
-    const address: LcnAddress = stringToAddress(address_str);
-    const device = address[2] ? this.lcn.localize("group") : this.lcn.localize("module");
-    const segment_id = address[0];
-    const address_id = address[1];
-    const result: string = `${device} (${segment_id}, ${address_id})`;
+  private _addressRepr(address: string): string {
+    const lcnAddress: LcnAddress = stringToAddress(address);
+    const device = lcnAddress[2] ? this.lcn.localize("group") : this.lcn.localize("module");
+    const segmentId = lcnAddress[0];
+    const addressId = lcnAddress[1];
+    const result = `${device} (${segmentId}, ${addressId})`;
     return result;
   }
 

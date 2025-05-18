@@ -76,7 +76,7 @@ export class LCNConfigDashboard extends LitElement {
     state: true,
     subscribe: false,
   })
-  private _filter: string = "";
+  private _filter = "";
 
   @storage({
     storage: "sessionStorage",
@@ -214,16 +214,16 @@ export class LCNConfigDashboard extends LitElement {
     this._dataTable.then(renderBrandLogo);
   }
 
-  protected renderSoftwareSerial(software_serial: number) {
+  protected renderSoftwareSerial(softwareSerial: number) {
     let serial: LcnSerial;
     try {
-      serial = parseSerialNumber(software_serial);
-    } catch (error) {
+      serial = parseSerialNumber(softwareSerial);
+    } catch {
       return html`-`;
     }
 
     return html`
-      ${software_serial.toString(16).toUpperCase()}
+      ${softwareSerial.toString(16).toUpperCase()}
       <simple-tooltip animation-delay="0">
         ${this.lcn.localize("firmware-date", {
           year: serial.year,
@@ -234,16 +234,16 @@ export class LCNConfigDashboard extends LitElement {
     `;
   }
 
-  protected renderHardwareSerial(hardware_serial: number) {
+  protected renderHardwareSerial(hardwareSerial: number) {
     let serial: LcnSerial;
     try {
-      serial = parseSerialNumber(hardware_serial);
-    } catch (error) {
+      serial = parseSerialNumber(hardwareSerial);
+    } catch {
       return html`-`;
     }
 
     return html`
-      ${hardware_serial.toString(16).toUpperCase()}
+      ${hardwareSerial.toString(16).toUpperCase()}
       <simple-tooltip animation-delay="0">
         ${this.lcn.localize("hardware-date", {
           year: serial.year,
@@ -336,8 +336,8 @@ export class LCNConfigDashboard extends LitElement {
     `;
   }
 
-  private _getDeviceConfigByUniqueId(unique_id: string): LcnDeviceConfig {
-    const address = stringToAddress(unique_id);
+  private _getDeviceConfigByUniqueId(uniqueId: string): LcnDeviceConfig {
+    const address = stringToAddress(uniqueId);
     const deviceConfig = this._deviceConfigs.find(
       (el) =>
         el.address[0] === address[0] &&
@@ -348,8 +348,8 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   private _rowClicked(ev: CustomEvent) {
-    const unique_id: string = ev.detail.id;
-    navigate(`/lcn/entities?address=${unique_id}`, { replace: true });
+    const uniqueId: string = ev.detail.id;
+    navigate(`/lcn/entities?address=${uniqueId}`, { replace: true });
   }
 
   private async _scanDevices() {
@@ -398,7 +398,7 @@ export class LCNConfigDashboard extends LitElement {
   }
 
   private async _deleteSelected() {
-    const devices = this._selected.map((unique_id) => this._getDeviceConfigByUniqueId(unique_id));
+    const devices = this._selected.map((uniqueId) => this._getDeviceConfigByUniqueId(uniqueId));
     await this._deleteDevices(devices);
     await this._clearSelection();
   }

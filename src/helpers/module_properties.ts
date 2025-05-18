@@ -8,17 +8,17 @@ export interface LcnSerial {
 const serialRegExp =
   /(?<year>[A-F0-9]{2}).(?<month>[A-F0-9])(?<day>[A-F0-9]{2})(?<serial>[A-F0-9]{4})?/;
 
-export function parseSerialNumber(serial_number: number): LcnSerial {
-  const result = serialRegExp.exec(serial_number.toString(16).toUpperCase());
+export function parseSerialNumber(serialNumber: number): LcnSerial {
+  const result = serialRegExp.exec(serialNumber.toString(16).toUpperCase());
   if (!result) throw new Error("Wrong serial number");
 
-  const is_software_serial = result![4] === undefined;
+  const isSoftwareSerial = result![4] === undefined;
 
   return {
     year: Number("0x" + result![1]) + 1990,
     month: Number("0x" + result![2]),
     day: Number("0x" + result![3]),
-    serial: is_software_serial ? undefined : Number("0x" + result![4]),
+    serial: isSoftwareSerial ? undefined : Number("0x" + result![4]),
   };
 }
 

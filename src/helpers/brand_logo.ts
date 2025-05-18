@@ -22,12 +22,12 @@ export async function renderBrandLogo(hassTabsSubpageDataTable: HaTabsSubpageDat
       </simple-tooltip>
       `;
 
-  const toolbar_content = hassTabsSubpageDataTable
+  const toolbarContent = hassTabsSubpageDataTable
     .shadowRoot!.querySelector("hass-tabs-subpage")!
     .shadowRoot!.querySelector(".toolbar-content")!;
 
-  const tabbar = toolbar_content.querySelector("#tabbar");
+  const tabbar = toolbarContent.querySelector("#tabbar");
 
-  if (!toolbar_content?.querySelector("#brand-logo"))
+  if (!toolbarContent?.querySelector("#brand-logo"))
     tabbar?.insertAdjacentHTML("beforebegin", brandHTML);
 }

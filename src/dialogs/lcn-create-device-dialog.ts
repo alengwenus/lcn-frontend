@@ -23,13 +23,13 @@ export class CreateDeviceDialog extends LitElement {
 
   @state() private _params?: LcnDeviceDialogParams;
 
-  @state() private _isGroup: boolean = false;
+  @state() private _isGroup = false;
 
-  @state() private _segmentId: number = 0;
+  @state() private _segmentId = 0;
 
-  @state() private _addressId: number = 5;
+  @state() private _addressId = 5;
 
-  @state() private _invalid: boolean = false;
+  @state() private _invalid = false;
 
   public async showDialog(params: LcnDeviceDialogParams): Promise<void> {
     this._params = params;
@@ -143,18 +143,18 @@ export class CreateDeviceDialog extends LitElement {
     this._addressId = +target.value;
   }
 
-  private _validateSegmentId(segment_id: number): boolean {
+  private _validateSegmentId(segmentId: number): boolean {
     // segement_id: 0, 5-128
-    return segment_id === 0 || (segment_id >= 5 && segment_id <= 128);
+    return segmentId === 0 || (segmentId >= 5 && segmentId <= 128);
   }
 
-  private _validateAddressId(address_id: number, is_group: boolean): boolean {
+  private _validateAddressId(addressId: number, isGroup: boolean): boolean {
     // module_id: 5-254
     // group_id: 5-254
-    if (is_group) {
-      return address_id >= 5 && address_id <= 254;
+    if (isGroup) {
+      return addressId >= 5 && addressId <= 254;
     }
-    return address_id >= 5 && address_id <= 254;
+    return addressId >= 5 && addressId <= 254;
   }
 
   private get _validityTransformSegmentId() {

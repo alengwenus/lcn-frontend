@@ -26,7 +26,7 @@ export class LCNConfigSensorElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property({ attribute: false, type: Number }) public softwareSerial: number = -1;
+  @property({ attribute: false, type: Number }) public softwareSerial = -1;
 
   @property({ attribute: false }) public domainData: SensorConfig = {
     source: "VAR1",
