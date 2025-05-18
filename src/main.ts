@@ -84,16 +84,16 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
   }
 
   protected async _initLCN(): Promise<void> {
-    let entry_id: string = this._searchParms.get("config_entry")!;
-    if (entry_id != null) {
-      window.localStorage.setItem("lcn_entry_id", entry_id);
+    let entryId: string = this._searchParms.get("config_entry")!;
+    if (entryId != null) {
+      window.localStorage.setItem("lcn_entry_id", entryId);
     }
-    entry_id = window.localStorage.getItem("lcn_entry_id")!;
+    entryId = window.localStorage.getItem("lcn_entry_id")!;
     this.lcn = {
       language: this.hass.language,
       localize: (string, replace) => localize(this.hass, string, replace),
       log: new LCNLogger(),
-      config_entry: (await getConfigEntry(this.hass, entry_id)).config_entry,
+      config_entry: (await getConfigEntry(this.hass, entryId)).config_entry,
     };
   }
 

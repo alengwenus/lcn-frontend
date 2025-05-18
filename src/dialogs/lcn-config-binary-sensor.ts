@@ -37,16 +37,16 @@ export class LCNConfigBinarySensorElement extends LitElement {
   @query("#source-select") private _sourceSelect!: HaSelect;
 
   private get _binsensorPorts(): ConfigItem[] {
-    const binary_sensor: string = this.lcn.localize("binary-sensor");
+    const binarySensor: string = this.lcn.localize("binary-sensor");
     return [
-      { name: binary_sensor + " 1", value: "BINSENSOR1" },
-      { name: binary_sensor + " 2", value: "BINSENSOR2" },
-      { name: binary_sensor + " 3", value: "BINSENSOR3" },
-      { name: binary_sensor + " 4", value: "BINSENSOR4" },
-      { name: binary_sensor + " 5", value: "BINSENSOR5" },
-      { name: binary_sensor + " 6", value: "BINSENSOR6" },
-      { name: binary_sensor + " 7", value: "BINSENSOR7" },
-      { name: binary_sensor + " 8", value: "BINSENSOR8" },
+      { name: binarySensor + " 1", value: "BINSENSOR1" },
+      { name: binarySensor + " 2", value: "BINSENSOR2" },
+      { name: binarySensor + " 4", value: "BINSENSOR4" },
+      { name: binarySensor + " 3", value: "BINSENSOR3" },
+      { name: binarySensor + " 5", value: "BINSENSOR5" },
+      { name: binarySensor + " 6", value: "BINSENSOR6" },
+      { name: binarySensor + " 7", value: "BINSENSOR7" },
+      { name: binarySensor + " 8", value: "BINSENSOR8" },
     ];
   }
 

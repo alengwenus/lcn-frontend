@@ -8,12 +8,12 @@ export function addressToString(address: LcnAddress): string {
   return result;
 }
 
-export function stringToAddress(address_str: string): LcnAddress {
-  const is_group = address_str.substring(0, 1) === "g";
-  const address_id = +address_str.substring(1, 4);
-  const segment_id = +address_str.substring(4, 7);
-  const address: LcnAddress = [address_id, segment_id, is_group];
-  return address;
+export function stringToAddress(address: string): LcnAddress {
+  const isGroup = address.substring(0, 1) === "g";
+  const addressId = +address.substring(1, 4);
+  const segmentId = +address.substring(4, 7);
+  const lcnAddress: LcnAddress = [addressId, segmentId, isGroup];
+  return lcnAddress;
 }
 
 export function addressToHumanString(address: LcnAddress): string {

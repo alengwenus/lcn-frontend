@@ -84,41 +84,41 @@ export interface LcnConfig {
 
 export const fetchDevices = (
   hass: HomeAssistant,
-  config_entry: ConfigEntry,
+  configEntry: ConfigEntry,
 ): Promise<LcnDeviceConfig[]> =>
   hass.callWS({
     type: "lcn/devices",
-    entry_id: config_entry.entry_id,
+    entry_id: configEntry.entry_id,
   });
 
 export const fetchEntities = (
   hass: HomeAssistant,
-  config_entry: ConfigEntry,
+  configEntry: ConfigEntry,
   address: LcnAddress | undefined = undefined,
 ): Promise<LcnEntityConfig[]> =>
   hass.callWS({
     type: "lcn/entities",
-    entry_id: config_entry.entry_id,
+    entry_id: configEntry.entry_id,
     address: address,
   });
 
 export const scanDevices = (
   hass: HomeAssistant,
-  config_entry: ConfigEntry,
+  configEntry: ConfigEntry,
 ): Promise<LcnDeviceConfig[]> =>
   hass.callWS({
     type: "lcn/devices/scan",
-    entry_id: config_entry.entry_id,
+    entry_id: configEntry.entry_id,
   });
 
 export const addEntity = (
   hass: HomeAssistant,
-  config_entry: ConfigEntry,
+  configEntry: ConfigEntry,
   entity: Partial<LcnEntityConfig>,
 ): Promise<boolean> =>
   hass.callWS({
     type: "lcn/entities/add",
-    entry_id: config_entry.entry_id,
+    entry_id: configEntry.entry_id,
     address: entity.address,
     name: entity.name,
     domain: entity.domain,
@@ -127,12 +127,12 @@ export const addEntity = (
 
 export const deleteEntity = (
   hass: HomeAssistant,
-  config_entry: ConfigEntry,
+  configEntry: ConfigEntry,
   entity: LcnEntityConfig,
 ): Promise<void> =>
   hass.callWS({
     type: "lcn/entities/delete",
-    entry_id: config_entry.entry_id,
+    entry_id: configEntry.entry_id,
     address: entity.address,
     domain: entity.domain,
     domain_data: entity.domain_data,
@@ -140,22 +140,22 @@ export const deleteEntity = (
 
 export const addDevice = (
   hass: HomeAssistant,
-  config_entry: ConfigEntry,
+  configEntry: ConfigEntry,
   device: Partial<LcnDeviceConfig>,
 ): Promise<boolean> =>
   hass.callWS({
     type: "lcn/devices/add",
-    entry_id: config_entry.entry_id,
+    entry_id: configEntry.entry_id,
     address: device.address,
   });
 
 export const deleteDevice = (
   hass: HomeAssistant,
-  config_entry: ConfigEntry,
+  configEntry: ConfigEntry,
   device: LcnDeviceConfig,
 ): Promise<void> =>
   hass.callWS({
     type: "lcn/devices/delete",
-    entry_id: config_entry.entry_id,
+    entry_id: configEntry.entry_id,
     address: device.address,
   });

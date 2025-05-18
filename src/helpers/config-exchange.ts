@@ -36,12 +36,12 @@ export async function exportConfig(hass: HomeAssistant, lcn: LCN) {
     address: device.address,
   }));
   for await (const device of config.devices) {
-    const device_entities: LcnEntityConfig[] = await fetchEntities(
+    const deviceEntities: LcnEntityConfig[] = await fetchEntities(
       hass!,
       lcn.config_entry,
       device.address,
     );
-    config.entities.push(...device_entities);
+    config.entities.push(...deviceEntities);
   }
   const jsonData = JSON.stringify(config, null, 2);
   const blob = new Blob([jsonData], { type: "application/json" });
@@ -56,23 +56,23 @@ export async function importConfig(hass: HomeAssistant, lcn: LCN) {
   const config: LcnConfig = await readConfigFile(file);
 
   lcn.log.debug("Importing configuration");
-  let devices_success: number = 0;
-  let entities_success: number = 0;
+  let devicesSuccess = 0;
+  let entitiesSuccess = 0;
 
   for await (const device of config.devices) {
-    if (await addDevice(hass, lcn.config_entry, device)) devices_success++;
+    if (await addDevice(hass, lcn.config_entry, device)) devicesSuccess++;
     else lcn.log.debug(`Skipping device ${addressToString(device.address!)}. Already present.`);
   }
 
   for await (const entity of config.entities) {
-    if (await addEntity(hass, lcn.config_entry, entity)) entities_success++;
+    if (await addEntity(hass, lcn.config_entry, entity)) entitiesSuccess++;
     else
       lcn.log.debug(
         `Skipping entity ${addressToString(entity.address)}-${entity.name}. Already present.`,
       );
   }
-  lcn.log.debug(`Sucessfully imported ${devices_success} out of ${config.devices.length} devices.`);
+  lcn.log.debug(`Sucessfully imported ${devicesSuccess} out of ${config.devices.length} devices.`);
   lcn.log.debug(
-    `Sucessfully imported ${entities_success} out of ${config.entities.length} entities.`,
+    `Sucessfully imported ${entitiesSuccess} out of ${config.entities.length} entities.`,
   );
 }

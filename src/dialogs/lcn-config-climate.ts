@@ -24,7 +24,7 @@ export class LCNConfigClimateElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property({ attribute: false, type: Number }) public softwareSerial: number = -1;
+  @property({ attribute: false, type: Number }) public softwareSerial = -1;
 
   @property({ attribute: false }) public domainData: ClimateConfig = {
     source: "VAR1",
@@ -44,7 +44,7 @@ export class LCNConfigClimateElement extends LitElement {
 
   @state() private _lockOption!: ConfigItem;
 
-  @state() private _targetValueLocked: number = 0;
+  @state() private _targetValueLocked = 0;
 
   private _invalid = false;
 
@@ -336,16 +336,16 @@ export class LCNConfigClimateElement extends LitElement {
     this.domainData.target_value_locked = +target.value;
   }
 
-  private _validateMaxTemp(max_temp: number): boolean {
-    return max_temp > this.domainData.min_temp;
+  private _validateMaxTemp(maxTemp: number): boolean {
+    return maxTemp > this.domainData.min_temp;
   }
 
-  private _validateMinTemp(min_temp: number): boolean {
-    return min_temp < this.domainData.max_temp;
+  private _validateMinTemp(minTemp: number): boolean {
+    return minTemp < this.domainData.max_temp;
   }
 
-  private _validateTargetValueLocked(target_value_locked: number): boolean {
-    return target_value_locked >= 0 && target_value_locked <= 100;
+  private _validateTargetValueLocked(targetValueLocked: number): boolean {
+    return targetValueLocked >= 0 && targetValueLocked <= 100;
   }
 
   private get _validityTransformMaxTemp() {

@@ -62,53 +62,53 @@ export interface EntityRowData extends LcnEntityConfig {
   entityRegistryEntry: EntityRegistryEntry;
 }
 
-function get_resource(domain_name: string, domain_data: LcnDomainData): string {
-  let resource: string = "";
-  switch (domain_name) {
+function getResource(domainName: string, domainData: LcnDomainData): string {
+  let resource = "";
+  switch (domainName) {
     case "switch":
-      resource = (domain_data as SwitchConfig).output;
+      resource = (domainData as SwitchConfig).output;
       break;
     case "light":
-      resource = (domain_data as LightConfig).output;
+      resource = (domainData as LightConfig).output;
       break;
     case "sensor":
-      resource = (domain_data as SensorConfig).source;
+      resource = (domainData as SensorConfig).source;
       break;
     case "binary_sensor":
-      resource = (domain_data as BinarySensorConfig).source;
+      resource = (domainData as BinarySensorConfig).source;
       break;
     case "cover":
-      resource = (domain_data as CoverConfig).motor;
+      resource = (domainData as CoverConfig).motor;
       break;
     case "climate":
-      resource = `${(domain_data as ClimateConfig).setpoint}`;
+      resource = `${(domainData as ClimateConfig).setpoint}`;
       break;
     case "scene":
-      resource = `${(domain_data as SceneConfig).register}${(domain_data as SceneConfig).scene}`;
+      resource = `${(domainData as SceneConfig).register}${(domainData as SceneConfig).scene}`;
       break;
   }
   return resource.toLowerCase();
 }
 
-function createUniqueEntityId(entity: LcnEntityConfig, includeDomain: boolean = true): string {
-  let unique_id = `${addressToString(entity.address)}-${get_resource(entity.domain, entity.domain_data)}`;
+function createUniqueEntityId(entity: LcnEntityConfig, includeDomain = true): string {
+  let uniqueId = `${addressToString(entity.address)}-${getResource(entity.domain, entity.domain_data)}`;
   if (includeDomain) {
-    unique_id = `${entity.domain}-` + unique_id;
+    uniqueId = `${entity.domain}-` + uniqueId;
   }
-  return unique_id;
+  return uniqueId;
 }
 
-function parseUniqueEntityId(unique_id: string): {
+function parseUniqueEntityId(uniqueId: string): {
   address: LcnAddress;
   domain: string;
   resource: string;
 } {
-  const splitted = unique_id.split("-");
+  const splitted = uniqueId.split("-");
   const resource = splitted.pop()!;
-  const address_str = splitted.pop();
+  const address = splitted.pop();
   const domain = splitted.pop()!;
-  const address = stringToAddress(address_str!);
-  const result = { address: address, domain: domain, resource: resource };
+  const lcnAddress = stringToAddress(address!);
+  const result = { address: lcnAddress, domain: domain, resource: resource };
   return result;
 }
 
@@ -261,7 +261,7 @@ export class LCNEntitiesPage extends LitElement {
         title: this.lcn.localize("resource"),
         sortable: true,
         filterable: true,
-        template: (entry) => get_resource(entry.domain, entry.domain_data),
+        template: (entry) => getResource(entry.domain, entry.domain_data),
       },
       delete: {
         title: this.lcn.localize("delete"),
@@ -376,9 +376,9 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   private _setFiltersFromUrl() {
-    const address_str = this._searchParms.get("address");
+    const address = this._searchParms.get("address");
 
-    if (!address_str && this._filters) {
+    if (!address && this._filters) {
       this._filters = {};
       return;
     }
@@ -386,7 +386,7 @@ export class LCNEntitiesPage extends LitElement {
     this._filter = history.state?.filter || "";
 
     this._filters = {
-      "lcn-filter-address": address_str ? [address_str] : [],
+      "lcn-filter-address": address ? [address] : [],
     };
 
     this._updateFilteredDevice();
@@ -488,22 +488,22 @@ export class LCNEntitiesPage extends LitElement {
     `;
   }
 
-  private _getEntityConfigByUniqueId(unique_id: string): LcnEntityConfig {
-    const { address, domain, resource } = parseUniqueEntityId(unique_id);
+  private _getEntityConfigByUniqueId(uniqueId: string): LcnEntityConfig {
+    const { address, domain, resource } = parseUniqueEntityId(uniqueId);
     const entityConfig = this._entityConfigs.find(
       (el) =>
         el.address[0] === address[0] &&
         el.address[1] === address[1] &&
         el.address[2] === address[2] &&
         el.domain === domain &&
-        get_resource(el.domain, el.domain_data) === resource,
+        getResource(el.domain, el.domain_data) === resource,
     );
     return entityConfig!;
   }
 
   private async _openEditEntry(ev: CustomEvent): Promise<void> {
-    const unique_id = (ev.detail as RowClickedEvent).id;
-    const entityConfig = this._getEntityConfigByUniqueId(unique_id);
+    const uniqueId = (ev.detail as RowClickedEvent).id;
+    const entityConfig = this._getEntityConfigByUniqueId(uniqueId);
     const entityRegistryEntry = this._entityRegistryEntries.find(
       (entry) =>
         computeDomain(entry.entity_id) === entityConfig.domain &&
@@ -518,7 +518,7 @@ export class LCNEntitiesPage extends LitElement {
   private async _addEntity() {
     showLCNCreateEntityDialog(this, {
       lcn: this.lcn,
-      deviceConfig: <LcnDeviceConfig | undefined>this._deviceConfig,
+      deviceConfig: this._deviceConfig as LcnDeviceConfig | undefined,
       createEntity: async (entityParams) => {
         if (await addEntity(this.hass, this.lcn.config_entry, entityParams)) {
           updateEntityConfigs(this);
@@ -530,7 +530,7 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   private async _deleteSelected() {
-    const entities = this._selected.map((unique_id) => this._getEntityConfigByUniqueId(unique_id));
+    const entities = this._selected.map((uniqueId) => this._getEntityConfigByUniqueId(uniqueId));
     this._deleteEntities(entities);
     this._clearSelection();
   }

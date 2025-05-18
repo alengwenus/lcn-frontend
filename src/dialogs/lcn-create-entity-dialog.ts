@@ -38,11 +38,11 @@ export class CreateEntityDialog extends LitElement {
 
   @state() private _params?: LcnEntityDialogParams;
 
-  @state() private _name: string = "";
+  @state() private _name = "";
 
-  @state() public domain: string = "binary_sensor";
+  @state() public domain = "binary_sensor";
 
-  @state() private _invalid: boolean = true;
+  @state() private _invalid = true;
 
   @state() private _deviceConfig?: LcnDeviceConfig;
 

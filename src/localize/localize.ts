@@ -47,7 +47,7 @@ export function localize(hass: HomeAssistant, key: string, replace?: Record<stri
   if (!translatedMessage) {
     try {
       translatedMessage = new IntlMessageFormat(translatedValue, lang);
-    } catch (err: any) {
+    } catch {
       logger.warn(`Translation problem with '${key}' for '${lang}'`);
       return key;
     }
@@ -56,7 +56,7 @@ export function localize(hass: HomeAssistant, key: string, replace?: Record<stri
 
   try {
     return translatedMessage.format<string>(replace) as string;
-  } catch (err: any) {
+  } catch {
     logger.warn(`Translation problem with '${key}' for '${lang}'`);
     return key;
   }
