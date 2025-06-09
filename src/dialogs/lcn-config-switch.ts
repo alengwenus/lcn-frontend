@@ -1,8 +1,8 @@
-import "@ha/components/ha-list-item";
-import "@ha/components/ha-select";
-import type { HaSelect } from "@ha/components/ha-select";
+import "@ha/components/ha-md-select";
+import "@ha/components/ha-md-select-option";
+import type { HaMdSelect } from "@ha/components/ha-md-select";
 import "@ha/components/ha-textfield";
-import type { CSSResultGroup } from "lit";
+import type { CSSResultGroup, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
@@ -120,6 +120,13 @@ export class LCNConfigSwitchElement extends LitElement {
     this._port = this._portType.value[0];
   }
 
+  protected async updated(changedProperties: PropertyValues) {
+    if (changedProperties.has("_portType")) {
+      this._portSelect.selectIndex(0);
+    }
+    super.updated(changedProperties);
+  }
+
   protected render() {
     if (!(this._portType || this._port)) {
       return nothing;
@@ -163,18 +170,17 @@ export class LCNConfigSwitchElement extends LitElement {
         ></ha-radio>
       </ha-formfield>
 
-      <ha-select
+      <ha-md-select
         id="port-select"
         .label=${this._portType.name}
         .value=${this._port.value}
-        fixedMenuPosition
-        @selected=${this._portChanged}
+        @change=${this._portChanged}
         @closed=${stopPropagation}
       >
         ${this._portType.value.map(
-          (port) => html` <ha-list-item .value=${port.value}> ${port.name} </ha-list-item> `,
+          (port) => html` <ha-md-select-option .value=${port.value}> ${port.name} </ha-md-select-option> `,
         )}
-      </ha-select>
+      </ha-md-select>
     `;
   }
 
@@ -183,12 +189,11 @@ export class LCNConfigSwitchElement extends LitElement {
 
     this._portType = this._portTypes.find((portType) => portType.id === target.value)!;
     this._port = this._portType.value[0];
-    this._portSelect.select(-1); // need to change index, so ha-select gets updated
   }
 
   private _portChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaSelect;
-    if (target.index === -1) return;
+    const target = ev.target as HaMdSelect;
+    if (target.selectedIndex === -1) return;
 
     this._port = this._portType.value.find((portType) => portType.value === target.value)!;
     this.domainData.output = this._port.value;
@@ -206,7 +211,7 @@ export class LCNConfigSwitchElement extends LitElement {
           grid-template-columns: 1fr 1fr;
           column-gap: 4px;
         }
-        ha-select {
+        ha-md-select {
           display: block;
           margin-bottom: 8px;
         }

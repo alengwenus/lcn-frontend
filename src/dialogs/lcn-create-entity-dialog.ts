@@ -1,10 +1,10 @@
 import { consume } from "@lit/context";
 import { deviceConfigsContext } from "components/context";
 import "@ha/components/ha-icon-button";
-import "@ha/components/ha-list-item";
-import "@ha/components/ha-select";
+import "@ha/components/ha-md-select";
+import "@ha/components/ha-md-select-option";
 import { fireEvent } from "@ha/common/dom/fire_event";
-import type { HaSelect } from "@ha/components/ha-select";
+import type { HaMdSelect } from "@ha/components/ha-md-select";
 import type { CSSResultGroup } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
@@ -89,38 +89,36 @@ export class CreateEntityDialog extends LitElement {
         ) as unknown as string}
         @closed=${this._closeDialog}
       >
-        <ha-select
+        <ha-md-select
           id="device-select"
           .label=${this.lcn.localize("device")}
           .value=${this._deviceConfig ? addressToString(this._deviceConfig.address) : undefined}
-          fixedMenuPosition
-          @selected=${this._deviceChanged}
+          @change=${this._deviceChanged}
           @closed=${stopPropagation}
         >
           ${this.deviceConfigs.map(
             (deviceConfig) => html`
-              <ha-list-item .value=${addressToString(deviceConfig.address)}>
+              <ha-md-select-option .value=${addressToString(deviceConfig.address)}>
                 <div class="primary">${deviceConfig.name}</div>
                 <div class="secondary">(${addressToHumanString(deviceConfig.address)})</div>
-              </ha-list-item>
+              </ha-md-select-option>
             `,
           )}
-        </ha-select>
+        </ha-md-select>
 
-        <ha-select
+        <ha-md-select
           id="domain-select"
           .label=${this.lcn.localize("domain")}
           .value=${this.domain}
-          fixedMenuPosition
-          @selected=${this._domainChanged}
+          @change=${this._domainChanged}
           @closed=${stopPropagation}
         >
           ${this._domains.map(
             (domain) => html`
-              <ha-list-item .value=${domain.domain}> ${domain.name} </ha-list-item>
+              <ha-md-select-option .value=${domain.domain}> ${domain.name} </ha-md-select-option>
             `,
           )}
-        </ha-select>
+        </ha-md-select>
         <ha-textfield
           id="name-input"
           label=${this.lcn.localize("name")}
@@ -257,7 +255,7 @@ export class CreateEntityDialog extends LitElement {
   }
 
   private _domainChanged(ev: CustomEvent) {
-    const target = ev.target as HaSelect;
+    const target = ev.target as HaMdSelect;
     this.domain = target.value;
   }
 
@@ -269,7 +267,7 @@ export class CreateEntityDialog extends LitElement {
           --mdc-dialog-max-width: 500px;
           --dialog-z-index: 10;
         }
-        ha-select,
+        ha-md-select,
         ha-textfield {
           display: block;
           margin-bottom: 8px;

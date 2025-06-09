@@ -4,8 +4,8 @@ import { deviceConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
 import "@material/mwc-button";
 import "@ha/components/ha-fab";
-import "@ha/components/ha-button-menu";
-import "@ha/components/ha-list-item";
+import "@ha/components/ha-md-button-menu";
+import "@ha/components/ha-md-list-item";
 import "@ha/components/ha-md-menu-item";
 import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
@@ -288,22 +288,31 @@ export class LCNConfigDashboard extends LitElement {
         .hasfab
         class=${this.narrow ? "narrow" : ""}
       >
-        <ha-button-menu slot="toolbar-icon">
+        <ha-md-button-menu slot="toolbar-icon">
           <ha-icon-button .path=${mdiDotsVertical} .label="Actions" slot="trigger"></ha-icon-button>
-          <ha-list-item @click=${this._scanDevices}>
+          <ha-md-list-item
+            type="button"
+            @click=${this._scanDevices}
+          >
             ${this.lcn.localize("dashboard-devices-scan")}
-          </ha-list-item>
+          </ha-md-list-item>
 
           ${isDevBuild()
             ? html` <li divider role="separator"></li>
-                <ha-list-item @click=${this._importConfig}>
+                <ha-md-list-item
+                  type="button"
+                  @click=${this._importConfig}
+                >
                   ${this.lcn.localize("import-config")}
-                </ha-list-item>
-                <ha-list-item @click=${this._exportConfig}>
+                </ha-md-list-item>
+                <ha-md-list-item
+                  type="button"
+                  @click=${this._exportConfig}
+                >
                   ${this.lcn.localize("export-config")}
-                </ha-list-item>`
+                </ha-md-list-item>`
             : nothing}
-        </ha-button-menu>
+        </ha-md-button-menu>
 
         <div class="header-btns" slot="selection-bar">
           ${!this.narrow

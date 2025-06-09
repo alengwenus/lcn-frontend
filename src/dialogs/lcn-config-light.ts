@@ -1,6 +1,6 @@
-import "@ha/components/ha-list-item";
-import "@ha/components/ha-select";
-import type { HaSelect } from "@ha/components/ha-select";
+import "@ha/components/ha-md-select";
+import "@ha/components/ha-md-select-option";
+import type { HaMdSelect } from "@ha/components/ha-md-select";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield";
@@ -99,6 +99,13 @@ export class LCNConfigLightElement extends LitElement {
     );
   }
 
+  protected async updated(changedProperties: PropertyValues) {
+    if (changedProperties.has("_portType")) {
+      this._portSelect.selectIndex(0);
+    }
+    super.updated(changedProperties);
+  }
+
   protected render() {
     if (!(this._portType || this._port)) {
       return nothing;
@@ -124,7 +131,7 @@ export class LCNConfigLightElement extends LitElement {
         ></ha-radio>
       </ha-formfield>
 
-      <ha-select
+      <ha-md-select
         id="port-select"
         .label=${this.lcn.localize("port")}
         .value=${this._port.value}
@@ -133,9 +140,9 @@ export class LCNConfigLightElement extends LitElement {
         @closed=${stopPropagation}
       >
         ${this._portType.value.map(
-          (port) => html` <ha-list-item .value=${port.value}> ${port.name} </ha-list-item> `,
+          (port) => html` <ha-md-select-option .value=${port.value}> ${port.name} </ha-md-select-option> `,
         )}
-      </ha-select>
+      </ha-md-select>
 
       ${this._renderOutputFeatures()}
     `;
@@ -183,12 +190,11 @@ export class LCNConfigLightElement extends LitElement {
 
     this._portType = this._portTypes.find((portType) => portType.id === target.value)!;
     this._port = this._portType.value[0];
-    this._portSelect.select(-1); // need to change index, so ha-select gets updated
   }
 
   private _portChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaSelect;
-    if (target.index === -1) return;
+    const target = ev.target as HaMdSelect;
+    if (target.selectedIndex === -1) return;
 
     this._port = this._portType.value.find((portType) => portType.value === target.value)!;
     this.domainData.output = this._port.value;
@@ -219,7 +225,7 @@ export class LCNConfigLightElement extends LitElement {
         #port-type {
           margin-top: 16px;
         }
-        ha-select,
+        ha-md-select,
         ha-textfield {
           display: block;
           margin-bottom: 8px;
