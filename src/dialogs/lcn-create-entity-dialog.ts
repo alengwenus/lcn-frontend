@@ -1,4 +1,4 @@
-import { consume } from "@lit-labs/context";
+import { consume } from "@lit/context";
 import { deviceConfigsContext } from "components/context";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-list-item";

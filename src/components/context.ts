@@ -1,4 +1,4 @@
-import { createContext } from "@lit-labs/context";
+import { createContext } from "@lit/context";
 import type { LcnDeviceConfig, LcnEntityConfig } from "types/lcn";
 
 export const deviceConfigsContext = createContext<LcnDeviceConfig[]>("deviceConfigs");

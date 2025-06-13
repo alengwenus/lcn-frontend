@@ -11,7 +11,7 @@ readme       = "README.md"
 authors      = [
     {name = "Andre Lengwenus", email = "alengwenus@gmail.com"},
 ]
-requires-python = ">=3.10.0"
+requires-python = ">=3.11.0"
 dynamic = ["version"]
 
 [project.urls]
@@ -20,10 +20,10 @@ Repository = "https://github.com/alengwenus/lcn-frontend.git"
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
 
-[tool.setuptools]
-platforms = ["any"]
-zip-safe  = false
-include-package-data = true
-
 [tool.setuptools.packages.find]
 include = ["lcn_frontend*"]
+
+[tool.mypy]
+python_version = "3.9"
+show_error_codes = true
+strict = true

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const { existsSync } = require("fs");
 const path = require("path");
 const rspack = require("@rspack/core");
@@ -9,7 +8,6 @@ const { StatsWriterPlugin } = require("webpack-stats-plugin");
 const filterStats = require("@bundle-stats/plugin-webpack-filter");
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const TerserPlugin = require("terser-webpack-plugin");
-// eslint-disable-next-line @typescript-eslint/naming-convention
 const { WebpackManifestPlugin } = require("rspack-manifest-plugin");
 const log = require("fancy-log");
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -56,14 +54,21 @@ const createRspackConfig = ({
       rules: [
         {
           test: /\.m?js$|\.ts$/,
-          use: {
-            loader: "babel-loader",
-            options: {
-              ...bundle.babelOptions({ latestBuild }),
-              cacheDirectory: !isProdBuild,
-              cacheCompression: false,
+          exclude: /node_modules[\\/]core-js/,
+          use: (info) => [
+            {
+              loader: "babel-loader",
+              options: {
+                ...bundle.babelOptions({ latestBuild, sw: info.issuerLayer === "sw" }),
+                cacheDirectory: !isProdBuild,
+                cacheCompression: false,
+              },
             },
-          },
+            {
+              loader: "builtin:swc-loader",
+              options: bundle.swcOptions(),
+            },
+          ],
           resolve: {
             fullySpecified: false,
           },
@@ -108,7 +113,8 @@ const createRspackConfig = ({
             // calling define.amd will call require("!!webpack amd options")
             resource.startsWith("!!webpack") ||
             // loaded by webpack dev server but doesn't exist.
-            resource === "webpack/hot"
+            resource === "webpack/hot" ||
+            resource.startsWith("@swc/helpers")
           ) {
             return false;
           }
@@ -118,7 +124,6 @@ const createRspackConfig = ({
               ? path.resolve(context, resource)
               : require.resolve(resource);
           } catch (err) {
-            // eslint-disable-next-line no-console
             console.error("Error in Home Assistant ignore plugin", resource, context);
             throw err;
           }
@@ -128,7 +133,7 @@ const createRspackConfig = ({
       }),
       new rspack.NormalModuleReplacementPlugin(
         new RegExp(bundle.emptyPackages({ isHassioBuild }).join("|")),
-        path.resolve(paths.polymer_dir, "homeassistant-frontend/src/util/empty.js"),
+        path.resolve(paths.root_dir, "homeassistant-frontend/src/util/empty.js"),
       ),
       !isProdBuild && new LogStartCompilePlugin(),
       isProdBuild &&
@@ -163,7 +168,7 @@ const createRspackConfig = ({
           "@lit-labs/virtualizer/polyfills/resize-observer-polyfill/ResizeObserver.js",
         "@lit-labs/observers/resize-controller": "@lit-labs/observers/resize-controller.js",
       },
-      tsConfig: path.resolve(paths.polymer_dir, "tsconfig.json"),
+      tsConfig: path.resolve(paths.root_dir, "tsconfig.json"),
     },
     output: {
       module: latestBuild,

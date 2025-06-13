@@ -1,4 +1,4 @@
-import { consume } from "@lit-labs/context";
+import { consume } from "@lit/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { fullEntitiesContext } from "@ha/data/context";
 import { haStyle } from "@ha/resources/styles";
