@@ -2,7 +2,7 @@ import defineProvider from "@babel/helper-define-polyfill-provider";
 import { join } from "node:path";
 import paths from "../paths.cjs";
 
-const POLYFILL_DIR = join(paths.polymer_dir, "src/resources/polyfills");
+const POLYFILL_DIR = join(paths.root_dir, "homeassistant-frontend/src/resources/polyfills");
 
 // List of polyfill keys with supported browser targets for the functionality
 const polyfillSupport = {
@@ -98,7 +98,7 @@ const polyfillMap = {
       ["getAttributeNames", "toggleAttribute"].map((prop) => {
         const key = `element-${prop.toLowerCase()}`;
         return [prop, { key, module: join(POLYFILL_DIR, `${key}.ts`) }];
-      })
+      }),
     ),
   },
   static: {
@@ -123,28 +123,26 @@ const polyfillMap = {
         ].map((obj) => [
           obj,
           { key: "intl-other", module: join(POLYFILL_DIR, "intl-polyfill.ts") },
-        ])
+        ]),
       ),
     },
   },
 };
 
 // Create plugin using the same factory as for CoreJS
-export default defineProvider(
-  ({ createMetaResolver, debug, shouldInjectPolyfill }) => {
-    const resolvePolyfill = createMetaResolver(polyfillMap);
-    return {
-      name: "custom-polyfill",
-      polyfills: polyfillSupport,
-      usageGlobal(meta, utils) {
-        const polyfill = resolvePolyfill(meta);
-        if (polyfill && shouldInjectPolyfill(polyfill.desc.key)) {
-          debug(polyfill.desc.key);
-          utils.injectGlobalImport(polyfill.desc.module);
-          return true;
-        }
-        return false;
-      },
-    };
-  }
-);
+export default defineProvider(({ createMetaResolver, debug, shouldInjectPolyfill }) => {
+  const resolvePolyfill = createMetaResolver(polyfillMap);
+  return {
+    name: "custom-polyfill",
+    polyfills: polyfillSupport,
+    usageGlobal(meta, utils) {
+      const polyfill = resolvePolyfill(meta);
+      if (polyfill && shouldInjectPolyfill(polyfill.desc.key)) {
+        debug(polyfill.desc.key);
+        utils.injectGlobalImport(polyfill.desc.module);
+        return true;
+      }
+      return false;
+    },
+  };
+});

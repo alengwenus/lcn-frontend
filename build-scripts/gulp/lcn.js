@@ -38,6 +38,6 @@ gulp.task(
     "rspack-prod-lcn",
     "gen-index-lcn-prod",
     ...// Don't compress running tests
-    (env.isTestBuild() ? [] : ["compress-lcn"]),
+    (env.isTest() ? [] : ["compress-lcn"]),
   ),
 );

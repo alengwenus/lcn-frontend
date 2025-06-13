@@ -4,8 +4,8 @@ import gulp from "gulp";
 import { join, resolve } from "node:path";
 import paths from "../paths.cjs";
 
-const formatjsDir = join(paths.polymer_dir, "node_modules", "@formatjs");
-const outDir = join(paths.build_dir, "locale-data");
+const formatjsDir = join(paths.root_dir, "node_modules", "@formatjs");
+const outDir = join(paths.upstream_build_dir, "locale-data");
 
 const INTL_POLYFILLS = {
   "intl-datetimeformat": "DateTimeFormat",
@@ -20,17 +20,14 @@ const convertToJSON = async (
   lang,
   subDir = "locale-data",
   addFunc = "__addLocaleData",
-  skipMissing = true
+  skipMissing = true,
 ) => {
   let localeData;
   try {
     // use "pt" for "pt-BR", because "pt-BR" is unsupported by @formatjs
     const language = lang === "pt-BR" ? "pt" : lang;
 
-    localeData = await readFile(
-      join(formatjsDir, pkg, subDir, `${language}.js`),
-      "utf-8"
-    );
+    localeData = await readFile(join(formatjsDir, pkg, subDir, `${language}.js`), "utf-8");
   } catch (e) {
     // Ignore if language is missing (i.e. not supported by @formatjs)
     if (e.code === "ENOENT" && skipMissing) {
@@ -41,10 +38,7 @@ const convertToJSON = async (
   }
   // Convert to JSON
   const obj = INTL_POLYFILLS[pkg];
-  const dataRegex = new RegExp(
-    `Intl\\.${obj}\\.${addFunc}\\((?<data>.*)\\)`,
-    "s"
-  );
+  const dataRegex = new RegExp(`Intl\\.${obj}\\.${addFunc}\\((?<data>.*)\\)`, "s");
   localeData = localeData.match(dataRegex)?.groups?.data;
   if (!localeData) {
     throw Error(`Failed to extract data for language ${lang} from ${pkg}`);
@@ -58,10 +52,7 @@ gulp.task("clean-locale-data", async () => deleteSync([outDir]));
 
 gulp.task("create-locale-data", async () => {
   const translationMeta = JSON.parse(
-    await readFile(
-      resolve(paths.translations_src, "translationMetadata.json"),
-      "utf-8"
-    )
+    await readFile(resolve(paths.translations_src, "translationMetadata.json"), "utf-8"),
   );
   const conversions = [];
   for (const pkg of Object.keys(INTL_POLYFILLS)) {
@@ -71,19 +62,8 @@ gulp.task("create-locale-data", async () => {
       conversions.push(convertToJSON(pkg, lang));
     }
   }
-  conversions.push(
-    convertToJSON(
-      "intl-datetimeformat",
-      "add-all-tz",
-      ".",
-      "__addTZData",
-      false
-    )
-  );
+  conversions.push(convertToJSON("intl-datetimeformat", "add-all-tz", ".", "__addTZData", false));
   await Promise.all(conversions);
 });
 
-gulp.task(
-  "build-locale-data",
-  gulp.series("clean-locale-data", "create-locale-data")
-);
+gulp.task("build-locale-data", gulp.series("clean-locale-data", "create-locale-data"));

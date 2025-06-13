@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 
 // Currently only supports CommonJS modules, as require is synchronous. `import` would need babel running asynchronous.
@@ -28,6 +29,7 @@ module.exports = function inlineConstants(babel, options, cwd) {
       const absolute = module.startsWith(".")
         ? require.resolve(module, { paths: [cwd] })
         : module;
+      // eslint-disable-next-line import/no-dynamic-require
       return [absolute, require(absolute)];
     })
   );

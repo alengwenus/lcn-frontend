@@ -3,7 +3,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
-import tsParser from "@typescript-eslint/parser";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
@@ -43,7 +42,6 @@ export default tseslint.config(
         __VERSION__: false,
         __STATIC_PATH__: false,
         __SUPERVISOR__: false,
-        Polymer: true,
       },
 
       parser: tseslint.parser,
@@ -54,8 +52,6 @@ export default tseslint.config(
         ecmaFeatures: {
           modules: true,
         },
-
-        project: "./tsconfig.json",
       },
     },
 
@@ -152,15 +148,15 @@ export default tseslint.config(
         },
       ],
 
-      "@typescript-eslint/no-unused-vars": "off",
-
-      "unused-imports/no-unused-vars": [
+      "@typescript-eslint/no-unused-vars": [
         "error",
         {
-          vars: "all",
-          varsIgnorePattern: "^_",
-          args: "after-used",
+          args: "all",
           argsIgnorePattern: "^_",
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
           ignoreRestSiblings: true,
         },
       ],
@@ -178,6 +174,16 @@ export default tseslint.config(
       "lit-a11y/role-has-required-aria-attrs": "error",
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-import-type-side-effects": "error",
+      camelcase: "off",
+      "@typescript-eslint/no-dynamic-delete": "off",
+      "@typescript-eslint/no-empty-object-type": [
+        "error",
+        {
+          allowInterfaces: "always",
+          allowObjectTypes: "always",
+        },
+      ],
+      "no-use-before-define": "off",
     },
   },
 );

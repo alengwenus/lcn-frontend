@@ -28,7 +28,7 @@ gulp.task(
   "translations-enable-merge-backend",
   gulp.parallel(async () => {
     mergeBackend = true;
-  }, "allow-setup-fetch-nightly-translations")
+  }, "allow-setup-fetch-nightly-translations"),
 );
 
 // Transform stream to apply a function on Vinyl JSON files (buffer mode only).
@@ -97,8 +97,7 @@ const flatten = (data, prefix = "", sep = ".") => {
 
 // Filter functions that can be passed directly to JSON.parse()
 const emptyReviver = (_key, value) => value || undefined;
-const testReviver = (_key, value) =>
-  value && typeof value === "string" ? "TRANSLATED" : value;
+const testReviver = (_key, value) => (value && typeof value === "string" ? "TRANSLATED" : value);
 
 /**
  * Replace Lokalise key placeholders with their actual values.
@@ -169,9 +168,7 @@ const setFragment = (fragment) => async () => {
 };
 
 const panelFragment = (fragment) =>
-  fragment !== "base" &&
-  fragment !== "supervisor" &&
-  fragment !== "landing-page";
+  fragment !== "base" && fragment !== "supervisor" && fragment !== "landing-page";
 
 const HASHES = new Map();
 
@@ -223,13 +220,10 @@ const createTranslations = async () => {
               return [flatten(data["landing-page"]), ""];
             default:
               // Create a fragment with only the given panel
-              return [
-                flatten(data.ui.panel[fragment], `ui.panel.${fragment}.`),
-                fragment,
-              ];
+              return [flatten(data.ui.panel[fragment], `ui.panel.${fragment}.`), fragment];
           }
-        })
-      )
+        }),
+      ),
     )
     .pipe(gulp.dest(outDir));
 
@@ -241,9 +235,7 @@ const createTranslations = async () => {
   // TODO: This is a naive interpretation of BCP47 that should be improved.
   //       Will be OK for now as long as we don't have anything more complicated
   // than a base translation + region.
-  const masterStream = gulp
-    .src(`${workDir}/en.json`)
-    .pipe(new PassThrough({ objectMode: true }));
+  const masterStream = gulp.src(`${workDir}/en.json`).pipe(new PassThrough({ objectMode: true }));
   masterStream.pipe(hashStream, { end: false });
   const mergesFinished = [finished(masterStream)];
   for (const translationFile of translationFiles) {
@@ -288,9 +280,7 @@ const writeTranslationMetaData = () =>
         for (const locale of Object.keys(meta)) {
           if (!meta[locale].nativeName) {
             meta[locale] = undefined;
-            console.warn(
-              `Skipping locale ${locale} because native name is not translated.`
-            );
+            console.warn(`Skipping locale ${locale} because native name is not translated.`);
           } else {
             meta[locale].hash = HASHES.get(locale);
           }
@@ -299,30 +289,27 @@ const writeTranslationMetaData = () =>
           fragments: FRAGMENTS.filter(panelFragment),
           translations: meta,
         };
-      })
+      }),
     )
     .pipe(gulp.dest(workDir));
 
 gulp.task(
   "build-translations",
   gulp.series(
-    gulp.parallel(
-      "fetch-nightly-translations",
-      gulp.series("clean-translations", makeWorkDir)
-    ),
+    gulp.parallel("fetch-nightly-translations", gulp.series("clean-translations", makeWorkDir)),
     createTestTranslation,
     createMasterTranslation,
     createTranslations,
-    writeTranslationMetaData
-  )
+    writeTranslationMetaData,
+  ),
 );
 
 gulp.task(
   "build-supervisor-translations",
-  gulp.series(setFragment("supervisor"), "build-translations")
+  gulp.series(setFragment("supervisor"), "build-translations"),
 );
 
 gulp.task(
   "build-landing-page-translations",
-  gulp.series(setFragment("landing-page"), "build-translations")
+  gulp.series(setFragment("landing-page"), "build-translations"),
 );

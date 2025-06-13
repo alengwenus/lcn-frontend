@@ -71,6 +71,6 @@ gulp.task("rspack-prod-lcn", () =>
   prodBuild(
     bothBuilds(createLCNConfig, {
       isProdBuild: true,
-    })
-  )
+    }),
+  ),
 );
