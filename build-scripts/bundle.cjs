@@ -136,7 +136,7 @@ module.exports.config = {
       publicPath: publicPath(latestBuild, paths.lcn_publicPath),
       isProdBuild,
       latestBuild,
-      isHassioBuild: true,
+      isHassioBuild: false,
     };
   },
 };

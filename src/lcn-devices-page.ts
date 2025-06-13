@@ -1,9 +1,8 @@
 import { isDevBuild } from "helpers/build-info";
-import { consume } from "@lit-labs/context";
+import { consume } from "@lit/context";
 import { deviceConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
 import "@material/mwc-button";
-import "@ha/components/ha-clickable-list-item";
 import "@ha/components/ha-fab";
 import "@ha/components/ha-button-menu";
 import "@ha/components/ha-list-item";

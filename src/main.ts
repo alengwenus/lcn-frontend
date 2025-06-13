@@ -1,13 +1,13 @@
-import { ContextProvider } from "@lit-labs/context";
+import { ContextProvider } from "@lit/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
+import "@ha/resources/append-ha-style";
 import { debounce } from "@ha/common/util/debounce";
 import { applyThemesOnElement } from "@ha/common/dom/apply_themes_on_element";
 import { listenMediaQuery } from "@ha/common/dom/media_query";
 import { navigate } from "@ha/common/navigate";
 import { makeDialogManager } from "@ha/dialogs/make-dialog-manager";
-import "@ha/resources/ha-style";
 import { getConfigEntry } from "@ha/data/config_entries";
 import type { HomeAssistant, Route } from "@ha/types";
 import { fullEntitiesContext } from "@ha/data/context";
