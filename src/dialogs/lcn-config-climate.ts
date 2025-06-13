@@ -189,7 +189,9 @@ export class LCNConfigClimateElement extends LitElement {
         @closed=${stopPropagation}
       >
         ${this._varUnits.map(
-          (unit) => html` <ha-md-select-option .value=${unit.value}> ${unit.name} </ha-md-select-option> `,
+          (unit) => html`
+            <ha-md-select-option .value=${unit.value}> ${unit.name} </ha-md-select-option>
+          `,
         )}
       </ha-md-select>
 
@@ -235,7 +237,9 @@ export class LCNConfigClimateElement extends LitElement {
         >
           ${this._regulatorLockOptions.map(
             (lockOption) => html`
-              <ha-md-select-option .value=${lockOption.value}> ${lockOption.name} </ha-md-select-option>
+              <ha-md-select-option .value=${lockOption.value}>
+                ${lockOption.name}
+              </ha-md-select-option>
             `,
           )}
         </ha-md-select>

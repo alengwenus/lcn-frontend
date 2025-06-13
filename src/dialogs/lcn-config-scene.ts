@@ -143,7 +143,9 @@ export class LCNConfigSceneElement extends LitElement {
           @closed=${stopPropagation}
         >
           ${this._scenes.map(
-            (scene) => html` <ha-md-select-option .value=${scene.value}> ${scene.name} </ha-md-select-option> `,
+            (scene) => html`
+              <ha-md-select-option .value=${scene.value}> ${scene.name} </ha-md-select-option>
+            `,
           )}
         </ha-md-select>
       </div>

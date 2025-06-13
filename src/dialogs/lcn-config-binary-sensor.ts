@@ -141,7 +141,9 @@ export class LCNConfigBinarySensorElement extends LitElement {
         >
           ${this._sourceTypes.map(
             (sourceType) => html`
-              <ha-md-select-option .value=${sourceType.id}> ${sourceType.name} </ha-md-select-option>
+              <ha-md-select-option .value=${sourceType.id}>
+                ${sourceType.name}
+              </ha-md-select-option>
             `,
           )}
         </ha-md-select>

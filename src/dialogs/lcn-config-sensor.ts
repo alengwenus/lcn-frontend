@@ -217,7 +217,9 @@ export class LCNConfigSensorElement extends LitElement {
         >
           ${this._sourceTypes.map(
             (sourceType) => html`
-              <ha-md-select-option .value=${sourceType.id}> ${sourceType.name} </ha-md-select-option>
+              <ha-md-select-option .value=${sourceType.id}>
+                ${sourceType.name}
+              </ha-md-select-option>
             `,
           )}
         </ha-md-select>
@@ -245,7 +247,9 @@ export class LCNConfigSensorElement extends LitElement {
         @closed=${stopPropagation}
       >
         ${this._varUnits.map(
-          (unit) => html` <ha-md-select-option .value=${unit.value}> ${unit.name} </ha-md-select-option> `,
+          (unit) => html`
+            <ha-md-select-option .value=${unit.value}> ${unit.name} </ha-md-select-option>
+          `,
         )}
       </ha-md-select>
     `;

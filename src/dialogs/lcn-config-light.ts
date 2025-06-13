@@ -140,7 +140,9 @@ export class LCNConfigLightElement extends LitElement {
         @closed=${stopPropagation}
       >
         ${this._portType.value.map(
-          (port) => html` <ha-md-select-option .value=${port.value}> ${port.name} </ha-md-select-option> `,
+          (port) => html`
+            <ha-md-select-option .value=${port.value}> ${port.name} </ha-md-select-option>
+          `,
         )}
       </ha-md-select>
 

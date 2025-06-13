@@ -76,7 +76,9 @@ export class LCNConfigCoverElement extends LitElement {
         @closed=${stopPropagation}
       >
         ${this._motors.map(
-          (motor) => html` <ha-md-select-option .value=${motor.value}> ${motor.name} </ha-md-select-option> `,
+          (motor) => html`
+            <ha-md-select-option .value=${motor.value}> ${motor.name} </ha-md-select-option>
+          `,
         )}
       </ha-md-select>
 
@@ -91,7 +93,9 @@ export class LCNConfigCoverElement extends LitElement {
             >
               ${this._reverseDelays.map(
                 (reverseDelay) => html`
-                  <ha-md-select-option .value=${reverseDelay.value}> ${reverseDelay.name} </ha-md-select-option>
+                  <ha-md-select-option .value=${reverseDelay.value}>
+                    ${reverseDelay.name}
+                  </ha-md-select-option>
                 `,
               )}
             </ha-md-select>
