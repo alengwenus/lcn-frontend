@@ -27,7 +27,6 @@
     "postpack": "pinst --enable"
   },
   "dependenciesOverride": {
-    "compare-versions": "6.1.0",
     "@polymer/paper-item": "3.0.1",
     "@polymer/paper-listbox": "3.0.1",
     "@polymer/paper-tabs": "3.1.0",
