@@ -1,6 +1,6 @@
-import "@ha/components/ha-list-item";
-import "@ha/components/ha-select";
-import type { HaSelect } from "@ha/components/ha-select";
+import "@ha/components/ha-md-select";
+import "@ha/components/ha-md-select-option";
+import type { HaMdSelect } from "@ha/components/ha-md-select";
 import "@ha/components/ha-textfield";
 import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-checkbox";
@@ -121,33 +121,33 @@ export class LCNConfigSceneElement extends LitElement {
     }
     return html`
       <div class="registers">
-        <ha-select
+        <ha-md-select
           id="register-select"
           .label=${this.lcn.localize("register")}
           .value=${this._register.value}
-          fixedMenuPosition
-          @selected=${this._registerChanged}
+          @change=${this._registerChanged}
           @closed=${stopPropagation}
         >
           ${this._registers.map(
             (register) => html`
-              <ha-list-item .value=${register.value}> ${register.name} </ha-list-item>
+              <ha-md-select-option .value=${register.value}> ${register.name} </ha-md-select-option>
             `,
           )}
-        </ha-select>
+        </ha-md-select>
 
-        <ha-select
+        <ha-md-select
           id="scene-select"
           .label=${this.lcn.localize("scene")}
           .value=${this._scene.value}
-          fixedMenuPosition
-          @selected=${this._sceneChanged}
+          @change=${this._sceneChanged}
           @closed=${stopPropagation}
         >
           ${this._scenes.map(
-            (scene) => html` <ha-list-item .value=${scene.value}> ${scene.name} </ha-list-item> `,
+            (scene) => html`
+              <ha-md-select-option .value=${scene.value}> ${scene.name} </ha-md-select-option>
+            `,
           )}
-        </ha-select>
+        </ha-md-select>
       </div>
 
       <div class="ports">
@@ -190,16 +190,16 @@ export class LCNConfigSceneElement extends LitElement {
   }
 
   private _registerChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaSelect;
-    if (target.index === -1) return;
+    const target = ev.target as HaMdSelect;
+    if (target.selectedIndex === -1) return;
 
     this._register = this._registers.find((register) => register.value === target.value)!;
     this.domainData.register = +this._register.value;
   }
 
   private _sceneChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaSelect;
-    if (target.index === -1) return;
+    const target = ev.target as HaMdSelect;
+    if (target.selectedIndex === -1) return;
 
     this._scene = this._scenes.find((scene) => scene.value === target.value)!;
     this.domainData.scene = +this._scene.value;
@@ -244,7 +244,7 @@ export class LCNConfigSceneElement extends LitElement {
           grid-template-columns: 1fr 1fr;
           column-gap: 4px;
         }
-        ha-select,
+        ha-md-select,
         ha-textfield {
           display: block;
           margin-bottom: 8px;

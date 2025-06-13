@@ -1,6 +1,6 @@
-import "@ha/components/ha-list-item";
-import "@ha/components/ha-select";
-import type { HaSelect } from "@ha/components/ha-select";
+import "@ha/components/ha-md-select";
+import "@ha/components/ha-md-select-option";
+import type { HaMdSelect } from "@ha/components/ha-md-select";
 import type { CSSResult } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
@@ -68,60 +68,61 @@ export class LCNConfigCoverElement extends LitElement {
       return nothing;
     }
     return html`
-      <ha-select
+      <ha-md-select
         id="motor-select"
         .label=${this.lcn.localize("motor")}
         .value=${this._motor.value}
-        fixedMenuPosition
-        @selected=${this._motorChanged}
+        @change=${this._motorChanged}
         @closed=${stopPropagation}
       >
         ${this._motors.map(
-          (motor) => html` <ha-list-item .value=${motor.value}> ${motor.name} </ha-list-item> `,
+          (motor) => html`
+            <ha-md-select-option .value=${motor.value}> ${motor.name} </ha-md-select-option>
+          `,
         )}
-      </ha-select>
+      </ha-md-select>
 
       ${this._motor.value === "OUTPUTS"
         ? html`
-            <ha-select
+            <ha-md-select
               id="reverse-delay-select"
               .label=${this.lcn.localize("reverse-delay")}
               .value=${this._reverseDelay.value}
-              fixedMenuPosition
-              @selected=${this._reverseDelayChanged}
+              @change=${this._reverseDelayChanged}
               @closed=${stopPropagation}
             >
               ${this._reverseDelays.map(
                 (reverseDelay) => html`
-                  <ha-list-item .value=${reverseDelay.value}> ${reverseDelay.name} </ha-list-item>
+                  <ha-md-select-option .value=${reverseDelay.value}>
+                    ${reverseDelay.name}
+                  </ha-md-select-option>
                 `,
               )}
-            </ha-select>
+            </ha-md-select>
           `
         : html`
-            <ha-select
+            <ha-md-select
               id="positioning-mode-select"
               .label=${this.lcn.localize("motor-positioning-mode")}
               .value=${this._positioningMode.value}
-              fixedMenuPosition
-              @selected=${this._positioningModeChanged}
+              @change=${this._positioningModeChanged}
               @closed=${stopPropagation}
             >
               ${this._positioningModes.map(
                 (positioningMode) => html`
-                  <ha-list-item .value=${positioningMode.value}>
+                  <ha-md-select-option .value=${positioningMode.value}>
                     ${positioningMode.name}
-                  </ha-list-item>
+                  </ha-md-select-option>
                 `,
               )}
-            </ha-select>
+            </ha-md-select>
           `}
     `;
   }
 
   private _motorChanged(ev: CustomEvent): void {
-    const target = ev.target as HaSelect;
-    if (target.index === -1) return;
+    const target = ev.target as HaMdSelect;
+    if (target.selectedIndex === -1) return;
 
     this._motor = this._motors.find((motor) => motor.value === target.value)!;
     this._positioningMode = this._positioningModes[0];
@@ -132,8 +133,8 @@ export class LCNConfigCoverElement extends LitElement {
   }
 
   private _positioningModeChanged(ev: CustomEvent): void {
-    const target = ev.target as HaSelect;
-    if (target.index === -1) return;
+    const target = ev.target as HaMdSelect;
+    if (target.selectedIndex === -1) return;
 
     this._positioningMode = this._positioningModes.find(
       (positioningMode) => positioningMode.value === target.value,
@@ -142,8 +143,8 @@ export class LCNConfigCoverElement extends LitElement {
   }
 
   private _reverseDelayChanged(ev: CustomEvent): void {
-    const target = ev.target as HaSelect;
-    if (target.index === -1) return;
+    const target = ev.target as HaMdSelect;
+    if (target.selectedIndex === -1) return;
 
     this._reverseDelay = this._reverseDelays.find(
       (reverseDelay) => reverseDelay.value === target.value,
@@ -155,7 +156,7 @@ export class LCNConfigCoverElement extends LitElement {
     return [
       haStyleDialog,
       css`
-        ha-select {
+        ha-md-select {
           display: block;
           margin-bottom: 8px;
         }

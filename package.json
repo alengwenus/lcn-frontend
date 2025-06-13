@@ -26,12 +26,7 @@
     "prepack": "pinst --disable",
     "postpack": "pinst --enable"
   },
-  "dependenciesOverride": {
-    "@polymer/paper-item": "3.0.1",
-    "@polymer/paper-listbox": "3.0.1",
-    "@polymer/paper-tabs": "3.1.0",
-    "@polymer/polymer": "3.5.2"
-  },
+  "dependenciesOverride": {},
   "resolutionsOverride": {},
   "dependencies": {
     "@babel/runtime": "7.27.6",
