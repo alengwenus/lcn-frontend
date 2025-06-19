@@ -261,6 +261,7 @@ export class LCNConfigSensorElement extends LitElement {
 
     this._sourceType = this._sourceTypes.find((sourceType) => sourceType.id === target.value)!;
     this._source = this._sourceType.value[0];
+    this.domainData.source = this._source.value;
   }
 
   private _sourceChanged(ev: CustomEvent): void {
