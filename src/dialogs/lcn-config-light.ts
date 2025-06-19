@@ -192,6 +192,7 @@ export class LCNConfigLightElement extends LitElement {
 
     this._portType = this._portTypes.find((portType) => portType.id === target.value)!;
     this._port = this._portType.value[0];
+    this.domainData.output = this._port.value;
   }
 
   private _portChanged(ev: ValueChangedEvent<string>): void {
