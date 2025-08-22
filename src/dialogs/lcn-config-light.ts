@@ -136,7 +136,7 @@ export class LCNConfigLightElement extends LitElement {
         .label=${this.lcn.localize("port")}
         .value=${this._port.value}
         fixedMenuPosition
-        @selected=${this._portChanged}
+        @change=${this._portChanged}
         @closed=${stopPropagation}
       >
         ${this._portType.value.map(
