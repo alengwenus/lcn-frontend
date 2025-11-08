@@ -15,6 +15,7 @@ import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-
 import memoize from "memoize-one";
 import { storage } from "@ha/common/decorators/storage";
 import "@ha/panels/config/ha-config-section";
+import "@ha/components/ha-button";
 import "@ha/components/ha-svg-icon";
 import "@ha/components/ha-icon";
 import "@ha/components/ha-icon-button";
@@ -443,9 +444,9 @@ export class LCNEntitiesPage extends LitElement {
         <div class="header-btns" slot="selection-bar">
           ${!this.narrow
             ? html`
-                <mwc-button @click=${this._deleteSelected} class="warning">
+                <ha-button @click=${this._deleteSelected} class="warning">
                   ${this.lcn.localize("delete-selected")}
-                </mwc-button>
+                </ha-button>
               `
             : html`
                 <ha-icon-button
