@@ -1,5 +1,6 @@
 import { consume } from "@lit/context";
 import { deviceConfigsContext } from "components/context";
+import "@ha/components/ha-button";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-md-select";
 import "@ha/components/ha-md-select-option";
@@ -129,17 +130,12 @@ export class CreateEntityDialog extends LitElement {
         ${this._renderDomain(this.domain)}
 
         <div class="buttons">
-          <mwc-button
-            slot="secondaryAction"
-            @click=${this._closeDialog}
-            .label=${this.lcn.localize("dismiss")}
-          ></mwc-button>
-          <mwc-button
-            slot="primaryAction"
-            .disabled=${this._invalid}
-            @click=${this._create}
-            .label=${this.lcn.localize("create")}
-          ></mwc-button>
+          <ha-button slot="secondaryAction" @click=${this._closeDialog}>
+            ${this.lcn.localize("dismiss")}</ha-button
+          >
+          <ha-button slot="primaryAction" .disabled=${this._invalid} @click=${this._create}>
+            ${this.lcn.localize("create")}
+          </ha-button>
         </div>
       </ha-dialog>
     `;

@@ -1,3 +1,4 @@
+import "@ha/components/ha-button";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
@@ -112,18 +113,12 @@ export class CreateDeviceDialog extends LitElement {
         ></ha-textfield>
 
         <div class="buttons">
-          <mwc-button
-            slot="secondaryAction"
-            @click=${this._closeDialog}
-            .label=${this.lcn.localize("dismiss")}
-          ></mwc-button>
-
-          <mwc-button
-            slot="primaryAction"
-            @click=${this._create}
-            .disabled=${this._invalid}
-            .label=${this.lcn.localize("create")}
-          ></mwc-button>
+          <ha-button slot="secondaryAction" @click=${this._closeDialog}>
+            ${this.lcn.localize("dismiss")}
+          </ha-button>
+          <ha-button slot="primaryAction" @click=${this._create} .disabled=${this._invalid}>
+            ${this.lcn.localize("create")}
+          </ha-button>
         </div>
       </ha-dialog>
     `;

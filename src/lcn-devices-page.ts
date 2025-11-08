@@ -2,7 +2,7 @@ import { isDevBuild } from "helpers/build-info";
 import { consume } from "@lit/context";
 import { deviceConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
-import "@material/mwc-button";
+import "@ha/components/ha-button";
 import "@ha/components/ha-fab";
 import "@ha/components/ha-md-button-menu";
 import "@ha/components/ha-md-menu-item";
@@ -307,9 +307,9 @@ export class LCNConfigDashboard extends LitElement {
         <div class="header-btns" slot="selection-bar">
           ${!this.narrow
             ? html`
-                <mwc-button @click=${this._deleteSelected} class="warning">
+                <ha-button @click=${this._deleteSelected} class="warning">
                   ${this.lcn.localize("delete-selected")}
-                </mwc-button>
+                </ha-button>
               `
             : html`
                 <ha-icon-button
