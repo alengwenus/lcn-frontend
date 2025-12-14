@@ -155,14 +155,14 @@ export class LCNConfigDashboard extends LitElement {
         sortable: true,
         filterable: true,
         defaultHidden: true,
-        template: (entry) => this.renderHardwareSerial(entry.hardware_serial),
+        template: (entry) => this.renderHardwareSerial(entry),
       },
       software_serial: {
         title: this.lcn.localize("software-serial"),
         sortable: true,
         filterable: true,
         defaultHidden: true,
-        template: (entry) => this.renderSoftwareSerial(entry.software_serial),
+        template: (entry) => this.renderSoftwareSerial(entry),
       },
       hardware_type: {
         title: this.lcn.localize("hardware-type"),
@@ -182,16 +182,13 @@ export class LCNConfigDashboard extends LitElement {
         template: (entry) => {
           const handler = (_ev) => this._deleteDevices([entry]);
           return html`
-            <ha-tooltip
-              content=${this.lcn.localize("dashboard-devices-table-delete")}
-              distance="-5"
-              placement="left"
-            >
-              <ha-icon-button
-                id=${"delete-device-" + entry.unique_id}
-                .path=${mdiDelete}
-                @click=${handler}
-              ></ha-icon-button>
+            <ha-icon-button
+              id=${"delete-device-" + entry.unique_id}
+              .path=${mdiDelete}
+              @click=${handler}
+            ></ha-icon-button>
+            <ha-tooltip .for="delete-device-${entry.unique_id}" distance="-5" placement="left">
+              ${this.lcn.localize("dashboard-devices-table-delete")}
             </ha-tooltip>
           `;
         },
@@ -210,48 +207,48 @@ export class LCNConfigDashboard extends LitElement {
     this._dataTable.then(renderBrandLogo);
   }
 
-  protected renderSoftwareSerial(softwareSerial: number) {
+  protected renderSoftwareSerial(entry: DeviceRowData) {
     let serial: LcnSerial;
     try {
-      serial = parseSerialNumber(softwareSerial);
+      serial = parseSerialNumber(entry.software_serial);
     } catch {
       return html`-`;
     }
 
     return html`
-      <ha-tooltip
-        placement="bottom-start"
-        content=${this.lcn.localize("firmware-date", {
+      <span .id="software-serial-${entry.unique_id}">
+        ${entry.software_serial.toString(16).toUpperCase()}
+      </span>
+      <ha-tooltip .for="software-serial-${entry.unique_id}" placement="bottom-start">
+        ${this.lcn.localize("firmware-date", {
           year: serial.year,
           month: serial.month,
           day: serial.day,
         })}
-      >
-        <span>${softwareSerial.toString(16).toUpperCase()}</span>
       </ha-tooltip>
     `;
   }
 
-  protected renderHardwareSerial(hardwareSerial: number) {
+  protected renderHardwareSerial(entry: DeviceRowData) {
     let serial: LcnSerial;
     try {
-      serial = parseSerialNumber(hardwareSerial);
+      serial = parseSerialNumber(entry.hardware_serial);
     } catch {
       return html`-`;
     }
 
     return html`
-      <ha-tooltip placement="bottom-start">
-        <span slot="content">
-          ${this.lcn.localize("hardware-date", {
-            year: serial.year,
-            month: serial.month,
-            day: serial.day,
-          })}
-          <br />
-          ${this.lcn.localize("hardware-number", { serial: serial.serial })}
-        </span>
-        <span>${hardwareSerial.toString(16).toUpperCase()}</span>
+      <span id="hardware-serial-${entry.unique_id}"
+        >${entry.hardware_serial.toString(16).toUpperCase()}</span
+      >
+      <ha-tooltip placement="bottom-start" .for="hardware-serial-${entry.unique_id}">
+        ${this.lcn.localize("hardware-date", {
+          year: serial.year,
+          month: serial.month,
+          day: serial.day,
+        })}
+        <br />
+        ${this.lcn.localize("hardware-number", { serial: serial.serial })}
       </ha-tooltip>
     `;
   }
