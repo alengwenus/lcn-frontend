@@ -3,6 +3,7 @@
 import { constants } from "node:zlib";
 import gulp from "gulp";
 import brotli from "gulp-brotli";
+import zopfli from "gulp-zopfli-green";
 import paths from "../paths.cjs";
 
 const filesGlob = "*.{js,json,css,svg,xml}";
@@ -12,17 +13,18 @@ const brotliOptions = {
     [constants.BROTLI_PARAM_QUALITY]: constants.BROTLI_MAX_QUALITY,
   },
 };
+const zopfliOptions = { threshold: 150 };
 
-const compressModern = (rootDir, modernDir) =>
+const compressModern = (rootDir, modernDir, compress) =>
   gulp
     .src([`${modernDir}/**/${filesGlob}`, `${rootDir}/sw-modern.js`], {
       base: rootDir,
       allowEmpty: true,
     })
-    .pipe(brotli(brotliOptions))
+    .pipe(compress === "zopfli" ? zopfli(zopfliOptions) : brotli(brotliOptions))
     .pipe(gulp.dest(rootDir));
 
-const compressOther = (rootDir, modernDir) =>
+const compressOther = (rootDir, modernDir, compress) =>
   gulp
     .src(
       [
@@ -33,10 +35,20 @@ const compressOther = (rootDir, modernDir) =>
       ],
       { base: rootDir, allowEmpty: true },
     )
-    .pipe(brotli(brotliOptions))
+    .pipe(compress === "zopfli" ? zopfli(zopfliOptions) : brotli(brotliOptions))
     .pipe(gulp.dest(rootDir));
 
-const compressLcnModern = () => compressModern(paths.lcn_output_root, paths.lcn_output_latest);
-const compressLcnOther = () => compressOther(paths.lcn_output_root, paths.lcn_output_latest);
+const compressLcnModernBrotli = () => compressModern(paths.lcn_output_root, paths.lcn_output_latest, "brotli");
+const compressLcnModernZopfli = () => compressModern(paths.lcn_output_root, paths.lcn_output_latest, "zopfli");
+const compressLcnOtherBrotli = () => compressOther(paths.lcn_output_root, paths.lcn_output_latest, "brotli");
+const compressLcnOtherZopfli = () => compressOther(paths.lcn_output_root, paths.lcn_output_latest, "zopfli");
 
-gulp.task("compress-lcn", gulp.parallel(compressLcnModern, compressLcnOther));
+gulp.task(
+  "compress-lcn",
+  gulp.parallel(
+    compressLcnModernBrotli,
+    compressLcnModernZopfli,
+    compressLcnOtherBrotli,
+    compressLcnOtherZopfli
+  )
+);
