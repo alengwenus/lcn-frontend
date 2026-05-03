@@ -3,14 +3,16 @@ import { consume } from "@lit/context";
 import { deviceConfigsContext } from "components/context";
 import { haStyle } from "@ha/resources/styles";
 import "@ha/components/ha-button";
+import "@ha/components/ha-dropdown";
+import type { HaDropdownSelectEvent } from "@ha/components/ha-dropdown";
+import "@ha/components/ha-dropdown-item";
 import "@ha/components/ha-fab";
-import "@ha/components/ha-md-button-menu";
-import "@ha/components/ha-md-menu-item";
 import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-tooltip";
+import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { storage } from "@ha/common/decorators/storage";
@@ -284,22 +286,21 @@ export class LCNConfigDashboard extends LitElement {
         has-fab
         class=${this.narrow ? "narrow" : ""}
       >
-        <ha-md-button-menu slot="toolbar-icon">
+        <ha-dropdown @click=${stopPropagation} @wa-select=${this._handleAction} slot="toolbar-icon">
           <ha-icon-button .path=${mdiDotsVertical} .label="Actions" slot="trigger"></ha-icon-button>
-          <ha-md-menu-item @click=${this._scanDevices}>
+          <ha-dropdown-item value="scan_devices">
             ${this.lcn.localize("dashboard-devices-scan")}
-          </ha-md-menu-item>
+          </ha-dropdown-item>
 
           ${isDevBuild()
-            ? html` <li divider role="separator"></li>
-                <ha-md-menu-item @click=${this._importConfig}>
+            ? html` <ha-dropdown-item value="import_config">
                   ${this.lcn.localize("import-config")}
-                </ha-md-menu-item>
-                <ha-md-menu-item @click=${this._exportConfig}>
+                </ha-dropdown-item>
+                <ha-dropdown-item value="export_config">
                   ${this.lcn.localize("export-config")}
-                </ha-md-menu-item>`
+                </ha-dropdown-item>`
             : nothing}
-        </ha-md-button-menu>
+        </ha-dropdown>
 
         <div class="header-btns" slot="selection-bar">
           ${!this.narrow
@@ -331,6 +332,21 @@ export class LCNConfigDashboard extends LitElement {
         </ha-fab>
       </hass-tabs-subpage-data-table>
     `;
+  }
+
+  private _handleAction(ev: HaDropdownSelectEvent) {
+    const action = ev.detail.item.value;
+    switch (action) {
+      case "scan_devices":
+        this._scanDevices();
+        break;
+      case "import_config":
+        this._importConfig();
+        break;
+      case "export_config":
+        this._exportConfig();
+        break;
+    }
   }
 
   private _getDeviceConfigByUniqueId(uniqueId: string): LcnDeviceConfig {
