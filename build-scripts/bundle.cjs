@@ -9,15 +9,15 @@ const BABEL_PLUGINS = path.join(paths.root_dir, "homeassistant-frontend/build-sc
 module.exports.ignorePackages = () => [];
 
 // Files from NPM packages that we should replace with empty file
-module.exports.emptyPackages = ({ isHassioBuild }) =>
+module.exports.emptyPackages = () =>
   [
-    // Icons in supervisor conflict with icons in HA so we don't load.
+    // Icons in landingpage conflict with icons in HA so we don't load.
     // ... for LCN we seem to need it - probably due to iframe.
-    // isHassioBuild &&
+    //
     //   require.resolve(
     //     path.resolve(paths.root_dir, "homeassistant-frontend/src/components/ha-icon.ts"),
     //   ),
-    // isHassioBuild &&
+    //
     //   require.resolve(
     //     path.resolve(paths.root_dir, "homeassistant-frontend/src/components/ha-icon-picker.ts"),
     //   ),
@@ -28,7 +28,6 @@ module.exports.definedVars = ({ isProdBuild, latestBuild, defineOverlay }) => ({
   __BUILD__: JSON.stringify(latestBuild ? "latest" : "es5"),
   __VERSION__: JSON.stringify(env.version()),
   __DEMO__: false,
-  __SUPERVISOR__: false,
   __BACKWARDS_COMPAT__: false,
   __STATIC_PATH__: "/static/",
   __HASS_URL__: `\`${
@@ -40,6 +39,18 @@ module.exports.definedVars = ({ isProdBuild, latestBuild, defineOverlay }) => ({
   "process.env.NODE_ENV": JSON.stringify(isProdBuild ? "production" : "development"),
   ...defineOverlay,
 });
+
+module.exports.htmlMinifierOptions = {
+  caseSensitive: true,
+  collapseWhitespace: true,
+  conservativeCollapse: true,
+  decodeEntities: true,
+  removeComments: true,
+  removeRedundantAttributes: true,
+  minifyCSS: {
+    compatibility: "*,-properties.zeroUnits",
+  },
+};
 
 module.exports.terserOptions = ({ latestBuild, isTestBuild }) => ({
   safari10: !latestBuild,
@@ -62,7 +73,7 @@ module.exports.swcOptions = () => ({
   },
 });
 
-module.exports.babelOptions = ({ latestBuild }) => ({
+module.exports.babelOptions = ({ latestBuild, isProdBuild }) => ({
   babelrc: false,
   compact: false,
   assumptions: {
@@ -90,8 +101,27 @@ module.exports.babelOptions = ({ latestBuild }) => ({
         ignoreModuleNotFound: true,
       },
     ],
-    // TODO: LCN minify template literals for production builds ? "template-html-minifier"
-
+    isProdBuild && [
+      "template-html-minifier",
+      {
+        modules: {
+          ...Object.fromEntries(
+            ["lit", "lit-element", "lit-html"].map((m) => [
+              m,
+              [
+                "html",
+                { name: "svg", encapsulation: "svg" },
+                { name: "css", encapsulation: "style" },
+              ],
+            ])
+          ),
+          "@polymer/polymer/lib/utils/html-tag.js": ["html"],
+        },
+        strictCSS: true,
+        htmlMinifier: module.exports.htmlMinifierOptions,
+        failOnError: false, // we can turn this off in case of false positives
+      },
+    ],
     // Import helpers and regenerator from runtime package
     ["@babel/plugin-transform-runtime", { version: dependencies["@babel/runtime"] }],
     "@babel/plugin-transform-class-properties",
@@ -101,8 +131,7 @@ module.exports.babelOptions = ({ latestBuild }) => ({
     // \\ for Windows, / for Mac OS and Linux
     /node_modules[\\/]core-js/,
   ],
-  // TODO: LCN: sourceMaps: !isTestBuild, // what is this?
-  sourceMaps: true,
+  // TODO: LCN: sourceMaps: !isTestBuild,
   overrides: [
     {
       // Add plugin to inject various polyfills, excluding the polyfills
@@ -154,7 +183,6 @@ module.exports.config = {
       publicPath: publicPath(latestBuild, paths.lcn_publicPath),
       isProdBuild,
       latestBuild,
-      isHassioBuild: true,
     };
   },
 };
