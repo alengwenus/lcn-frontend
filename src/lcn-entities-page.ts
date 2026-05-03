@@ -414,7 +414,7 @@ export class LCNEntitiesPage extends LitElement {
         .localizeFunc=${this.lcn.localize}
         .columns=${this._columns()}
         .data=${filteredEntities}
-        hasFilters
+        has-filters
         .filters=${Object.values(this._filters).filter((filter) =>
           Array.isArray(filter)
             ? filter.length
@@ -435,7 +435,7 @@ export class LCNEntitiesPage extends LitElement {
         @search-changed=${this._handleSearchChange}
         @row-click=${this._openEditEntry}
         id="unique_id"
-        .hasfab=${hasFab}
+        .has-fab=${hasFab}
         class=${this.narrow ? "narrow" : ""}
       >
         <div class="header-btns" slot="selection-bar">
