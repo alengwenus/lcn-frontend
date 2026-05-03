@@ -37,7 +37,6 @@ const createRspackConfig = ({
   isProdBuild,
   latestBuild,
   isStatsBuild,
-  isHassioBuild,
   dontHash,
 }) => {
   if (!dontHash) {
@@ -59,7 +58,7 @@ const createRspackConfig = ({
             {
               loader: "babel-loader",
               options: {
-                ...bundle.babelOptions({ latestBuild, sw: info.issuerLayer === "sw" }),
+                ...bundle.babelOptions({ latestBuild, isProdBuild, sw: info.issuerLayer === "sw" }),
                 cacheDirectory: !isProdBuild,
                 cacheCompression: false,
               },
@@ -131,11 +130,11 @@ const createRspackConfig = ({
           return ignorePackages.some((toIgnorePath) => fullPath.startsWith(toIgnorePath));
         },
       }),
-      bundle.emptyPackages({ isHassioBuild }).length
+      bundle.emptyPackages().length
         ? new rspack.NormalModuleReplacementPlugin(
             new RegExp(
               bundle
-                .emptyPackages({ isHassioBuild })
+                .emptyPackages()
                 .join("|")
             ),
             path.resolve(paths.root_dir, "src/util/empty.js")
@@ -159,6 +158,7 @@ const createRspackConfig = ({
         "lit/decorators$": "lit/decorators.js",
         "lit/directive$": "lit/directive.js",
         "lit/directives/until$": "lit/directives/until.js",
+        "lit/directives/ref$": "lit/directives/ref.js",
         "lit/directives/class-map$": "lit/directives/class-map.js",
         "lit/directives/style-map$": "lit/directives/style-map.js",
         "lit/directives/if-defined$": "lit/directives/if-defined.js",
@@ -167,13 +167,16 @@ const createRspackConfig = ({
         "lit/directives/join$": "lit/directives/join.js",
         "lit/directives/repeat$": "lit/directives/repeat.js",
         "lit/directives/live$": "lit/directives/live.js",
-        "lit/directives/keyed$": "lit/directives/keyed.js",
+        "lit/directives/keyed$": latestBuild
+          ? "lit/directives/keyed.js"
+          : path.resolve(__dirname, "../homeassistant-frontend/src/common/lit/keyed-es5.ts"),
         "lit/directives/map$": "lit/directives/map.js",
         "lit/polyfill-support$": "lit/polyfill-support.js",
         "@lit-labs/virtualizer/layouts/grid": "@lit-labs/virtualizer/layouts/grid.js",
         "@lit-labs/virtualizer/polyfills/resize-observer-polyfill/ResizeObserver":
           "@lit-labs/virtualizer/polyfills/resize-observer-polyfill/ResizeObserver.js",
-        "@lit-labs/observers/resize-controller": "@lit-labs/observers/resize-controller.js",        "@formatjs/intl-durationformat/should-polyfill$":
+        "@lit-labs/observers/resize-controller": "@lit-labs/observers/resize-controller.js",
+        "@formatjs/intl-durationformat/should-polyfill$":
           "@formatjs/intl-durationformat/should-polyfill.js",
         "@formatjs/intl-durationformat/polyfill-force$":
           "@formatjs/intl-durationformat/polyfill-force.js",
