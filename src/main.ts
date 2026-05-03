@@ -1,6 +1,7 @@
 import { ContextProvider } from "@lit/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
-import { LitElement, html, nothing } from "lit";
+import { LitElement, html } from "lit";
+import "@ha/layouts/hass-loading-screen";
 import { customElement, property, state } from "lit/decorators";
 import "@ha/resources/append-ha-style";
 import { debounce } from "@ha/common/util/debounce";
@@ -30,6 +31,8 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
 
   @property({ attribute: false }) public route!: Route;
 
+  @state() private _translationsLoaded = false;
+
   @state() private _searchParms = new URLSearchParams(window.location.search);
 
   private _deviceConfigs = new ContextProvider(this, {
@@ -56,6 +59,11 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       await this._initLCN();
       await this._postLCNSetup();
     }
+    // lcn object must be initialized before loading translations
+    if (this.lcn && !this._translationsLoaded) {
+      await this._loadTranslations();
+    }
+
     this.addEventListener("lcn-location-changed", (e) => this._setRoute(e as LocationChangedEvent));
 
     listenMediaQuery("(prefers-color-scheme: dark)", (_matches) => {
@@ -69,9 +77,28 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     }
   }
 
+  private async _loadTranslations() {
+    const results = await Promise.allSettled([
+      // FE translation fragment
+      this.hass.loadFragmentTranslation("config"),
+      // BE translations
+      this.hass.loadBackendTranslation("config_panel", "lcn", false),
+      this.hass.loadBackendTranslation("selector", "lcn", false),
+      this.hass.loadBackendTranslation("title", this.lcn.supportedPlatforms, false),
+      this.hass.loadBackendTranslation("selector", this.lcn.supportedPlatforms, false),
+    ]);
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        this.lcn.log.error(`Failed to load translation (index ${index}):`, result.reason);
+        // try loading the page even if one of the translation loads fails
+      }
+    });
+    this._translationsLoaded = true;
+  }
+
   protected render() {
-    if (!this.hass || !this.lcn) {
-      return nothing;
+    if (!this.hass || !this.lcn || !this._translationsLoaded) {
+      return html` <hass-loading-screen .message=${"Loading LCN..."}></hass-loading-screen> `;
     }
     return html`
       <lcn-router
