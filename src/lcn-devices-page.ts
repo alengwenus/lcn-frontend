@@ -281,7 +281,7 @@ export class LCNConfigDashboard extends LitElement {
         @search-changed=${this._handleSearchChange}
         @row-click=${this._rowClicked}
         id="unique_id"
-        .hasfab
+        has-fab
         class=${this.narrow ? "narrow" : ""}
       >
         <ha-md-button-menu slot="toolbar-icon">
