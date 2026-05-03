@@ -9,7 +9,8 @@ import type { HaMdSelect } from "@ha/components/ha-md-select";
 import type { CSSResultGroup } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import { createCloseHeading } from "@ha/components/ha-dialog";
+import "@ha/components/ha-wa-dialog";
+import "@ha/components/ha-dialog-footer";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { HomeAssistant } from "@ha/types";
@@ -38,6 +39,8 @@ export class CreateEntityDialog extends LitElement {
   @property({ attribute: false }) public lcn!: LCN;
 
   @state() private _params?: LcnEntityDialogParams;
+
+  @state() private _open = false;
 
   @state() private _name = "";
 
@@ -69,10 +72,20 @@ export class CreateEntityDialog extends LitElement {
     this._name = "";
     this._invalid = true;
     this._deviceConfig = params.deviceConfig;
+    this._open = true;
 
     if (!this._deviceConfig) this._deviceConfig = this.deviceConfigs[0];
+  }
 
-    await this.updateComplete;
+  private _dialogClosed() {
+    if (this._params?.dialogClosedCallback) {
+      this._params = undefined;
+      fireEvent(this, "dialog-closed", { dialog: this.localName });
+    }
+  }
+
+  private _closeDialog(): void {
+    this._open = false;
   }
 
   protected render() {
@@ -80,15 +93,11 @@ export class CreateEntityDialog extends LitElement {
       return nothing;
     }
     return html`
-      <ha-dialog
-        open
-        scrimClickAction
-        escapeKeyAction
-        .heading=${createCloseHeading(
-          this.hass,
-          this.lcn.localize("dashboard-entities-dialog-create-title"),
-        ) as unknown as string}
-        @closed=${this._closeDialog}
+      <ha-wa-dialog
+        .hass=${this.hass}
+        .open=${this._open}
+        header-title=${this.lcn.localize("dashboard-entities-dialog-create-title")}
+        @closed=${this._dialogClosed}
       >
         <ha-md-select
           id="device-select"
@@ -129,15 +138,15 @@ export class CreateEntityDialog extends LitElement {
 
         ${this._renderDomain(this.domain)}
 
-        <div class="buttons">
+        <ha-dialog-footer slot="footer">
           <ha-button slot="secondaryAction" @click=${this._closeDialog}>
             ${this.lcn.localize("dismiss")}</ha-button
           >
-          <ha-button slot="primaryAction" .disabled=${this._invalid} @click=${this._create}>
+          <ha-button slot="primaryAction" @click=${this._create} .disabled=${this._invalid}>
             ${this.lcn.localize("create")}
           </ha-button>
-        </div>
-      </ha-dialog>
+        </ha-dialog-footer>
+      </ha-wa-dialog>
     `;
   }
 
@@ -233,7 +242,7 @@ export class CreateEntityDialog extends LitElement {
       domain_data: domainElement.domainData,
     };
 
-    if (!(await this._params!.createEntity(values))) {
+    if (!(await this._params!.dialogClosedCallback(values))) {
       await showAlertDialog(this, {
         title: this.lcn.localize("dashboard-entities-dialog-add-alert-title"),
         text: `${this.lcn.localize("dashboard-entities-dialog-add-alert-text")}
@@ -241,13 +250,7 @@ export class CreateEntityDialog extends LitElement {
       });
       return;
     }
-
     this._closeDialog();
-  }
-
-  private _closeDialog(): void {
-    this._params = undefined;
-    fireEvent(this, "dialog-closed", { dialog: this.localName });
   }
 
   private _domainChanged(ev: CustomEvent) {

@@ -4,7 +4,7 @@ import type { LCN, LcnEntityConfig, LcnDeviceConfig } from "types/lcn";
 export interface LcnEntityDialogParams {
   lcn: LCN;
   deviceConfig: LcnDeviceConfig | undefined;
-  createEntity: (entityParams: Partial<LcnEntityConfig>) => Promise<boolean>;
+  dialogClosedCallback: (entityParams: Partial<LcnEntityConfig>) => Promise<boolean>;
 }
 
 export const loadLCNCreateEntityDialog = () => import("./lcn-create-entity-dialog");

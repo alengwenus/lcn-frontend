@@ -379,7 +379,7 @@ export class LCNConfigDashboard extends LitElement {
   private _addDevice() {
     showLCNCreateDeviceDialog(this, {
       lcn: this.lcn,
-      createDevice: (deviceParams) => this._createDevice(deviceParams),
+      dialogClosedCallback: (deviceParams) => this._createDevice(deviceParams),
     });
   }
 

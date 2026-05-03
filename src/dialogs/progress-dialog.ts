@@ -1,11 +1,12 @@
 import "@ha/components/ha-spinner";
 import type { CSSResultGroup } from "lit";
 import { css, html, LitElement, nothing } from "lit";
-import { customElement, property, query, state } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { HomeAssistant } from "@ha/types";
 import { fireEvent } from "@ha/common/dom/fire_event";
-import type { HaDialog } from "@ha/components/ha-dialog";
+import "@ha/components/ha-wa-dialog";
+import "@ha/components/ha-dialog-footer";
 import type { ProgressDialogParams } from "./show-dialog-progress";
 
 @customElement("progress-dialog")
@@ -14,16 +15,20 @@ export class ProgressDialog extends LitElement {
 
   @state() private _params?: ProgressDialogParams;
 
-  @query("ha-dialog", true) private _dialog!: HaDialog;
+  @state() private _open = false;
 
   public async showDialog(params: ProgressDialogParams): Promise<void> {
     this._params = params;
-    await this.updateComplete;
-    fireEvent(this._dialog as HTMLElement, "iron-resize");
+    this._open = true;
   }
 
-  public async closeDialog() {
-    this.close();
+  private _dialogClosed() {
+    this._params = undefined;
+    fireEvent(this, "dialog-closed", { dialog: this.localName });
+  }
+
+  public closeDialog(): void {
+    this._open = false;
   }
 
   protected render() {
@@ -31,19 +36,18 @@ export class ProgressDialog extends LitElement {
       return nothing;
     }
     return html`
-      <ha-dialog open scrimClickAction escapeKeyAction @close-dialog=${this.closeDialog}>
-        <h2>${this._params?.title}</h2>
-        <p>${this._params?.text}</p>
+      <ha-wa-dialog
+        .open=${this._open}
+        header-title=${this._params.title}
+        @close-dialog=${this._dialogClosed}
+      >
+        ${this._params?.text}
 
         <div id="dialog-content">
           <ha-spinner></ha-spinner>
         </div>
-      </ha-dialog>
+      </ha-wa-dialog>
     `;
-  }
-
-  public close() {
-    this._params = undefined;
   }
 
   static get styles(): CSSResultGroup[] {

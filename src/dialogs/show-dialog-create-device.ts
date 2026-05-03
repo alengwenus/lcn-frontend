@@ -3,7 +3,7 @@ import type { LCN, LcnDeviceConfig } from "types/lcn";
 
 export interface LcnDeviceDialogParams {
   lcn: LCN;
-  createDevice: (values: Partial<LcnDeviceConfig>) => Promise<unknown>;
+  dialogClosedCallback: (values: Partial<LcnDeviceConfig>) => Promise<unknown>;
 }
 
 export const loadLCNCreateDeviceDialog = () =>

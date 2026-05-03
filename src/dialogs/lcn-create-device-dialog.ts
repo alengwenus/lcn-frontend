@@ -7,7 +7,8 @@ import { fireEvent } from "@ha/common/dom/fire_event";
 import type { PropertyValues, CSSResultGroup } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import { createCloseHeading } from "@ha/components/ha-dialog";
+import "@ha/components/ha-wa-dialog";
+import "@ha/components/ha-dialog-footer";
 import type { HaRadio } from "@ha/components/ha-radio";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
@@ -24,6 +25,8 @@ export class CreateDeviceDialog extends LitElement {
 
   @state() private _params?: LcnDeviceDialogParams;
 
+  @state() private _open = false;
+
   @state() private _isGroup = false;
 
   @state() private _segmentId = 0;
@@ -32,23 +35,38 @@ export class CreateDeviceDialog extends LitElement {
 
   @state() private _invalid = false;
 
-  public async showDialog(params: LcnDeviceDialogParams): Promise<void> {
-    this._params = params;
-    this.lcn = params.lcn;
-    await this.updateComplete;
-  }
-
   protected firstUpdated(changedProperties: PropertyValues): void {
     super.firstUpdated(changedProperties);
     loadProgressDialog();
   }
 
   public willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has("_invalid")) {
+    if (
+      changedProperties.has("_isGroup") ||
+      changedProperties.has("_segmentId") ||
+      changedProperties.has("_addressId")
+    ) {
       this._invalid =
         !this._validateSegmentId(this._segmentId) ||
         !this._validateAddressId(this._addressId, this._isGroup);
     }
+  }
+
+  public async showDialog(params: LcnDeviceDialogParams): Promise<void> {
+    this._params = params;
+    this.lcn = params.lcn;
+    this._open = true;
+  }
+
+  private _dialogClosed() {
+    if (this._params?.dialogClosedCallback) {
+      this._params = undefined;
+      fireEvent(this, "dialog-closed", { dialog: this.localName });
+    }
+  }
+
+  private _closeDialog(): void {
+    this._open = false;
   }
 
   protected render() {
@@ -56,15 +74,11 @@ export class CreateDeviceDialog extends LitElement {
       return nothing;
     }
     return html`
-      <ha-dialog
-        open
-        scrimClickAction
-        escapeKeyAction
-        .heading=${createCloseHeading(
-          this.hass,
-          this.lcn.localize("dashboard-devices-dialog-create-title"),
-        ) as unknown as string}
-        @closed=${this._closeDialog}
+      <ha-wa-dialog
+        .hass=${this.hass}
+        .open=${this._open}
+        header-title=${this.lcn.localize("dashboard-devices-dialog-create-title")}
+        @closed=${this._dialogClosed}
       >
         <div id="type">${this.lcn.localize("type")}</div>
 
@@ -112,15 +126,15 @@ export class CreateDeviceDialog extends LitElement {
             : this.lcn.localize("dashboard-devices-dialog-error-module")}
         ></ha-textfield>
 
-        <div class="buttons">
+        <ha-dialog-footer slot="footer">
           <ha-button slot="secondaryAction" @click=${this._closeDialog}>
             ${this.lcn.localize("dismiss")}
           </ha-button>
           <ha-button slot="primaryAction" @click=${this._create} .disabled=${this._invalid}>
             ${this.lcn.localize("create")}
           </ha-button>
-        </div>
-      </ha-dialog>
+        </ha-dialog-footer>
+      </ha-wa-dialog>
     `;
   }
 
@@ -165,13 +179,8 @@ export class CreateDeviceDialog extends LitElement {
       name: "",
       address: [this._segmentId, this._addressId, this._isGroup],
     };
-    await this._params!.createDevice(values);
+    await this._params!.dialogClosedCallback(values);
     this._closeDialog();
-  }
-
-  private _closeDialog(): void {
-    this._params = undefined;
-    fireEvent(this, "dialog-closed", { dialog: this.localName });
   }
 
   static get styles(): CSSResultGroup {
@@ -184,11 +193,6 @@ export class CreateDeviceDialog extends LitElement {
         ha-textfield {
           display: block;
           margin-bottom: 8px;
-        }
-        .buttons {
-          display: flex;
-          justify-content: space-between;
-          padding: 8px;
         }
       `,
     ];
