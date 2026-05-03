@@ -2,7 +2,7 @@ import { consume } from "@lit/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
 import { fullEntitiesContext } from "@ha/data/context";
 import { haStyle } from "@ha/resources/styles";
-import type { EntityRegistryEntry } from "@ha/data/entity_registry";
+import type { EntityRegistryEntry } from "@ha/data/entity/entity_registry";
 import type { CSSResultGroup, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { ifDefined } from "lit/directives/if-defined";

@@ -11,7 +11,7 @@ import { makeDialogManager } from "@ha/dialogs/make-dialog-manager";
 import { getConfigEntry } from "@ha/data/config_entries";
 import type { HomeAssistant, Route } from "@ha/types";
 import { fullEntitiesContext } from "@ha/data/context";
-import { fetchEntityRegistry } from "@ha/data/entity_registry";
+import { fetchEntityRegistry } from "@ha/data/entity/entity_registry";
 import "./lcn-router";
 import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
 import { LCNLogger } from "./lcn-logger";
