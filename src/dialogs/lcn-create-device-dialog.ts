@@ -7,7 +7,7 @@ import { fireEvent } from "@ha/common/dom/fire_event";
 import type { PropertyValues, CSSResultGroup } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import "@ha/components/ha-wa-dialog";
+import "@ha/components/ha-dialog";
 import "@ha/components/ha-dialog-footer";
 import type { HaRadio } from "@ha/components/ha-radio";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -74,7 +74,7 @@ export class CreateDeviceDialog extends LitElement {
       return nothing;
     }
     return html`
-      <ha-wa-dialog
+      <ha-dialog
         .hass=${this.hass}
         .open=${this._open}
         header-title=${this.lcn.localize("dashboard-devices-dialog-create-title")}
@@ -134,7 +134,7 @@ export class CreateDeviceDialog extends LitElement {
             ${this.lcn.localize("create")}
           </ha-button>
         </ha-dialog-footer>
-      </ha-wa-dialog>
+      </ha-dialog>
     `;
   }
 

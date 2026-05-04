@@ -9,7 +9,7 @@ import type { HaMdSelect } from "@ha/components/ha-md-select";
 import type { CSSResultGroup } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import "@ha/components/ha-wa-dialog";
+import "@ha/components/ha-dialog";
 import "@ha/components/ha-dialog-footer";
 import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
@@ -93,7 +93,7 @@ export class CreateEntityDialog extends LitElement {
       return nothing;
     }
     return html`
-      <ha-wa-dialog
+      <ha-dialog
         .hass=${this.hass}
         .open=${this._open}
         header-title=${this.lcn.localize("dashboard-entities-dialog-create-title")}
@@ -146,7 +146,7 @@ export class CreateEntityDialog extends LitElement {
             ${this.lcn.localize("create")}
           </ha-button>
         </ha-dialog-footer>
-      </ha-wa-dialog>
+      </ha-dialog>
     `;
   }
 
