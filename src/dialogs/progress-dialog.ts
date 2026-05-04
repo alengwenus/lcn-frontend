@@ -5,7 +5,7 @@ import { customElement, property, state } from "lit/decorators";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { HomeAssistant } from "@ha/types";
 import { fireEvent } from "@ha/common/dom/fire_event";
-import "@ha/components/ha-wa-dialog";
+import "@ha/components/ha-dialog";
 import "@ha/components/ha-dialog-footer";
 import type { ProgressDialogParams } from "./show-dialog-progress";
 
@@ -36,7 +36,7 @@ export class ProgressDialog extends LitElement {
       return nothing;
     }
     return html`
-      <ha-wa-dialog
+      <ha-dialog
         .open=${this._open}
         header-title=${this._params.title}
         @close-dialog=${this._dialogClosed}
@@ -46,7 +46,7 @@ export class ProgressDialog extends LitElement {
         <div id="dialog-content">
           <ha-spinner></ha-spinner>
         </div>
-      </ha-wa-dialog>
+      </ha-dialog>
     `;
   }
 
