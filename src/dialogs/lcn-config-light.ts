@@ -1,16 +1,13 @@
-import "@ha/components/ha-md-select";
-import "@ha/components/ha-md-select-option";
-import type { HaMdSelect } from "@ha/components/ha-md-select";
+import "@ha/components/ha-select";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
 import "@ha/components/ha-textfield";
 import type { CSSResultGroup, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
-import { customElement, property, query, state } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import type { HaRadio } from "@ha/components/ha-radio";
 import type { HaSwitch } from "@ha/components/ha-switch";
 import type { HaTextField } from "@ha/components/ha-textfield";
-import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { LCN, LightConfig } from "types/lcn";
@@ -32,17 +29,11 @@ export class LCNConfigLightElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property({ attribute: false }) public domainData: LightConfig = {
-    output: "OUTPUT1",
-    dimmable: false,
-    transition: 0,
-  };
+  @property({ attribute: false }) public domainData!: LightConfig;
 
   @state() private _portType!: ConfigItemCollection;
 
   @state() private _port!: ConfigItem;
-
-  @query("#port-select") private _portSelect;
 
   private _invalid = false;
 
@@ -77,14 +68,19 @@ export class LCNConfigLightElement extends LitElement {
     ];
   }
 
-  public connectedCallback(): void {
-    super.connectedCallback();
-    this._portType = this._portTypes[0];
-    this._port = this._portType.value[0];
-  }
-
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
+    if (!this._portType) {
+      this._portType = this._portTypes[0];
+      this._port = this._portType.value[0];
+
+      this.domainData = {
+        output: this._port.value,
+        dimmable: false,
+        transition: 0,
+      };
+    }
+
     this._invalid = !this._validateTransition(this.domainData.transition);
   }
 
@@ -97,13 +93,6 @@ export class LCNConfigLightElement extends LitElement {
         composed: true,
       }),
     );
-  }
-
-  protected async updated(changedProperties: PropertyValues) {
-    if (changedProperties.has("_portType")) {
-      this._portSelect.selectIndex(0);
-    }
-    super.updated(changedProperties);
   }
 
   protected render() {
@@ -131,20 +120,16 @@ export class LCNConfigLightElement extends LitElement {
         ></ha-radio>
       </ha-formfield>
 
-      <ha-md-select
+      <ha-select
         id="port-select"
         .label=${this.lcn.localize("port")}
         .value=${this._port.value}
-        fixedMenuPosition
-        @change=${this._portChanged}
-        @closed=${stopPropagation}
-      >
-        ${this._portType.value.map(
-          (port) => html`
-            <ha-md-select-option .value=${port.value}> ${port.name} </ha-md-select-option>
-          `,
-        )}
-      </ha-md-select>
+        @selected=${this._portChanged}
+        .options=${this._portType.value.map((port) => ({
+          value: port.value,
+          label: port.name,
+        }))}
+      ></ha-select>
 
       ${this._renderOutputFeatures()}
     `;
@@ -196,10 +181,7 @@ export class LCNConfigLightElement extends LitElement {
   }
 
   private _portChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._port = this._portType.value.find((portType) => portType.value === target.value)!;
+    this._port = this._portType.value.find((portType) => portType.value === ev.detail.value)!;
     this.domainData.output = this._port.value;
   }
 
@@ -228,7 +210,7 @@ export class LCNConfigLightElement extends LitElement {
         #port-type {
           margin-top: 16px;
         }
-        ha-md-select,
+        ha-select,
         ha-textfield {
           display: block;
           margin-bottom: 8px;

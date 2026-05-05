@@ -1,11 +1,8 @@
-import "@ha/components/ha-md-select";
-import "@ha/components/ha-md-select-option";
-import type { HaMdSelect } from "@ha/components/ha-md-select";
+import "@ha/components/ha-select";
 import type { CSSResult, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
-import { stopPropagation } from "@ha/common/dom/stop_propagation";
-import { customElement, property, query, state } from "lit/decorators";
-import type { HomeAssistant } from "@ha/types";
+import { customElement, property, state } from "lit/decorators";
+import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { LCN, BinarySensorConfig } from "types/lcn";
 
@@ -20,13 +17,9 @@ export class LCNConfigBinarySensorElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property({ attribute: false }) public domainData: BinarySensorConfig = {
-    source: "BINSENSOR1",
-  };
+  @property({ attribute: false }) public domainData!: BinarySensorConfig;
 
   @state() private _source!: ConfigItem;
-
-  @query("#source-select") private _sourceSelect!: HaMdSelect;
 
   private get _sources(): ConfigItem[] {
     const binarySensor: string = this.lcn.localize("binary-sensor");
@@ -42,16 +35,14 @@ export class LCNConfigBinarySensorElement extends LitElement {
     ];
   }
 
-  public connectedCallback(): void {
-    super.connectedCallback();
-    this._source = this._sources[0];
-  }
+  public willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
 
-  protected async updated(changedProperties: PropertyValues) {
-    if (changedProperties.has("_sourceType")) {
-      this._sourceSelect.selectIndex(0);
+    if (!this._source) {
+      this._source = this._sources[0];
+
+      this.domainData = { source: this._source.value };
     }
-    super.updated(changedProperties);
   }
 
   protected render() {
@@ -60,28 +51,23 @@ export class LCNConfigBinarySensorElement extends LitElement {
     }
     return html`
       <div class="sources">
-        <ha-md-select
+        <ha-select
           id="source-select"
           .label=${this.lcn.localize("source")}
           .value=${this._source.value}
-          @change=${this._sourceChanged}
-          @closed=${stopPropagation}
-        >
-          ${this._sources.map(
-            (source) => html`
-              <ha-md-select-option .value=${source.value}> ${source.name} </ha-md-select-option>
-            `,
-          )}
-        </ha-md-select>
+          @selected=${this._sourceChanged}
+          .options=${this._sources.map((source) => ({
+            value: source.value,
+            label: source.name,
+          }))}
+        ></ha-select>
       </div>
     `;
   }
 
-  private _sourceChanged(ev: CustomEvent): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._source = this._sources.find((source) => source.value === target.value)!;
+  private _sourceChanged(ev: ValueChangedEvent<string>): void {
+    ev.stopPropagation();
+    this._source = this._sources.find((source) => source.value === ev.detail.value)!;
     this.domainData.source = this._source.value;
   }
 

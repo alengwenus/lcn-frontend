@@ -4,11 +4,15 @@ import { brandsUrl } from "@ha/util/brands-url";
 import { VERSION } from "version";
 
 export async function renderBrandLogo(hassTabsSubpageDataTable: HaTabsSubpageDataTable) {
-  const toolbarContent = hassTabsSubpageDataTable
-    .shadowRoot!.querySelector("hass-tabs-subpage")!
-    .shadowRoot!.querySelector(".toolbar-content")!;
+  const toolbarContent = hassTabsSubpageDataTable?.shadowRoot
+    ?.querySelector("hass-tabs-subpage")
+    ?.shadowRoot?.querySelector(".toolbar-content");
 
-  const tabbar = toolbarContent.querySelector("#tabbar");
+  if (!toolbarContent) return;
+
+  const tabbar = toolbarContent?.querySelector("#tabbar");
+
+  if (!tabbar) return;
 
   if (!toolbarContent.querySelector("#brand-logo")) {
     const img = document.createElement("img");
