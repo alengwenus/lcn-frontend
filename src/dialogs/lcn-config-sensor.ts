@@ -1,12 +1,9 @@
-import "@ha/components/ha-md-select";
-import "@ha/components/ha-md-select-option";
-import type { HaMdSelect } from "@ha/components/ha-md-select";
+import "@ha/components/ha-select";
 import type { CSSResultGroup, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
-import { customElement, property, query, state } from "lit/decorators";
-import type { HomeAssistant } from "@ha/types";
+import { customElement, property, state } from "lit/decorators";
+import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
-import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import type { LCN, SensorConfig } from "types/lcn";
 
 interface ConfigItem {
@@ -28,18 +25,13 @@ export class LCNConfigSensorElement extends LitElement {
 
   @property({ attribute: false, type: Number }) public softwareSerial = -1;
 
-  @property({ attribute: false }) public domainData: SensorConfig = {
-    source: "VAR1",
-    unit_of_measurement: "NATIVE",
-  };
+  @property({ attribute: false }) public domainData!: SensorConfig;
 
   @state() private _sourceType!: ConfigItemCollection;
 
   @state() private _source!: ConfigItem;
 
   @state() private _unit!: ConfigItem;
-
-  @query("#source-select") private _sourceSelect!: HaMdSelect;
 
   private get _is2013() {
     return this.softwareSerial >= 0x170206;
@@ -188,18 +180,19 @@ export class LCNConfigSensorElement extends LitElement {
     ];
   }
 
-  public connectedCallback(): void {
-    super.connectedCallback();
-    this._sourceType = this._sourceTypes[0];
-    this._source = this._sourceType.value[0];
-    this._unit = this._varUnits[0];
-  }
+  public willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
 
-  protected async updated(changedProperties: PropertyValues) {
-    if (changedProperties.has("_sourceType")) {
-      this._sourceSelect.selectIndex(0);
+    if (!this._sourceType) {
+      this._sourceType = this._sourceTypes[0];
+      this._source = this._sourceType.value[0];
+      this._unit = this._varUnits[0];
+
+      this.domainData = {
+        source: this._source.value,
+        unit_of_measurement: this._unit.value,
+      };
     }
-    super.updated(changedProperties);
   }
 
   protected render() {
@@ -208,75 +201,55 @@ export class LCNConfigSensorElement extends LitElement {
     }
     return html`
       <div class="sources">
-        <ha-md-select
+        <ha-select
           id="source-type-select"
           .label=${this.lcn.localize("source-type")}
           .value=${this._sourceType.id}
-          @change=${this._sourceTypeChanged}
-          @closed=${stopPropagation}
-        >
-          ${this._sourceTypes.map(
-            (sourceType) => html`
-              <ha-md-select-option .value=${sourceType.id}>
-                ${sourceType.name}
-              </ha-md-select-option>
-            `,
-          )}
-        </ha-md-select>
+          @selected=${this._sourceTypeChanged}
+          .options=${this._sourceTypes.map((sourceType) => ({
+            value: sourceType.id,
+            label: sourceType.name,
+          }))}
+        ></ha-select>
 
-        <ha-md-select
+        <ha-select
           id="source-select"
           .label=${this.lcn.localize("source")}
           .value=${this._source.value}
-          @change=${this._sourceChanged}
-          @closed=${stopPropagation}
-        >
-          ${this._sourceType.value.map(
-            (source) => html`
-              <ha-md-select-option .value=${source.value}> ${source.name} </ha-md-select-option>
-            `,
-          )}
-        </ha-md-select>
+          @selected=${this._sourceChanged}
+          .options=${this._sourceType.value.map((source) => ({
+            value: source.value,
+            label: source.name,
+          }))}
+        ></ha-select>
       </div>
 
-      <ha-md-select
+      <ha-select
         id="unit-select"
         .label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
         .value=${this._unit.value}
-        @change=${this._unitChanged}
-        @closed=${stopPropagation}
-      >
-        ${this._varUnits.map(
-          (unit) => html`
-            <ha-md-select-option .value=${unit.value}> ${unit.name} </ha-md-select-option>
-          `,
-        )}
-      </ha-md-select>
+        @selected=${this._unitChanged}
+        .options=${this._varUnits.map((unit) => ({
+          value: unit.value,
+          label: unit.name,
+        }))}
+      ></ha-select>
     `;
   }
 
-  private _sourceTypeChanged(ev: CustomEvent): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._sourceType = this._sourceTypes.find((sourceType) => sourceType.id === target.value)!;
+  private _sourceTypeChanged(ev: ValueChangedEvent<string>): void {
+    this._sourceType = this._sourceTypes.find((sourceType) => sourceType.id === ev.detail.value)!;
     this._source = this._sourceType.value[0];
     this.domainData.source = this._source.value;
   }
 
-  private _sourceChanged(ev: CustomEvent): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._source = this._sourceType.value.find((source) => source.value === target.value)!;
+  private _sourceChanged(ev: ValueChangedEvent<string>): void {
+    this._source = this._sourceType.value.find((source) => source.value === ev.detail.value)!;
     this.domainData.source = this._source.value;
   }
 
-  private _unitChanged(ev: CustomEvent): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._unit = this._varUnits.find((unit) => unit.value === target.value)!;
+  private _unitChanged(ev: ValueChangedEvent<string>): void {
+    this._unit = this._varUnits.find((unit) => unit.value === ev.detail.value)!;
     this.domainData.unit_of_measurement = this._unit.value;
   }
 
@@ -289,7 +262,7 @@ export class LCNConfigSensorElement extends LitElement {
           grid-template-columns: 1fr 1fr;
           column-gap: 4px;
         }
-        ha-md-select {
+        ha-select {
           display: block;
           margin-bottom: 8px;
         }

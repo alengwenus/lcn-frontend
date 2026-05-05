@@ -1,11 +1,8 @@
-import "@ha/components/ha-md-select";
-import "@ha/components/ha-md-select-option";
-import type { HaMdSelect } from "@ha/components/ha-md-select";
-import type { CSSResult } from "lit";
+import "@ha/components/ha-select";
+import type { CSSResult, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import type { HomeAssistant } from "@ha/types";
-import { stopPropagation } from "@ha/common/dom/stop_propagation";
+import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { LCN, CoverConfig } from "types/lcn";
 
@@ -20,11 +17,7 @@ export class LCNConfigCoverElement extends LitElement {
 
   @property({ attribute: false }) public lcn!: LCN;
 
-  @property({ attribute: false }) public domainData: CoverConfig = {
-    motor: "MOTOR1",
-    positioning_mode: "NONE",
-    reverse_time: "RT1200",
-  };
+  @property({ attribute: false }) public domainData!: CoverConfig;
 
   @state() private _motor!: ConfigItem;
 
@@ -56,11 +49,20 @@ export class LCNConfigCoverElement extends LitElement {
     ];
   }
 
-  public connectedCallback(): void {
-    super.connectedCallback();
-    this._motor = this._motors[0];
-    this._positioningMode = this._positioningModes[0];
-    this._reverseDelay = this._reverseDelays[0];
+  public willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
+
+    if (!this._motor) {
+      this._motor = this._motors[0];
+      this._positioningMode = this._positioningModes[0];
+      this._reverseDelay = this._reverseDelays[0];
+
+      this.domainData = {
+        motor: this._motor.value,
+        positioning_mode: this._positioningMode.value,
+        reverse_time: this._reverseDelay.value,
+      };
+    }
   }
 
   protected render() {
@@ -68,63 +70,47 @@ export class LCNConfigCoverElement extends LitElement {
       return nothing;
     }
     return html`
-      <ha-md-select
+      <ha-select
         id="motor-select"
         .label=${this.lcn.localize("motor")}
         .value=${this._motor.value}
-        @change=${this._motorChanged}
-        @closed=${stopPropagation}
-      >
-        ${this._motors.map(
-          (motor) => html`
-            <ha-md-select-option .value=${motor.value}> ${motor.name} </ha-md-select-option>
-          `,
-        )}
-      </ha-md-select>
+        @selected=${this._motorChanged}
+        .options=${this._motors.map((motor) => ({
+          value: motor.value,
+          label: motor.name,
+        }))}
+      ></ha-select>
 
       ${this._motor.value === "OUTPUTS"
         ? html`
-            <ha-md-select
+            <ha-select
               id="reverse-delay-select"
               .label=${this.lcn.localize("reverse-delay")}
               .value=${this._reverseDelay.value}
-              @change=${this._reverseDelayChanged}
-              @closed=${stopPropagation}
-            >
-              ${this._reverseDelays.map(
-                (reverseDelay) => html`
-                  <ha-md-select-option .value=${reverseDelay.value}>
-                    ${reverseDelay.name}
-                  </ha-md-select-option>
-                `,
-              )}
-            </ha-md-select>
+              @selected=${this._reverseDelayChanged}
+              .options=${this._reverseDelays.map((reverseDelay) => ({
+                value: reverseDelay.value,
+                label: reverseDelay.name,
+              }))}
+            ></ha-select>
           `
         : html`
-            <ha-md-select
+            <ha-select
               id="positioning-mode-select"
               .label=${this.lcn.localize("motor-positioning-mode")}
               .value=${this._positioningMode.value}
-              @change=${this._positioningModeChanged}
-              @closed=${stopPropagation}
-            >
-              ${this._positioningModes.map(
-                (positioningMode) => html`
-                  <ha-md-select-option .value=${positioningMode.value}>
-                    ${positioningMode.name}
-                  </ha-md-select-option>
-                `,
-              )}
-            </ha-md-select>
+              @selected=${this._positioningModeChanged}
+              .options=${this._positioningModes.map((positioningMode) => ({
+                value: positioningMode.value,
+                label: positioningMode.name,
+              }))}
+            ></ha-select>
           `}
     `;
   }
 
-  private _motorChanged(ev: CustomEvent): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._motor = this._motors.find((motor) => motor.value === target.value)!;
+  private _motorChanged(ev: ValueChangedEvent<string>): void {
+    this._motor = this._motors.find((motor) => motor.value === ev.detail.value)!;
     this._positioningMode = this._positioningModes[0];
     this._reverseDelay = this._reverseDelays[0];
     this.domainData.motor = this._motor.value;
@@ -132,22 +118,16 @@ export class LCNConfigCoverElement extends LitElement {
     else this.domainData.reverse_time = "RT1200";
   }
 
-  private _positioningModeChanged(ev: CustomEvent): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
+  private _positioningModeChanged(ev: ValueChangedEvent<string>): void {
     this._positioningMode = this._positioningModes.find(
-      (positioningMode) => positioningMode.value === target.value,
+      (positioningMode) => positioningMode.value === ev.detail.value,
     )!;
     this.domainData.positioning_mode = this._positioningMode.value;
   }
 
-  private _reverseDelayChanged(ev: CustomEvent): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
+  private _reverseDelayChanged(ev: ValueChangedEvent<string>): void {
     this._reverseDelay = this._reverseDelays.find(
-      (reverseDelay) => reverseDelay.value === target.value,
+      (reverseDelay) => reverseDelay.value === ev.detail.value,
     )!;
     this.domainData.reverse_time = this._reverseDelay.value;
   }
@@ -156,7 +136,7 @@ export class LCNConfigCoverElement extends LitElement {
     return [
       haStyleDialog,
       css`
-        ha-md-select {
+        ha-select {
           display: block;
           margin-bottom: 8px;
         }

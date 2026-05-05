@@ -1,6 +1,4 @@
-import "@ha/components/ha-md-select";
-import "@ha/components/ha-md-select-option";
-import type { HaMdSelect } from "@ha/components/ha-md-select";
+import "@ha/components/ha-select";
 import "@ha/components/ha-textfield";
 import type { HaTextField } from "@ha/components/ha-textfield";
 import "@ha/components/ha-switch";
@@ -8,7 +6,6 @@ import type { CSSResultGroup, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
-import { stopPropagation } from "@ha/common/dom/stop_propagation";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { LCN, ClimateConfig } from "types/lcn";
 
@@ -25,15 +22,7 @@ export class LCNConfigClimateElement extends LitElement {
 
   @property({ attribute: false, type: Number }) public softwareSerial = -1;
 
-  @property({ attribute: false }) public domainData: ClimateConfig = {
-    source: "VAR1",
-    setpoint: "R1VARSETPOINT",
-    max_temp: 35,
-    min_temp: 7,
-    lockable: false,
-    target_value_locked: -1,
-    unit_of_measurement: "°C",
-  };
+  @property({ attribute: false }) public domainData!: ClimateConfig;
 
   @state() private _source!: ConfigItem;
 
@@ -117,16 +106,25 @@ export class LCNConfigClimateElement extends LitElement {
     return this._is2012 ? this._varSetpoints.concat(this._variablesNew) : this._varSetpoints;
   }
 
-  public connectedCallback(): void {
-    super.connectedCallback();
-    this._source = this._sources[0];
-    this._setpoint = this._setpoints[0];
-    this._unit = this._varUnits[0];
-    this._lockOption = this._regulatorLockOptions[0];
-  }
-
   public willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
+    if (!this._source) {
+      this._source = this._sources[0];
+      this._setpoint = this._setpoints[0];
+      this._unit = this._varUnits[0];
+      this._lockOption = this._regulatorLockOptions[0];
+
+      this.domainData = {
+        source: this._source.value,
+        setpoint: this._setpoint.value,
+        max_temp: 35,
+        min_temp: 7,
+        lockable: false,
+        target_value_locked: -1,
+        unit_of_measurement: this._unit.value,
+      };
+    }
+
     this._invalid =
       !this._validateMinTemp(this.domainData.min_temp) ||
       !this._validateMaxTemp(this.domainData.max_temp) ||
@@ -150,50 +148,39 @@ export class LCNConfigClimateElement extends LitElement {
     }
     return html`
       <div class="sources">
-        <ha-md-select
+        <ha-select
           id="source-select"
           .label=${this.lcn.localize("source")}
           .value=${this._source.value}
-          @change=${this._sourceChanged}
-          @closed=${stopPropagation}
-        >
-          ${this._sources.map(
-            (source) => html`
-              <ha-md-select-option .value=${source.value}> ${source.name} </ha-md-select-option>
-            `,
-          )}
-        </ha-md-select>
+          @selected=${this._sourceChanged}
+          .options=${this._sources.map((source) => ({
+            value: source.value,
+            label: source.name,
+          }))}
+        ></ha-select>
 
-        <ha-md-select
+        <ha-select
           id="setpoint-select"
           .label=${this.lcn.localize("setpoint")}
           .value=${this._setpoint.value}
-          fixedMenuPosition
-          @change=${this._setpointChanged}
-          @closed=${stopPropagation}
-        >
-          ${this._setpoints.map(
-            (setpoint) => html`
-              <ha-md-select-option .value=${setpoint.value}> ${setpoint.name} </ha-md-select-option>
-            `,
-          )}
-        </ha-md-select>
+          @selected=${this._setpointChanged}
+          .options=${this._setpoints.map((setpoint) => ({
+            value: setpoint.value,
+            label: setpoint.name,
+          }))}
+        ></ha-select>
       </div>
 
-      <ha-md-select
+      <ha-select
         id="unit-select"
         .label=${this.lcn.localize("dashboard-entities-dialog-unit-of-measurement")}
         .value=${this._unit.value}
-        fixedMenuPosition
-        @change=${this._unitChanged}
-        @closed=${stopPropagation}
-      >
-        ${this._varUnits.map(
-          (unit) => html`
-            <ha-md-select-option .value=${unit.value}> ${unit.name} </ha-md-select-option>
-          `,
-        )}
-      </ha-md-select>
+        @selected=${this._unitChanged}
+        .options=${this._varUnits.map((unit) => ({
+          value: unit.value,
+          label: unit.name,
+        }))}
+      ></ha-select>
 
       <div class="temperatures">
         <ha-textfield
@@ -228,21 +215,16 @@ export class LCNConfigClimateElement extends LitElement {
       </div>
 
       <div class="lock-options">
-        <ha-md-select
+        <ha-select
           id="lock-options-select"
           .label=${this.lcn.localize("dashboard-entities-dialog-climate-regulator-lock")}
           .value=${this._lockOption.value}
-          @change=${this._lockOptionChanged}
-          @closed=${stopPropagation}
-        >
-          ${this._regulatorLockOptions.map(
-            (lockOption) => html`
-              <ha-md-select-option .value=${lockOption.value}>
-                ${lockOption.name}
-              </ha-md-select-option>
-            `,
-          )}
-        </ha-md-select>
+          @selected=${this._lockOptionChanged}
+          .options=${this._regulatorLockOptions.map((lockOption) => ({
+            value: lockOption.value,
+            label: lockOption.name,
+          }))}
+        ></ha-select>
 
         <ha-textfield
           id="target-value"
@@ -267,18 +249,12 @@ export class LCNConfigClimateElement extends LitElement {
   }
 
   private _sourceChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._source = this._sources.find((source) => source.value === target.value)!;
+    this._source = this._sources.find((source) => source.value === ev.detail.value)!;
     this.domainData.source = this._source.value;
   }
 
   private _setpointChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._setpoint = this._setpoints.find((setpoint) => setpoint.value === target.value)!;
+    this._setpoint = this._setpoints.find((setpoint) => setpoint.value === ev.detail.value)!;
     this.domainData.setpoint = this._setpoint.value;
   }
 
@@ -299,21 +275,14 @@ export class LCNConfigClimateElement extends LitElement {
   }
 
   private _unitChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaMdSelect;
-    if (target.selectedIndex === -1) return;
-
-    this._unit = this._varUnits.find((unit) => unit.value === target.value)!;
+    this._unit = this._varUnits.find((unit) => unit.value === ev.detail.value)!;
     this.domainData.unit_of_measurement = this._unit.value;
   }
 
   private _lockOptionChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaMdSelect;
-
-    if (target.selectedIndex === -1) this._lockOption = this._regulatorLockOptions[0];
-    else
-      this._lockOption = this._regulatorLockOptions.find(
-        (option) => option.value === target.value,
-      )!;
+    this._lockOption = this._regulatorLockOptions.find(
+      (option) => option.value === ev.detail.value,
+    )!;
 
     switch (this._lockOption.value) {
       case "LOCKABLE":
@@ -372,7 +341,7 @@ export class LCNConfigClimateElement extends LitElement {
           grid-template-columns: 1fr 1fr;
           column-gap: 4px;
         }
-        ha-md-select,
+        ha-select,
         ha-textfield {
           display: block;
           margin-bottom: 8px;
