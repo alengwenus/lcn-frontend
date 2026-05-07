@@ -324,8 +324,13 @@ __metadata:
   linkType: hard
 
 "@babel/parser@npm:^7.28.6, @babel/parser@npm:^7.29.0":
+<<<<<<< HEAD
   version: 7.29.3
   resolution: "@babel/parser@npm:7.29.3"
+=======
+  version: 7.29.2
+  resolution: "@babel/parser@npm:7.29.2"
+>>>>>>> e1f48a9 (Bump homeassistant frontend to 20260325.2)
   dependencies:
     "@babel/types": "npm:^7.29.0"
   bin:
@@ -1065,7 +1070,11 @@ __metadata:
   languageName: node
   linkType: hard
 
+<<<<<<< HEAD
 "@babel/preset-env@npm:7.29.2":
+=======
+"@babel/preset-env@npm:7.29.2, @babel/preset-env@npm:^7.11.0":
+>>>>>>> e1f48a9 (Bump homeassistant frontend to 20260325.2)
   version: 7.29.2
   resolution: "@babel/preset-env@npm:7.29.2"
   dependencies:
@@ -5228,8 +5237,13 @@ __metadata:
   linkType: hard
 
 "@typescript-eslint/tsconfig-utils@npm:^8.57.1":
+<<<<<<< HEAD
   version: 8.59.2
   resolution: "@typescript-eslint/tsconfig-utils@npm:8.59.2"
+=======
+  version: 8.59.1
+  resolution: "@typescript-eslint/tsconfig-utils@npm:8.59.1"
+>>>>>>> e1f48a9 (Bump homeassistant frontend to 20260325.2)
   peerDependencies:
     typescript: ">=4.8.4 <6.1.0"
   checksum: 10/42479906a01469322d22e8d45c6200998382f19c1c2dcb59d6adb2e796238a0476f1aa8fd1a1b2c3b36c0c7aa77ebb72ffc958bd11b6efadd36cd175646d13de
@@ -5260,9 +5274,15 @@ __metadata:
   linkType: hard
 
 "@typescript-eslint/types@npm:^8.57.1":
+<<<<<<< HEAD
   version: 8.59.2
   resolution: "@typescript-eslint/types@npm:8.59.2"
   checksum: 10/dc828a5c50debac37047a30ec5bfdc21e2b410c7c8c517c1ab01164fa9a0197f4f6b829f502dd992d21044442277029bfacf0c0b70d7ac9446977cbc8d375e13
+=======
+  version: 8.59.1
+  resolution: "@typescript-eslint/types@npm:8.59.1"
+  checksum: 10/4d324a01c2314d8e196b43b9dc5fe9a4d82c1b65f4915cd2f965879c5565d4453603b6f7b6bcdc436fb629135f07ad0f9d274e4697b02ce8bc1c0310916f7ace
+>>>>>>> e1f48a9 (Bump homeassistant frontend to 20260325.2)
   languageName: node
   linkType: hard
 
@@ -10814,7 +10834,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+<<<<<<< HEAD
 "lru-cache@npm:^11.0.0, lru-cache@npm:^11.2.7":
+  version: 11.3.6
+  resolution: "lru-cache@npm:11.3.6"
+  checksum: 10/d69ab552776954c7d310a6b2843e7d6be3a1c36c0ce45fca373c225ce5a06b95fd4ed724305d9d15fa55aa24d3cd42f854aa061bc481241225b3accf32993eab
+=======
+"lru-cache@npm:^11.0.0":
+  version: 11.3.5
+  resolution: "lru-cache@npm:11.3.5"
+  checksum: 10/3701b77e87765a3aea453402a7850bdbf7e02445210f35bd5ba1561f601f605f488bf9932be4a3851a6664073924f671a1ec99c4a1a98c457e0d126872a3e04f
+>>>>>>> e1f48a9 (Bump homeassistant frontend to 20260325.2)
+  languageName: node
+  linkType: hard
+
+"lru-cache@npm:^11.2.7":
   version: 11.3.6
   resolution: "lru-cache@npm:11.3.6"
   checksum: 10/d69ab552776954c7d310a6b2843e7d6be3a1c36c0ce45fca373c225ce5a06b95fd4ed724305d9d15fa55aa24d3cd42f854aa061bc481241225b3accf32993eab
@@ -11897,13 +11931,22 @@ __metadata:
   linkType: hard
 
 "postcss@npm:^8.5.10":
+<<<<<<< HEAD
   version: 8.5.14
   resolution: "postcss@npm:8.5.14"
+=======
+  version: 8.5.13
+  resolution: "postcss@npm:8.5.13"
+>>>>>>> e1f48a9 (Bump homeassistant frontend to 20260325.2)
   dependencies:
     nanoid: "npm:^3.3.11"
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
+<<<<<<< HEAD
   checksum: 10/2e3f4dea69692918fe9df5402beb0e54df84499995a094f2fbf63d1a9e38bc1b7a42854df47f09e02593213e01a5eb0627b1d1bd6d1b0ea90767b2e072f7167c
+=======
+  checksum: 10/4763873c0a39a6f71fc552d0046fedb80dca889ed0b85e36217285f754a3bd003a906f6088feb266b1f53b0ad20483a475dce4cc1c756f05e27940c51e40ebd8
+>>>>>>> e1f48a9 (Bump homeassistant frontend to 20260325.2)
   languageName: node
   linkType: hard
 
