@@ -7,7 +7,6 @@ export interface LCN {
   localize(string: string, replace?: Record<string, any>): string;
   log: LCNLogger;
   config_entry: ConfigEntry;
-  supportedPlatforms: string[];
 }
 
 export type LcnAddress = [number, number, boolean];

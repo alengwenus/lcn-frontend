@@ -136,7 +136,7 @@ export class LCNEntitiesPage extends LitElement {
 
   @state()
   @consume({ context: fullEntitiesContext, subscribe: true })
-  _entityRegistryEntries!: EntityRegistryEntry[];
+  _entityRegistryEntries?: EntityRegistryEntry[];
 
   @storage({
     storage: "sessionStorage",
@@ -188,10 +188,12 @@ export class LCNEntitiesPage extends LitElement {
   private _dataTable!: Promise<HaTabsSubpageDataTable>;
 
   private get _extEntityConfigs(): EntityRowData[] {
+    if (!this._entityRegistryEntries) return [];
+
     const extEntityConfigs = memoize(
       (
         entityConfigs: LcnEntityConfig[] = this._entityConfigs,
-        entityRegistryEntries: EntityRegistryEntry[] = this._entityRegistryEntries,
+        entityRegistryEntries: EntityRegistryEntry[] = this._entityRegistryEntries!,
       ) =>
         entityConfigs.map((entityConfig) => ({
           ...entityConfig,
@@ -500,6 +502,7 @@ export class LCNEntitiesPage extends LitElement {
   }
 
   private async _openEditEntry(ev: CustomEvent): Promise<void> {
+    if (!this._entityRegistryEntries) return;
     const uniqueId = (ev.detail as RowClickedEvent).id;
     const entityConfig = this._getEntityConfigByUniqueId(uniqueId);
     const entityRegistryEntry = this._entityRegistryEntries.find(

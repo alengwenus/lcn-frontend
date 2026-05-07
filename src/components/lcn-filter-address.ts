@@ -44,7 +44,7 @@ export class HaFilterDomains extends LitElement {
         @expanded-changed=${this._expandedChanged}
       >
         <div slot="header" class="header">
-          ${this.lcn.localize("devices")}/${this.lcn.localize("addresses")}
+          ${this.lcn.localize("devices")}
           ${this.value?.length
             ? html`<div class="badge">${this.value?.length}</div>
                 <ha-icon-button
