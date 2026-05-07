@@ -5,10 +5,11 @@ import { customElement, property, state } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import type { HomeAssistant } from "@ha/types";
+import type { HaInputSearch } from "@ha/components/input/ha-input-search";
 import { haStyleScrollbar } from "@ha/resources/styles";
 import type { LCN, LcnAddress, LcnDeviceConfig } from "types/lcn";
 import "@ha/components/ha-domain-icon";
-import "@ha/components/search-input-outlined";
+import "@ha/components/input/ha-input-search";
 import "@ha/components/ha-expansion-panel";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-icon";
@@ -53,11 +54,11 @@ export class HaFilterDomains extends LitElement {
             : nothing}
         </div>
         ${this._shouldRender
-          ? html`<search-input-outlined
-                .hass=${this.hass}
-                .filter=${this._filter}
-                @value-changed=${this._handleSearchChange}
-              ></search-input-outlined>
+          ? html`<ha-input-search
+                appearence="outlined"
+                .value=${this._filter}
+                @input=${this._handleSearchChange}
+              ></ha-input-search>
 
               <mwc-list class="ha-scrollbar" multi @click=${this._handleItemClick}>
                 ${this._addresses(this.deviceConfigs, this._filter).map(
@@ -151,8 +152,8 @@ export class HaFilterDomains extends LitElement {
     });
   }
 
-  private _handleSearchChange(ev: CustomEvent) {
-    this._filter = ev.detail.value.toLowerCase();
+  private _handleSearchChange(ev: InputEvent) {
+    this._filter = ((ev.target as HaInputSearch).value ?? "").toLowerCase();
   }
 
   static get styles(): CSSResultGroup {
@@ -194,7 +195,7 @@ export class HaFilterDomains extends LitElement {
           padding: 0px 2px;
           color: var(--text-primary-color);
         }
-        search-input-outlined {
+        ha-input-search {
           display: block;
           padding: 0 8px;
         }
