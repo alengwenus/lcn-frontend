@@ -1,6 +1,6 @@
 import { ContextProvider } from "@lit/context";
 import { deviceConfigsContext, entityConfigsContext } from "components/context";
-import { LitElement, html } from "lit";
+import { html } from "lit";
 import "@ha/layouts/hass-loading-screen";
 import { customElement, property, state } from "lit/decorators";
 import "@ha/resources/append-ha-style";
@@ -13,8 +13,10 @@ import { getConfigEntry } from "@ha/data/config_entries";
 import type { HomeAssistant, Route } from "@ha/types";
 import { fullEntitiesContext } from "@ha/data/context";
 import { fetchEntityRegistry } from "@ha/data/entity/entity_registry";
+import { contextMixin } from "@ha/state/context-mixin";
 import "./lcn-router";
-import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
+import { HassBaseEl } from "@ha/state/hass-base-mixin";
+import type { PropertyValues } from "lit";
 import { LCNLogger } from "./lcn-logger";
 import { localize } from "./localize/localize";
 import type { LCN } from "./types/lcn";
@@ -22,7 +24,7 @@ import { fetchDevices, fetchEntities } from "./types/lcn";
 import type { LocationChangedEvent } from "./types/navigation";
 
 @customElement("lcn-frontend")
-class LcnFrontend extends ProvideHassLitMixin(LitElement) {
+class LcnFrontend extends contextMixin(HassBaseEl) {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public lcn!: LCN;
@@ -55,6 +57,9 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
     if (!this.hass) {
       return;
     }
+    // connect contexts by contextMixin
+    this.hassConnected();
+
     if (!this.lcn) {
       await this._initLCN();
       await this._postLCNSetup();
@@ -70,10 +75,17 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       this._applyTheme();
     });
 
-    makeDialogManager(this, this.shadowRoot!);
+    makeDialogManager(this);
 
     if (this.route.path === "" || this.route.path === "/") {
       navigate("/lcn/devices", { replace: true });
+    }
+  }
+
+  protected willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has("hass")) {
+      // update context providers when hass changes
+      this._updateHass(this.hass);
     }
   }
 
@@ -84,8 +96,6 @@ class LcnFrontend extends ProvideHassLitMixin(LitElement) {
       // BE translations
       this.hass.loadBackendTranslation("config_panel", "lcn", false),
       this.hass.loadBackendTranslation("selector", "lcn", false),
-      this.hass.loadBackendTranslation("title", this.lcn.supportedPlatforms, false),
-      this.hass.loadBackendTranslation("selector", this.lcn.supportedPlatforms, false),
     ]);
     results.forEach((result, index) => {
       if (result.status === "rejected") {
