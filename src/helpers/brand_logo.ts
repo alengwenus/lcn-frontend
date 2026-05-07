@@ -1,9 +1,30 @@
 import "@ha/components/ha-tooltip";
 import type { HaTabsSubpageDataTable } from "@ha/layouts/hass-tabs-subpage-data-table";
 import { brandsUrl } from "@ha/util/brands-url";
+import type { HomeAssistant } from "@ha/types";
 import { VERSION } from "version";
 
+async function lcnBrandsUrl(hass: HomeAssistant): Promise<string> {
+  const response = await fetch(
+    brandsUrl({
+      domain: "lcn",
+      type: "icon",
+    }),
+    {
+      headers: {
+        Authorization: `Bearer ${hass.auth.data.access_token}`,
+      },
+    },
+  );
+  if (!response.ok) return "";
+
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  return objectUrl;
+}
+
 export async function renderBrandLogo(hassTabsSubpageDataTable: HaTabsSubpageDataTable) {
+  const hass = hassTabsSubpageDataTable.hass;
   const toolbarContent = hassTabsSubpageDataTable?.shadowRoot
     ?.querySelector("hass-tabs-subpage")
     ?.shadowRoot?.querySelector(".toolbar-content");
@@ -14,21 +35,17 @@ export async function renderBrandLogo(hassTabsSubpageDataTable: HaTabsSubpageDat
 
   if (!tabbar) return;
 
-  if (!toolbarContent.querySelector("#brand-logo")) {
-    const img = document.createElement("img");
-    img.id = "brand-logo";
-    img.alt = "";
-    img.style.cursor = "pointer";
-    img.height = 48;
-    img.crossOrigin = "anonymous";
-    img.referrerPolicy = "no-referrer";
-    img.src = brandsUrl({
-      domain: "lcn",
-      type: "icon",
-    });
+  const brandUrl = await lcnBrandsUrl(hass);
 
-    img.title = `LCN Frontend Panel\nVersion: ${VERSION}`;
+  const brandHTML = `<img
+        id="brand-logo"
+        alt=""
+        height="48"
+        style="cursor: pointer;"
+        src=${brandUrl}
+        title="LCN Frontend Panel\nVersion: ${VERSION}"
+      />`;
 
-    tabbar?.before(img);
-  }
+  if (!toolbarContent?.querySelector("#brand-logo"))
+    tabbar?.insertAdjacentHTML("beforebegin", brandHTML);
 }
