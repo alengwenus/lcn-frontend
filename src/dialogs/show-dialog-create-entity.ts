@@ -4,6 +4,7 @@ import type { LCN, LcnEntityConfig, LcnDeviceConfig } from "types/lcn";
 export interface LcnEntityDialogParams {
   lcn: LCN;
   deviceConfig: LcnDeviceConfig | undefined;
+  deviceConfigs: LcnDeviceConfig[];
   dialogClosedCallback: (entityParams: Partial<LcnEntityConfig>) => Promise<boolean>;
 }
 

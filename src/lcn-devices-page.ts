@@ -6,7 +6,6 @@ import "@ha/components/ha-button";
 import "@ha/components/ha-dropdown";
 import type { HaDropdownSelectEvent } from "@ha/components/ha-dropdown";
 import "@ha/components/ha-dropdown-item";
-import "@ha/components/ha-fab";
 import "@ha/components/ha-help-tooltip";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-checkbox";
@@ -322,14 +321,10 @@ export class LCNConfigDashboard extends LitElement {
               `}
         </div>
 
-        <ha-fab
-          slot="fab"
-          .label=${this.lcn.localize("dashboard-devices-add")}
-          extended
-          @click=${this._addDevice}
-        >
+        <ha-button slot="fab" size="large" @click=${this._addDevice}>
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
-        </ha-fab>
+          ${this.lcn.localize("dashboard-devices-add")}
+        </ha-button>
       </hass-tabs-subpage-data-table>
     `;
   }
@@ -429,8 +424,9 @@ export class LCNConfigDashboard extends LitElement {
           ${this.lcn.localize("dashboard-devices-dialog-delete-warning")}
         `,
       }))
-    )
+    ) {
       return;
+    }
 
     for await (const device of devices) {
       await deleteDevice(this.hass, this.lcn.config_entry, device);

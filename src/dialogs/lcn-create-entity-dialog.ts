@@ -1,5 +1,3 @@
-import { consume } from "@lit/context";
-import { deviceConfigsContext } from "components/context";
 import "@ha/components/ha-button";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-select";
@@ -48,10 +46,6 @@ export class CreateEntityDialog extends LitElement {
 
   @state() private _deviceConfig?: LcnDeviceConfig;
 
-  @state()
-  @consume({ context: deviceConfigsContext, subscribe: true })
-  deviceConfigs!: LcnDeviceConfig[];
-
   private get _domains(): DomainItem[] {
     return [
       { name: this.lcn.localize("binary-sensor"), domain: "binary_sensor" },
@@ -72,7 +66,7 @@ export class CreateEntityDialog extends LitElement {
     this._deviceConfig = params.deviceConfig;
     this._open = true;
 
-    if (!this._deviceConfig) this._deviceConfig = this.deviceConfigs[0];
+    if (!this._deviceConfig) this._deviceConfig = this._params.deviceConfigs[0];
   }
 
   private _dialogClosed() {
@@ -102,7 +96,7 @@ export class CreateEntityDialog extends LitElement {
           .label=${this.lcn.localize("device")}
           .value=${this._deviceConfig ? addressToString(this._deviceConfig.address) : undefined}
           @selected=${this._deviceChanged}
-          .options=${this.deviceConfigs.map((deviceConfig) => ({
+          .options=${this._params.deviceConfigs.map((deviceConfig) => ({
             value: addressToString(deviceConfig.address),
             label: html`
               <div class="primary">${deviceConfig.name}</div>
@@ -207,7 +201,7 @@ export class CreateEntityDialog extends LitElement {
   private _deviceChanged(ev: ValueChangedEvent<string>): void {
     ev.stopPropagation();
     const address = stringToAddress(ev.detail.value);
-    this._deviceConfig = this.deviceConfigs.find(
+    this._deviceConfig = this._params!.deviceConfigs.find(
       (deviceConfig) =>
         deviceConfig.address[0] === address[0] &&
         deviceConfig.address[1] === address[1] &&

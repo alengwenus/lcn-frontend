@@ -21,7 +21,6 @@ import "@ha/components/ha-icon";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-state-icon";
 import "@ha/components/ha-domain-icon";
-import "@ha/components/ha-fab";
 import "@ha/components/ha-tooltip";
 import { mainWindow } from "@ha/common/dom/get_main_window";
 import type {
@@ -474,14 +473,10 @@ export class LCNEntitiesPage extends LitElement {
 
         ${hasFab
           ? html`
-              <ha-fab
-                slot="fab"
-                @click=${this._addEntity}
-                .label=${this.lcn.localize("dashboard-entities-add")}
-                extended
-              >
+              <ha-button slot="fab" @click=${this._addEntity}>
                 <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-              </ha-fab>
+                ${this.lcn.localize("dashboard-entities-add")}
+              </ha-button>
             `
           : nothing}
       </hass-tabs-subpage-data-table>
@@ -520,6 +515,7 @@ export class LCNEntitiesPage extends LitElement {
     showLCNCreateEntityDialog(this, {
       lcn: this.lcn,
       deviceConfig: this._deviceConfig as LcnDeviceConfig | undefined,
+      deviceConfigs: this._deviceConfigs,
       dialogClosedCallback: async (entityParams) => {
         if (await addEntity(this.hass, this.lcn.config_entry, entityParams)) {
           updateEntityConfigs(this);

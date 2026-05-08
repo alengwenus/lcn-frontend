@@ -1,4 +1,4 @@
-import IntlMessageFormat from "intl-messageformat";
+import { IntlMessageFormat } from "intl-messageformat";
 import type { HomeAssistant } from "@ha/types";
 import { LCNLogger } from "lcn-logger";
 import * as de from "./languages/de.json";

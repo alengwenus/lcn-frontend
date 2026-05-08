@@ -66,10 +66,11 @@ export async function importConfig(hass: HomeAssistant, lcn: LCN) {
 
   for await (const entity of config.entities) {
     if (await addEntity(hass, lcn.config_entry, entity)) entitiesSuccess++;
-    else
+    else {
       lcn.log.debug(
         `Skipping entity ${addressToString(entity.address)}-${entity.name}. Already present.`,
       );
+    }
   }
   lcn.log.debug(`Sucessfully imported ${devicesSuccess} out of ${config.devices.length} devices.`);
   lcn.log.debug(

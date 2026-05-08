@@ -16,7 +16,9 @@ async function lcnBrandsUrl(hass: HomeAssistant): Promise<string> {
       },
     },
   );
-  if (!response.ok) return "";
+  if (!response.ok) {
+    return "";
+  }
 
   const blob = await response.blob();
   const objectUrl = URL.createObjectURL(blob);
@@ -46,6 +48,7 @@ export async function renderBrandLogo(hassTabsSubpageDataTable: HaTabsSubpageDat
         title="LCN Frontend Panel\nVersion: ${VERSION}"
       />`;
 
-  if (!toolbarContent?.querySelector("#brand-logo"))
+  if (!toolbarContent?.querySelector("#brand-logo")) {
     tabbar?.insertAdjacentHTML("beforebegin", brandHTML);
+  }
 }
