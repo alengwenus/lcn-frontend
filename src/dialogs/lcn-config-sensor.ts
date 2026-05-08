@@ -193,6 +193,13 @@ export class LCNConfigSensorElement extends LitElement {
         unit_of_measurement: this._unit.value,
       };
     }
+
+    if (changedProperties.has("softwareSerial")) {
+      // reset source type and source when software serial changes, as supported sources depend on the LCN version
+      this._sourceType = this._sourceTypes[0];
+      this._source = this._sourceType.value[0];
+      this.domainData.source = this._source.value;
+    }
   }
 
   protected render() {

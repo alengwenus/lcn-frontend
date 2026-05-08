@@ -131,6 +131,18 @@ export class LCNConfigClimateElement extends LitElement {
       };
     }
 
+    if (changedProperties.has("softwareSerial")) {
+      // reset source, setpoint and lock options when software serial changes, as supported options might differ
+      this._source = this._sources[0];
+      this._setpoint = this._setpoints[0];
+      this._lockOption = this._regulatorLockOptions[0];
+      this._targetValueLocked = 0;
+      this.domainData.source = this._source.value;
+      this.domainData.setpoint = this._setpoint.value;
+      this.domainData.lockable = false;
+      this.domainData.target_value_locked = -1;
+    }
+
     this._invalid = this._minTempInvalid || this._maxTempInvalid || this._targetValueLockedInvalid;
   }
 
