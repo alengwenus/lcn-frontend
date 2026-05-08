@@ -1,5 +1,4 @@
 import "@ha/components/ha-select";
-import "@ha/components/ha-textfield";
 import type { CSSResultGroup, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";

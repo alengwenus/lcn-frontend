@@ -1,13 +1,13 @@
 import "@ha/components/ha-select";
 import "@ha/components/ha-radio";
 import "@ha/components/ha-formfield";
-import "@ha/components/ha-textfield";
+import "@ha/components/input/ha-input";
 import type { CSSResultGroup, PropertyValues } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import type { HaRadio } from "@ha/components/ha-radio";
 import type { HaSwitch } from "@ha/components/ha-switch";
-import type { HaTextField } from "@ha/components/ha-textfield";
+import type { HaInput } from "@ha/components/input/ha-input";
 import type { HomeAssistant, ValueChangedEvent } from "@ha/types";
 import { haStyleDialog } from "@ha/resources/styles";
 import type { LCN, LightConfig } from "types/lcn";
@@ -34,6 +34,8 @@ export class LCNConfigLightElement extends LitElement {
   @state() private _portType!: ConfigItemCollection;
 
   @state() private _port!: ConfigItem;
+
+  @state() private _transitionInvalid = false;
 
   private _invalid = false;
 
@@ -81,7 +83,7 @@ export class LCNConfigLightElement extends LitElement {
       };
     }
 
-    this._invalid = !this._validateTransition(this.domainData.transition);
+    this._invalid = this._transitionInvalid;
   }
 
   protected update(changedProperties: PropertyValues) {
@@ -148,7 +150,7 @@ export class LCNConfigLightElement extends LitElement {
             ></ha-switch>
           </div>
 
-          <ha-textfield
+          <ha-input
             id="transition"
             .label=${this.lcn.localize("dashboard-entities-dialog-light-transition")}
             type="number"
@@ -158,12 +160,12 @@ export class LCNConfigLightElement extends LitElement {
             max="486"
             required
             autoValidate
-            @input=${this._transitionChanged}
-            .validityTransform=${this._validityTransformTransition}
+            .invalid=${this._transitionInvalid}
             .validationMessage=${this.lcn.localize(
               "dashboard-entities-dialog-light-transition-error",
             )}
-          ></ha-textfield>
+            @input=${this._transitionChanged}
+          ></ha-input>
         `;
       case "relay":
         return nothing;
@@ -190,17 +192,19 @@ export class LCNConfigLightElement extends LitElement {
   }
 
   private _transitionChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaTextField;
-    this.domainData.transition = +target.value;
-    this.requestUpdate();
+    const input = ev.target as HaInput;
+    if (!input.value) {
+      this._transitionInvalid = true;
+    } else {
+      this.domainData.transition = +input.value;
+      this._transitionInvalid = !this._validateTransition(this.domainData.transition);
+    }
+
+    input.reportValidity();
   }
 
   private _validateTransition(transition: number): boolean {
     return transition >= 0 && transition <= 486;
-  }
-
-  private get _validityTransformTransition() {
-    return (value: string) => ({ valid: this._validateTransition(+value) });
   }
 
   static get styles(): CSSResultGroup[] {
@@ -211,7 +215,7 @@ export class LCNConfigLightElement extends LitElement {
           margin-top: 16px;
         }
         ha-select,
-        ha-textfield {
+        ha-input {
           display: block;
           margin-bottom: 8px;
         }

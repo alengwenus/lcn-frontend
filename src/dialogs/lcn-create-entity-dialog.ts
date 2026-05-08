@@ -3,6 +3,7 @@ import { deviceConfigsContext } from "components/context";
 import "@ha/components/ha-button";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-select";
+import "@ha/components/input/ha-input";
 import { fireEvent } from "@ha/common/dom/fire_event";
 import type { CSSResultGroup } from "lit";
 import { css, html, LitElement, nothing } from "lit";
@@ -20,7 +21,7 @@ import "./lcn-config-light";
 import "./lcn-config-scene";
 import "./lcn-config-sensor";
 import "./lcn-config-switch";
-import type { HaTextField } from "@ha/components/ha-textfield";
+import type { HaInput } from "@ha/components/input/ha-input";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 import type { LcnEntityDialogParams } from "./show-dialog-create-entity";
 
@@ -121,12 +122,16 @@ export class CreateEntityDialog extends LitElement {
           }))}
         ></ha-select>
 
-        <ha-textfield
+        <ha-input
           id="name-input"
           label=${this.lcn.localize("name")}
           type="string"
+          required
+          autoValidate
+          .invalid=${!this._name}
+          .validationMessage="${this.lcn.localize("dashboard-entities-dialog-error-name")};"
           @input=${this._nameChanged}
-        ></ha-textfield>
+        ></ha-input>
 
         ${this._renderDomain(this.domain)}
 
@@ -210,14 +215,16 @@ export class CreateEntityDialog extends LitElement {
     );
   }
 
-  private _nameChanged(ev: CustomEvent): void {
-    const target = ev.target as HaTextField;
-    this._name = target.value;
+  private _nameChanged(ev: InputEvent): void {
+    const input = ev.target as HaInput;
+    this._name = input.value!;
     this._validityChanged(
       new CustomEvent("validity-changed", {
         detail: !this._name,
       }),
     );
+
+    input.reportValidity();
   }
 
   private _validityChanged(ev: CustomEvent): void {
@@ -258,7 +265,7 @@ export class CreateEntityDialog extends LitElement {
           --dialog-z-index: 10;
         }
         ha-select,
-        ha-textfield {
+        ha-input {
           display: block;
           margin-bottom: 8px;
         }
