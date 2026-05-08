@@ -131,6 +131,7 @@
   "dashboard-entities-table-no-data": "Keine Entitäten konfiguriert.",
 
   "dashboard-entities-dialog-create-title": "Entität erstellen",
+  "dashboard-entities-dialog-error-name": "Name ist erforderlich",
 
   "dashboard-entities-dialog-unit-of-measurement": "Messeinheit",
 

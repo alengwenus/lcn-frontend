@@ -1,6 +1,6 @@
+import "@ha/components/input/ha-input";
 import "@ha/components/ha-select";
-import "@ha/components/ha-textfield";
-import type { HaTextField } from "@ha/components/ha-textfield";
+import type { HaInput } from "@ha/components/input/ha-input";
 import "@ha/components/ha-checkbox";
 import "@ha/components/ha-formfield";
 import type { CSSResultGroup, PropertyValues } from "lit";
@@ -26,6 +26,8 @@ export class LCNConfigSceneElement extends LitElement {
   @state() private _register!: ConfigItem;
 
   @state() private _scene!: ConfigItem;
+
+  @state() private _transitionInvalid = false;
 
   private _invalid = false;
 
@@ -100,7 +102,7 @@ export class LCNConfigSceneElement extends LitElement {
       };
     }
 
-    this._invalid = !this._validateTransition(this.domainData.transition);
+    this._invalid = this._transitionInvalid && !this._transitionDisabled;
   }
 
   protected update(changedProperties: PropertyValues) {
@@ -165,20 +167,20 @@ export class LCNConfigSceneElement extends LitElement {
         )}
       </div>
 
-      <ha-textfield
+      <ha-input
         .label=${this.lcn.localize("dashboard-entities-dialog-scene-transition")}
         type="number"
         suffix="s"
         .value=${this.domainData.transition.toString()}
+        .disabled=${this._transitionDisabled}
         min="0"
         max="486"
         required
         autoValidate
-        @input=${this._transitionChanged}
-        .validityTransform=${this._validityTransformTransition}
-        .disabled=${this._transitionDisabled}
+        .invalid=${this._transitionInvalid}
         .validationMessage=${this.lcn.localize("dashboard-entities-dialog-scene-transition-error")}
-      ></ha-textfield>
+        @input=${this._transitionChanged}
+      ></ha-input>
     `;
   }
 
@@ -202,17 +204,19 @@ export class LCNConfigSceneElement extends LitElement {
   }
 
   private _transitionChanged(ev: ValueChangedEvent<string>): void {
-    const target = ev.target as HaTextField;
-    this.domainData.transition = +target.value;
-    this.requestUpdate();
+    const input = ev.target as HaInput;
+    if (!input.value) {
+      this._transitionInvalid = true;
+    } else {
+      this.domainData.transition = +input.value;
+      this._transitionInvalid = !this._validateTransition(this.domainData.transition);
+    }
+
+    input.reportValidity();
   }
 
   private _validateTransition(transition: number): boolean {
     return transition >= 0 && transition <= 486;
-  }
-
-  private get _validityTransformTransition() {
-    return (value: string) => ({ valid: this._validateTransition(+value) });
   }
 
   private get _transitionDisabled(): boolean {
@@ -232,7 +236,7 @@ export class LCNConfigSceneElement extends LitElement {
           column-gap: 4px;
         }
         ha-select,
-        ha-textfield {
+        ha-input {
           display: block;
           margin-bottom: 8px;
         }
