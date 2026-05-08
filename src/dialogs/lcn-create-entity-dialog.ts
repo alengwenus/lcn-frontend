@@ -199,7 +199,6 @@ export class CreateEntityDialog extends LitElement {
   }
 
   private _deviceChanged(ev: ValueChangedEvent<string>): void {
-    ev.stopPropagation();
     const address = stringToAddress(ev.detail.value);
     this._deviceConfig = this._params!.deviceConfigs.find(
       (deviceConfig) =>
